@@ -1,4 +1,4 @@
-package nl.junglecomputing.constellation.edgeinference;
+package nl.zakarias.constellation.edgeinference;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
