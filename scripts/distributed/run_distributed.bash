@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Executes EdgeInference with Constellation using configurations from config.bash
+# Executes EdgeInference with Constellation using configurations from 
+# bin/distributed/config
 function check_env() {
     local name_env_dir=$1
     if [[ -z ${!name_env_dir} ]]
@@ -25,7 +26,7 @@ function check_env_dir() {
 check_env_dir EDGEINFERENCE_DIR
 BIN_DIR=$EDGEINFERENCE_DIR/bin
 
-check_env $CONSTELLATION_PORT
+check_env CONSTELLATION_PORT
 
 # Change the path to fit your system
 tmpdir=${EDGEINFERENCE_DIR}/java-io-tmpdir
@@ -36,7 +37,7 @@ rm -rf $tmpdir/*.so
 timestamp=`date +%s`
 
 # Get addresses of all compute nodes
-source ${EDGEINFERENCE_DIR}/bin/distributed/config.bash
+source ${EDGEINFERENCE_DIR}/bin/distributed/config
 
 nrComputeNodes=${#computeAddresses[*]}
 nrNodes=$((${nrComputeNodes} + 2))
@@ -66,13 +67,13 @@ clientTimeout=15
 x-terminal-emulator -e "${EDGEINFERENCE_DIR}/bin/distributed/constellation-server"
 
 # Start target
-x-terminal-emulator -e ssh ${targetAddress} "\${EDGEINFERENCE_DIR}/bin/distributed/start_target.bash"
+x-terminal-emulator -e ssh ${targetAddress} "\${EDGEINFERENCE_DIR}/bin/distributed/start_target.bash 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_target.log"
 
 # Start src
-x-terminal-emulator -e ssh ${sourceAddress} "\${EDGEINFERENCE_DIR}/bin/distributed/start_source.bash"
+x-terminal-emulator -e ssh ${sourceAddress} "\${EDGEINFERENCE_DIR}/bin/distributed/start_source.bash 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_source.log"
 
 for ip in "${computeAddresses[@]}"
 do
-  x-terminal-emulator -e ssh $ip "\${EDGEINFERENCE_DIR}/bin/distributed/start_predictor.bash ${clientTimeout} ${serverAddress} ${CONSTELLATION_PORT} ${nrNodes} ${className} ${poolName} ${args} 2>&1 | tee \${EDGEINFERENCE}/edge_inference.log"
+  x-terminal-emulator -e ssh ${ip} "\${EDGEINFERENCE_DIR}/bin/distributed/start_predictor.bash ${clientTimeout} ${serverAddress} ${CONSTELLATION_PORT} ${nrNodes} ${className} ${poolName} ${args} 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_compute.log"
 done
 

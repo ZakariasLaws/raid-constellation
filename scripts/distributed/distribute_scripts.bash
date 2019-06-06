@@ -25,9 +25,9 @@ function check_env_dir() {
 check_env_dir EDGEINFERENCE_DIR
 BIN_DIR=${EDGEINFERENCE_DIR}/bin
 
-source ${BIN_DIR}/distributed/config.bash
+source ${BIN_DIR}/distributed/config
 
 for ip in "${computeAddresses[@]}"
 do
-  scp -r ${BIN_DIR} ${ip}:"\${EDGEINFERENCE_DIR}/bin"
+  scp -r ${BIN_DIR}/distributed ${ip}:"\${EDGEINFERENCE_DIR}/bin"
 done
