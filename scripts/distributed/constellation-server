@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# This script is a convenience script to start the Constellation registry server
+
+function check_env() {
+    local name_env_dir=$1
+    if [[ -z ${!name_env_dir} ]]
+    then
+	echo "Environment variable $name_env_dir has not been set"
+	exit 1
+    fi
+}
+
+function check_env_dir() {
+    local name_env_dir=$1
+
+    check_env ${name_env_dir}
+
+    if [[ ! -d ${!name_env_dir} ]]
+    then
+	echo "Environment variable $name_env_dir does not represent a directory"
+	exit 1
+    fi
+}
+
+createClassPath() {
+    basedir=$1
+    jar=$2
+    classpath="$1/$2"
+
+    if [[ -d ${basedir}/lib ]]
+    then
+	for i in ${basedir}/lib/*.jar
+	do
+	    classpath+=":$i"
+	done
+    fi
+}
+
+check_env_dir EDGEINFERENCE_DIR
+
+BIN_DIR=$EDGEINFERENCE_DIR/bin
+
+check_env CONSTELLATION_PORT
+
+source ${BIN_DIR}/create_class_path.bash
+CLASSPATH=$(createClassPath ${EDGEINFERENCE_DIR} "lib/ipl-support-2.3.1.jar")
+
+exec java -cp $CLASSPATH \
+     -Dgat.adapter.path \
+     -Dibis.io.buffer.size=65536 \
+     -Dibis.io.conversion.buffer.size=65536 \
+     -Dibis.registry.central.server.connect.timeout=300 \
+     -Dlog4j.configuration=file:${EDGEINFERENCE_DIR}/log4j.properties \
+     -Xmx256M \
+     ibis.ipl.server.Server --events --port $CONSTELLATION_PORT
+

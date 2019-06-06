@@ -30,21 +30,18 @@ public class EdgeInference {
     }
 
     public static void main(String[] args) throws Exception {
-        // this code is executed on every node
+        // This code is executed on every device
 
         PrintStream out = new PrintStream(System.out);
 
-        // the number of executors per node in the cluster
-        int nrExecutorsPerNode = 4;
-
-        // number of nodes in the cluster
-        int nrNodes = 1;
-
-        // determine the number of tasks based on the size of the pool of nodes
-        String ibisPoolSize = System.getProperty("ibis.pool.size");
-        if (ibisPoolSize != null) {
-            nrNodes = Integer.parseInt(ibisPoolSize);
-        }
+//        int nrExecutorsPerNode = 2;
+//        int nrNodes = 1;
+//
+//        // Determine the number of tasks based on the size of the pool of nodes
+//        String ibisPoolSize = System.getProperty("ibis.pool.size");
+//        if (ibisPoolSize != null) {
+//            nrNodes = Integer.parseInt(ibisPoolSize);
+//        }
 
 /*        for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-nrExecutorsPerNode")) {
@@ -64,12 +61,13 @@ public class EdgeInference {
             }
         }*/
 
-        // Initialize Constellation with the following configuration for an
-        // executor.  We create nrExecutorsPerNode on a node.
+        // TODO figure out what resource this is and set up configuration
         ConstellationConfiguration config =
                 new ConstellationConfiguration(new Context("TEST"),
                         StealStrategy.SMALLEST, StealStrategy.BIGGEST,
                         StealStrategy.BIGGEST);
+
+        int nrExecutorsPerNode = 1;
 
         Constellation constellation =
                 ConstellationFactory.createConstellation(config, nrExecutorsPerNode);

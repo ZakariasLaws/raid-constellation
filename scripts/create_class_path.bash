@@ -12,4 +12,5 @@ createClassPath() {
 	    classpath+=":$i"
 	done
     fi
+    echo ${classpath}
 }

@@ -22,10 +22,10 @@ function check_env_dir() {
 }
 
 check_env_dir EDGEINFERENCE_DIR
-BIN_DIR=$EDGEINFERENCE_DIR/bin
+BIN_DIR=${EDGEINFERENCE_DIR}/bin
 
 check_env CONSTELLATION_PORT
-port=$CONSTELLATION_PORT
+port=${CONSTELLATION_PORT}
 
 JAVA_IO_TEMP_DIR=$EDGEINFERENCE_DIR/.java_io_tmp
 mkdir -p ${JAVA_IO_TEMP_DIR}
@@ -34,9 +34,9 @@ classname=nl.zakarias.constellation.edgeinference.EdgeInference
 
 # Generate class paths
 source ${BIN_DIR}/create_class_path.bash ${EDGEINFERENCE_DIR}
-createClassPath ${EDGEINFERENCE_DIR} lib/edgeinference-constellation.jar
+classpath=$(createClassPath ${EDGEINFERENCE_DIR} lib/edgeinference-constellation.jar)
 
-java -cp ${classpath}:$CLASSPATH -Xmx2G \
+java -cp ${classpath}:${CLASSPATH} -Xmx2G \
     -Dibis.server.address=localhost:${port} \
     -Dibis.constellation.distributed=false \
     ${classname}
