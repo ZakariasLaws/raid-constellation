@@ -19,7 +19,7 @@ public class EdgeInference {
 
     public static void writeFile(float[] array) {
         try {
-            PrintStream out = new PrintStream("vectoradd.out");
+            PrintStream out = new PrintStream("edgeinference.out");
             for (float v : array) {
                 out.println(v);
             }
@@ -32,8 +32,6 @@ public class EdgeInference {
     public static void main(String[] args) throws Exception {
         // This code is executed on every device
 
-        PrintStream out = new PrintStream(System.out);
-
 //        int nrExecutorsPerNode = 2;
 //        int nrNodes = 1;
 //
@@ -43,23 +41,23 @@ public class EdgeInference {
 //            nrNodes = Integer.parseInt(ibisPoolSize);
 //        }
 
-/*        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-nrExecutorsPerNode")) {
+        String role = "";
+        int nrExecutors = 1;
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-nrExecutors")) {
                 i++;
-                nrExecutorsPerNode = Integer.parseInt(args[i]);
-            } else if (args[i].equals("-computeDivideThreshold")) {
+                nrExecutors = Integer.parseInt(args[i]);
+            } else if (args[i].equals("-role")) {
                 i++;
-                computeDivideThreshold = Integer.parseInt(args[i]);
-            } else if (args[i].equals("-n")) {
-                i++;
-                n = Integer.parseInt(args[i]);
-            } else {
-                throw new Error("Usage: java VectorAdd "
-                        + "[ -nrExecutorsPerNode <num> ] "
-                        + "[ -computeDivideThreshold <num> ] "
-                        + "[ -n <num> ]");
+                role = args[i];
+            }  else {
+                throw new Error("Invalid argument: " + args[i] + " "
+                        + "Usage: java EdgeInference "
+                        + "[ -nrExecutors <num> ] "
+                        + "[ -role <string [source/target/predictor]> ");
             }
-        }*/
+        }
 
         // TODO figure out what resource this is and set up configuration
         ConstellationConfiguration config =
@@ -67,26 +65,26 @@ public class EdgeInference {
                         StealStrategy.SMALLEST, StealStrategy.BIGGEST,
                         StealStrategy.BIGGEST);
 
-        int nrExecutorsPerNode = 1;
-
         Constellation constellation =
-                ConstellationFactory.createConstellation(config, nrExecutorsPerNode);
+                ConstellationFactory.createConstellation(config, nrExecutors);
 
         constellation.activate();
 
-        if (constellation.isMaster()) {
-            // Runs only on Master node
-            out.println("Starting Constellation");
+        System.out.println("Constellation is Running " + role);
 
-            Timer overallTimer = constellation.getOverallTimer();
-            int timing = overallTimer.start();
-            overallTimer.stop(timing);
-
-            // Do computation
-
-
-//            writeFile(result.c);
-        }
+//        if (constellation.isMaster()) {
+//            // Runs only on Master node
+//            out.println("Starting Constellation");
+//
+//            Timer overallTimer = constellation.getOverallTimer();
+//            int timing = overallTimer.start();
+//            overallTimer.stop(timing);
+//
+//            // Do computation
+//
+//
+////            writeFile(result.c);
+//        }
 
         logger.debug("calling Constellation.done()");
         constellation.done();

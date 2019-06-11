@@ -13,11 +13,9 @@ serverAddress="10.72.21.42"
 # Add all the compute nodes to this list
 computeAddresses=(\
     "odroid-1" \
-    "odroid-2" \
 )
 
-# Add the target
-targetAddress="zaklaw01@10.72.21.42"
 
-# Add the source
-sourceAddress="zaklaw01@10.72.21.42"
+# target and source can NOT be the same
+targetAddress="odroid-2"
+sourceAddress="odroid-3"

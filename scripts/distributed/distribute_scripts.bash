@@ -29,5 +29,18 @@ source ${BIN_DIR}/distributed/config
 
 for ip in "${computeAddresses[@]}"
 do
+  echo "------ $ip ------"
   scp -r ${BIN_DIR}/distributed ${ip}:"\${EDGEINFERENCE_DIR}/bin"
+  scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${ip}:"\${EDGEINFERENCE_DIR}/lib/"
+  echo ""
 done
+
+echo "------ ${sourceAddress} ------"
+scp -r ${BIN_DIR}/distributed ${sourceAddress}:"\${EDGEINFERENCE_DIR}/bin"
+scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${sourceAddress}:"\${EDGEINFERENCE_DIR}/lib/"
+echo ""
+
+echo "------ ${targetAddress} ------"
+scp -r ${BIN_DIR}/distributed ${targetAddress}:"\${EDGEINFERENCE_DIR}/bin"
+scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${targetAddress}:"\${EDGEINFERENCE_DIR}/lib/"
+echo ""

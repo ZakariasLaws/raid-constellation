@@ -27,7 +27,7 @@ BIN_DIR=${EDGEINFERENCE_DIR}/bin
 check_env CONSTELLATION_PORT
 port=${CONSTELLATION_PORT}
 
-JAVA_IO_TEMP_DIR=$EDGEINFERENCE_DIR/.java_io_tmp
+JAVA_IO_TEMP_DIR=${EDGEINFERENCE_DIR}/.java_io_tmpdir
 mkdir -p ${JAVA_IO_TEMP_DIR}
 
 classname=nl.zakarias.constellation.edgeinference.EdgeInference
