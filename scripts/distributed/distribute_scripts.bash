@@ -29,18 +29,24 @@ source ${BIN_DIR}/distributed/config
 
 for ip in "${computeAddresses[@]}"
 do
-  echo "------ $ip ------"
-  scp -r ${BIN_DIR}/distributed ${ip}:"\${EDGEINFERENCE_DIR}/bin"
-  scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${ip}:"\${EDGEINFERENCE_DIR}/lib/"
+  arrIp=(${ip})
+  echo "------ ${arrIp[0]} ------"
+  scp -r ${BIN_DIR}/distributed ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/bin"
+  scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/lib/"
   echo ""
 done
 
-echo "------ ${sourceAddress} ------"
-scp -r ${BIN_DIR}/distributed ${sourceAddress}:"\${EDGEINFERENCE_DIR}/bin"
-scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${sourceAddress}:"\${EDGEINFERENCE_DIR}/lib/"
-echo ""
+arrSource=(${sourceAddress})
+if [[ "${arrSource[0]}" != "self" ]]; then
+    echo "------ ${arrSource[0]} ------"
+    scp -r ${BIN_DIR}/distributed ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/bin"
+    scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/lib/"
+    echo ""
+fi
 
-echo "------ ${targetAddress} ------"
-scp -r ${BIN_DIR}/distributed ${targetAddress}:"\${EDGEINFERENCE_DIR}/bin"
-scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${targetAddress}:"\${EDGEINFERENCE_DIR}/lib/"
-echo ""
+if [[ "${targetAddress}" != "self" ]]; then
+    echo "------ ${targetAddress} ------"
+    scp -r ${BIN_DIR}/distributed ${targetAddress}:"\${EDGEINFERENCE_DIR}/bin"
+    scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${targetAddress}:"\${EDGEINFERENCE_DIR}/lib/"
+    echo ""
+fi

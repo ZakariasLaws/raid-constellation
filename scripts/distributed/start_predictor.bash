@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Hello from $HOSTNAME acting as Predictor"
+echo ""
 
 function check_env() {
     local name_env_dir=$1
@@ -32,7 +33,8 @@ nrNodes=$1; shift
 classname=$1; shift
 poolName=$1; shift
 clientTimeout=$1; shift
-args="-role predictor $@"
+context=$1; shift
+args="-role PREDICTOR -context ${context} $@"
 
 tmpdir=${EDGEINFERENCE_DIR}/.java_io_tmpdir
 mkdir -p ${tmpdir}

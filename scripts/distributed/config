@@ -10,12 +10,16 @@ serverAddress="10.72.21.42"
 # "odroid@10.72.21.38" \
 #)
 
-# Add all the compute nodes to this list
+# Add all the compute nodes and their context separated with a space
+# Nodes will ONLY process Activities with a label matching one or more
+# indicated contexts
 computeAddresses=(\
-    "odroid-1" \
+    "odroid-1 A,B" \
 )
 
 
-# target and source can NOT be the same
-targetAddress="odroid-2"
-sourceAddress="odroid-3"
+# Target context will always be "target", this device will display results from ALL contexts
+targetAddress="self"
+
+# Source can produce Activites for multiple contexts
+sourceAddress="self A,B"
