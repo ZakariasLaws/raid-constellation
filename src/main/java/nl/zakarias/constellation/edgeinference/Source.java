@@ -42,7 +42,7 @@ public class Source implements DeviceRoleInterface {
             e.printStackTrace();
         }
 
-        for (int i=10; i>=-1; i--) {
+        for (int i=100; i>=-1; i--) {
             // Read input
 
             // Generate activity

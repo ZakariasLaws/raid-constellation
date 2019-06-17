@@ -70,24 +70,24 @@ x-terminal-emulator -e "${EDGEINFERENCE_DIR}/bin/distributed/constellation-serve
 # --- Start source ---
 arrSource=(${sourceAddress})
 # Normal
-#x-terminal-emulator -e ssh ${arrSource[0]} "\${EDGEINFERENCE_DIR}/bin/distributed/start_source.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${arrSource[1] ${args} 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_source.log"
+#x-terminal-emulator -e ssh ${arrSource[0]} "\${EDGEINFERENCE_DIR}/bin/distributed/closed-world/start_source.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${arrSource[1]} ${args} 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_source.log"
 
 # tcsh shell with no remote env set
 localDir=${EDGEINFERENCE_DIR}
-x-terminal-emulator -e ssh ${arrSource[0]} "setenv EDGEINFERENCE_DIR ${localDir}; \${EDGEINFERENCE_DIR}/bin/distributed/start_source.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${arrSource[1]} ${args} |& tee \${EDGEINFERENCE_DIR}/edge_inference_source.log"
+x-terminal-emulator -e ssh ${arrSource[0]} "setenv EDGEINFERENCE_DIR ${localDir}; \${EDGEINFERENCE_DIR}/bin/distributed/closed-world/start_source.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${arrSource[1]} ${args} |& tee \${EDGEINFERENCE_DIR}/edge_inference_source.log"
 
 # --- Start target ---
 # Normal
-#x-terminal-emulator -e ssh ${targetAddress} "\${EDGEINFERENCE_DIR}/bin/distributed/start_target.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${args} 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_target.log"
+#x-terminal-emulator -e ssh ${targetAddress} "\${EDGEINFERENCE_DIR}/bin/distributed/closed-world/start_target.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${args} 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_target.log"
 
 # tcsh shell with no remote env set
 localDir=${EDGEINFERENCE_DIR}
-x-terminal-emulator -e ssh ${targetAddress} "setenv EDGEINFERENCE_DIR ${localDir}; \${EDGEINFERENCE_DIR}/bin/distributed/start_target.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${args} |& tee \${EDGEINFERENCE_DIR}/edge_inference_target.log"
+x-terminal-emulator -e ssh ${targetAddress} "setenv EDGEINFERENCE_DIR ${localDir}; \${EDGEINFERENCE_DIR}/bin/distributed/closed-world/start_target.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${args} |& tee \${EDGEINFERENCE_DIR}/edge_inference_target.log"
 
 # --- Start compute nodes ---
 for ip in "${computeAddresses[@]}"
 do
   arrIP=(${ip})
-  x-terminal-emulator -e ssh ${arrIP[0]} "\${EDGEINFERENCE_DIR}/bin/distributed/start_predictor.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${arrIP[1]} ${args} 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_compute.log"
+  x-terminal-emulator -e ssh ${arrIP[0]} "\${EDGEINFERENCE_DIR}/bin/distributed/closed-world/start_predictor.bash ${CONSTELLATION_PORT} ${serverAddress} ${nrNodes} ${className} ${poolName} ${clientTimeout} ${arrIP[1]} ${args} 2>&1 | tee \${EDGEINFERENCE_DIR}/edge_inference_compute.log"
 done
 
