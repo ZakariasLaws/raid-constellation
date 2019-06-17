@@ -76,14 +76,3 @@ java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Dibis.constellation.closed=false \
         ${classname} \
         ${args}
-
-timeout=30
-
-if [[ ${timeout} -lt 0 ]]; then
-  while :; do
-    sleep 10
-  done
-else
-  echo "Shutting down connection in ${timeout} seconds"
-  sleep ${timeout}
-fi
