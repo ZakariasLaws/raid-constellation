@@ -8,13 +8,9 @@ public class CrunchifyGetIPHostname implements Serializable {
     private InetAddress ip;
     private String hostname;
 
-    public CrunchifyGetIPHostname() {
-        try {
-            ip = InetAddress.getLocalHost();
-            hostname = ip.getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+    public CrunchifyGetIPHostname() throws UnknownHostException {
+        ip = InetAddress.getLocalHost();
+        hostname = ip.getHostName();
     }
 
     public InetAddress ip(){

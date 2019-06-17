@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Utils {
-    private static Logger logger = LoggerFactory.getLogger(Utils.class);
+    public static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     public static String printArray(String[] contexts){
         StringBuilder result = new StringBuilder();
@@ -55,7 +55,7 @@ public class Utils {
                 return new ConstellationConfiguration(new OrContext(contexts), StealPool.WORLD, StealPool.WORLD, StealStrategy.SMALLEST, StealStrategy.BIGGEST, StealStrategy.BIGGEST);
             case TARGET:
                 // Configuration steals from WORLD using context TARGET_CONTEXT, it's own activities may not be stolen
-                return new ConstellationConfiguration(Configuration.TARGET_CONTEXT, StealPool.NONE, StealPool.WORLD, StealStrategy.SMALLEST, StealStrategy.BIGGEST, StealStrategy.BIGGEST);
+                return new ConstellationConfiguration(Configuration.TARGET_CONTEXT, StealPool.NONE, StealPool.NONE, StealStrategy.SMALLEST, StealStrategy.BIGGEST, StealStrategy.BIGGEST);
             default:
                 throw new Error("Invalid node role");
         }
