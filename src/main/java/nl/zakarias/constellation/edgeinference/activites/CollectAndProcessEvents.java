@@ -10,20 +10,20 @@ import ibis.constellation.Constellation;
 import ibis.constellation.Event;
 
 public class CollectAndProcessEvents extends Activity {
-    public static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEvents.class);
+    private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEvents.class);
 
     private static final long serialVersionUID = -538414301465754654L;
 
     private int count;
 
     public CollectAndProcessEvents(AbstractContext c) {
-        super(c, false, true);
+        super(c, true, true);
         count = 1;
     }
 
     @Override
     public int initialize(Constellation c) {
-        logger.debug("CollectAndProcessEvents: initialized");
+        logger.debug("\nCollectAndProcessEvents: initialized\n");
 
         // Immediately start waiting for events to process
         return SUSPEND;
@@ -34,9 +34,8 @@ public class CollectAndProcessEvents extends Activity {
         logger.debug("CollectAndProcessEvents: received event number " + count + " from src id " + e.getSource().toString());
         // Handle received event
 
-        if (((ImageData)e.getData()).data == -1){
-            logger.debug("CollectAndProcessEvent: event contains -1, stop execution");
-            notifyAll();
+        if (((ImageData)e.getData()).data < 0){
+            logger.debug("CollectAndProcessEvent: event contains " + ((ImageData)e.getData()).data + ", stop execution");
             return FINISH;
         }
 
@@ -55,16 +54,5 @@ public class CollectAndProcessEvents extends Activity {
     @Override
     public String toString() {
         return "CollectAndProcessEvents(" + identifier() + ")";
-    }
-
-    /**
-     * This method blocks the called until notifyAll() is called
-     */
-    public synchronized void waitToFinish() {
-        try {
-            wait();
-        } catch (Exception e) {
-            // ignore
-        }
     }
 }
