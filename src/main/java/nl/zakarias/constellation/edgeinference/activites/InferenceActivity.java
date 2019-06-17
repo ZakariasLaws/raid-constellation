@@ -41,6 +41,13 @@ public class InferenceActivity extends Activity {
         logger.debug("InferenceActivity: Performing inference...");
         data = data + data;
 
+        // Add artificial delay
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         return FINISH;
     }
 

@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Utils {
-    private static Logger logger = LoggerFactory.getLogger(Utils.class);
+    public static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     public static String printArray(String[] contexts){
         StringBuilder result = new StringBuilder();

@@ -38,18 +38,18 @@ public class Source {
         String[] targetIdentifier = target.split(":");
         ActivityIdentifier aid = ActivityIdentifierImpl.createActivityIdentifier(new ConstellationIdentifierImpl(Integer.parseInt(targetIdentifier[0]), Integer.parseInt(targetIdentifier[1])), Integer.parseInt(targetIdentifier[2]), false);
 
-        for (int i=100; i>=-1; i--) {
+        for (int i=0; i<100000; i++) {
             // Read input
 
             // Generate activity
             InferenceActivity activity = new InferenceActivity(this.contexts, true, false, i, aid);
 
             // submit activity
-            logger.debug("Submitting InferenceActivity");
+            logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
             constellation.submit(activity);
 
             try {
-                Thread.sleep(3000);
+                Thread.sleep(333);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

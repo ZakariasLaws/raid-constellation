@@ -29,6 +29,8 @@ function usage() {
     echo ""
     echo "For example, in order to start a predictor with contexts A, B and C:"
     echo "./bin/distributed/run.bash p 10.72.34.117 my.pool.name A,B,C"
+    echo "To start a source targeting activity 0:1:0 with results:"
+    echo "./bin/distributed/run.bash s 10.72.34.117 my.pool.name A,B,C -target 0:1:0"
     echo ""
     echo "Remember to start Constellation server first"
 }
@@ -46,22 +48,36 @@ serverAddress=$1; shift
 poolName=$1; shift
 context=$1; shift
 
-if [[ -z ${role} || -z ${serverAddress} || -z ${poolName} || -z ${context} ]]; then
+if [[ -z ${role} || -z ${serverAddress} || -z ${poolName} ]]; then
     usage
     exit 1
 fi
 
+roleFull=""
 if [[ ${role,,} == "p" ]]; then
+    if [[ -z ${context} ]]; then
+        usage
+        exit 1
+    fi
+
     args="-role PREDICTOR -context ${context} $@"
+    roleFull="Predictor"
 elif [[ ${role,,} == "s" ]]; then
+    if [[ -z ${context} ]]; then
+        usage
+        exit 1
+    fi
+
     args="-role SOURCE -context ${context} $@"
+    roleFull="Source"
 else
     args="-role TARGET $@"
+    roleFull="Target"
 fi
 
 classname="nl.zakarias.constellation.edgeinference.EdgeInference"
 
-echo "**** Starting PREDICTOR with ****"
+echo "**** Starting with following config ****"
 echo "Poolname: ${poolName}"
 echo "Server address: ${serverAddress}:${CONSTELLATION_PORT}"
 echo "Context: ${context}"
