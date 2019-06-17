@@ -8,16 +8,48 @@ import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.UnknownHostException;
+
 
 public class EdgeInference {
 
     private static Logger logger = LoggerFactory.getLogger(EdgeInference.class);
+
+    private static void startExecution(Constellation constellation, NODE_ROLES role, Context[] contexts, String targetActivity) throws Exception {
+        switch (role){
+            case SOURCE:
+                Source source = new Source(contexts);
+                if (targetActivity == null) {
+                    throw new IllegalArgumentException("Missing activity ID to send results to");
+                }
+
+                source.run(constellation, targetActivity);
+                break;
+            case PREDICTOR:
+                Predictor predictor = new Predictor(contexts);
+                predictor.run(constellation);
+                break;
+            case TARGET:
+                Target target = new Target();
+                target.run(constellation);
+                break;
+            default:
+                throw new Error("No matching Java Class found for role: " + role.toString());
+        }
+    }
+
+    private static String usage(){
+        return "Usage: java EdgeInference "
+                + "[ -nrExecutors <num> ] "
+                + "[ -role <string [" + Configuration.nodeRoleValues() + "]> ";
+    }
 
     public static void main(String[] args) throws Exception {
         NODE_ROLES role = null;
         String[] contextString = new String[0];
         int nrExecutors = 1;
         Context[] contexts;
+        String targetActivity = null;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -37,14 +69,16 @@ public class EdgeInference {
                     i++;
                     contextString = args[i].split(",");
                     break;
+                case "-target":
+                    i++;
+                    targetActivity = args[i];
+                    break;
                 default:
-                    throw new Error("Invalid argument: " + args[i] + " "
-                            + "Usage: java EdgeInference "
-                            + "[ -nrExecutors <num> ] "
-                            + "[ -role <string [" + Configuration.nodeRoleValues() + "]> ");
+                    throw new Error("Invalid argument: " + args[i] + " " + usage());
             }
         }
 
+        // Check if valid context was submitted, create array of Context objects from argument string
         if (role == null){
             throw new Error("Missing node role, must be one of following: " + Configuration.nodeRoleValues());
         } else if (contextString.length == 0 && !role.equals(NODE_ROLES.TARGET)) {
@@ -67,10 +101,11 @@ public class EdgeInference {
         logger.debug("Calling Constellation.activate()");
         constellation.activate();
 
-        // Start the correct execution depending on the role of the device executing
-        DeviceRoleFactory startExecution = new DeviceRoleFactory();
-        startExecution.startDevice(role, contexts).run(constellation);
-
+        try {
+            startExecution(constellation, role, contexts, targetActivity);
+        } catch (IllegalArgumentException e) {
+            throw new Error(e.getMessage() + " " + usage());
+        }
         logger.debug("calling Constellation.done()");
         constellation.done();
     }

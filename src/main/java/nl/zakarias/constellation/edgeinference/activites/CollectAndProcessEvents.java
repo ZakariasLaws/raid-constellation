@@ -17,13 +17,22 @@ public class CollectAndProcessEvents extends Activity {
     private int count;
 
     public CollectAndProcessEvents(AbstractContext c) {
-        super(c, true, true);
+        super(c, false, true);
         count = 1;
     }
 
     @Override
     public int initialize(Constellation c) {
         logger.debug("\nCollectAndProcessEvents: initialized\n");
+
+        String targetIdentifier = "";
+        String[] identifier = identifier().toString().split(":");
+        targetIdentifier += identifier[1] + ":";
+        targetIdentifier += identifier[2] + ":";
+        targetIdentifier += identifier[3];
+
+        System.out.println("In order to target this activity with classifications add the following as argument " +
+                "(exactly as printed) when initializing the new SOURCE: \"" + targetIdentifier + "\"\n\n");
 
         // Immediately start waiting for events to process
         return SUSPEND;
@@ -36,6 +45,7 @@ public class CollectAndProcessEvents extends Activity {
 
         if (((ImageData)e.getData()).data < 0){
             logger.debug("CollectAndProcessEvent: event contains " + ((ImageData)e.getData()).data + ", stop execution");
+            notifyAll();
             return FINISH;
         }
 
@@ -54,5 +64,13 @@ public class CollectAndProcessEvents extends Activity {
     @Override
     public String toString() {
         return "CollectAndProcessEvents(" + identifier() + ")";
+    }
+
+    public synchronized void waitToFinish(){
+        try {
+            wait();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

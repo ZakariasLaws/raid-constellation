@@ -6,6 +6,8 @@ import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.UnknownHostException;
+
 public class InferenceActivity extends Activity {
     private static Logger logger = LoggerFactory.getLogger(InferenceActivity.class);
 
@@ -16,7 +18,7 @@ public class InferenceActivity extends Activity {
     private CrunchifyGetIPHostname currentNetworkInfo;
 
 
-    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, int data, ActivityIdentifier aid) {
+    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, int data, ActivityIdentifier aid) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
@@ -27,7 +29,12 @@ public class InferenceActivity extends Activity {
     @Override
     public int initialize(Constellation constellation) {
         // Get the location of where we are currently executing
-        currentNetworkInfo = new CrunchifyGetIPHostname();
+        try {
+            currentNetworkInfo = new CrunchifyGetIPHostname();
+        } catch (UnknownHostException e) {
+            logger.error("InferenceActivity: Could not find host information");
+            e.printStackTrace();
+        }
         logger.debug("InferenceActivity: Executing on host: " + currentNetworkInfo.hostname());
 
 
