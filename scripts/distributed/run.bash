@@ -82,6 +82,22 @@ echo "Poolname: ${poolName}"
 echo "Server address: ${serverAddress}:${CONSTELLATION_PORT}"
 echo "Context: ${context}"
 
+# Add system properties specific for each instance
+command=""
+pre="-Dibis.constellation"
+if [[ ${role,,} == "s" ]]; then
+    command="\
+    ${pre}.queue.limit=1000 "
+elif [[ ${role,,} == "p" ]]; then
+    command="\
+    ${pre}.remotesteal.throttle=true \
+    ${pre}.remotesteal.size=1 \
+    "
+else
+    command="\
+    "
+fi
+
 java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Djava.rmi.server.hostname=localhost \
         -Djava.io.tmpdir=${tmpdir} \
@@ -90,5 +106,7 @@ java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Dibis.server.port=${CONSTELLATION_PORT} \
         -Dibis.pool.name=${poolName} \
         -Dibis.constellation.closed=false \
+        -Dibis.constelaltion.distributed=true \
+        ${command} \
         ${classname} \
         ${args}

@@ -16,6 +16,11 @@ serverAddress="10.72.21.42"
 computeAddresses=(\
     "odroid-1 A,B" \
     "odroid-2 A,B" \
+    "odroid-3 A,B" \
+    "odroid-4 A,B" \
+    "odroid-5 A,B" \
+    "odroid-6 A,B" \
+    "odroid-7 A,B" \
 )
 
 
