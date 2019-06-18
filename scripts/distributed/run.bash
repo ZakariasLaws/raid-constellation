@@ -107,6 +107,7 @@ java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Dibis.pool.name=${poolName} \
         -Dibis.constellation.closed=false \
         -Dibis.constelaltion.distributed=true \
+        -Dibis.io.serialization.object.default=sun \
         ${command} \
         ${classname} \
         ${args}
