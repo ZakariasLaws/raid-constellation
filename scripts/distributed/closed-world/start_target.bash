@@ -47,6 +47,7 @@ java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Dibis.server.port=${CONSTELLATION_PORT} \
         -Dibis.pool.name=${poolName} \
         -Dibis.constellation.closed=true \
+        -Dibis.io.serialization.object.default=sun \
         ${classname} \
         ${args}
 

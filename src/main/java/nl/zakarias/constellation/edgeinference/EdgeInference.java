@@ -13,7 +13,7 @@ public class EdgeInference {
 
     private static Logger logger = LoggerFactory.getLogger(EdgeInference.class);
 
-    private static void startExecution(Constellation constellation, NODE_ROLES role, Context[] contexts, String targetActivity) throws Exception {
+    private static void startExecution(Constellation constellation, NODE_ROLES role, Context[] contexts, String targetActivity, int nrExecutors) throws Exception {
         switch (role){
             case SOURCE:
                 Source source = new Source(contexts);
@@ -24,7 +24,7 @@ public class EdgeInference {
                 source.run(constellation, targetActivity);
                 break;
             case PREDICTOR:
-                Predictor predictor = new Predictor(contexts);
+                Predictor predictor = new Predictor(contexts, nrExecutors);
                 predictor.run(constellation);
                 break;
             case TARGET:
@@ -100,7 +100,7 @@ public class EdgeInference {
         constellation.activate();
 
         try {
-            startExecution(constellation, role, contexts, targetActivity);
+            startExecution(constellation, role, contexts, targetActivity, nrExecutors);
         } catch (IllegalArgumentException e) {
             throw new Error(e.getMessage() + " " + usage());
         }

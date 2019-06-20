@@ -8,7 +8,11 @@ import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Source {
     private static final Logger logger = LoggerFactory.getLogger(Source.class);
@@ -27,7 +31,12 @@ public class Source {
         submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
-    public void run(Constellation constellation, String target) throws NoSuitableExecutorException, UnknownHostException {
+
+    private static byte[] readAllBytesOrExit(Path path) throws IOException {
+        return Files.readAllBytes(path);
+    }
+
+    public void run(Constellation constellation, String target) throws NoSuitableExecutorException, IOException {
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
         // Use existing collectActivity
@@ -41,8 +50,10 @@ public class Source {
         for (int i=0; i<100000; i++) {
             // Read input
 
+            byte[] imageBytes = readAllBytesOrExit(Paths.get("/home/zaklaw01/Projects/odroid-constellation/InceptionTFModel/porcupine.jpg"));
+
             // Generate activity
-            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, i, aid);
+            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid);
 
             // submit activity
             logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());

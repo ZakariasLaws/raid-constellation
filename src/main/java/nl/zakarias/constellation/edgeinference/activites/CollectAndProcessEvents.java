@@ -1,6 +1,6 @@
 package nl.zakarias.constellation.edgeinference.activites;
 
-import nl.zakarias.constellation.edgeinference.ImageData;
+import nl.zakarias.constellation.edgeinference.ResultEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,17 +40,16 @@ public class CollectAndProcessEvents extends Activity {
 
     @Override
     public synchronized int process(Constellation c, Event e) {
-        logger.debug("CollectAndProcessEvents: received event number " + count + " from src id " + e.getSource().toString());
-        // Handle received event
-
-        if (((ImageData)e.getData()).data < 0){
-            logger.debug("CollectAndProcessEvent: event contains " + ((ImageData)e.getData()).data + ", stop execution");
-            notifyAll();
-            return FINISH;
+        if (logger.isDebugEnabled()) {
+            logger.debug("CollectAndProcessEvents: received event number " + count + " from src id " + e.getSource().toString());
+            // Handle received event
+            ResultEvent result = (ResultEvent) e.getData();
+            if (result.correct.equals(result.classification)) {
+                logger.debug(String.format("CollectAndProcessEvent: Correctly classified as %s with certainty %1.2f", result.classification, result.certainty));
+            } else {
+                logger.debug(String.format("CollectAndProcessEvent: Falsely classified %s as %s with certainty %1.2f", result.correct, result.classification, result.certainty));
+            }
         }
-
-
-        logger.debug("CollectAndProcessEvent: Contains " + ((ImageData)e.getData()).data);
 
         count++;
         return SUSPEND;

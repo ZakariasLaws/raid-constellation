@@ -12,8 +12,9 @@ public class Predictor {
 
     private AbstractContext contexts;
     private CrunchifyGetIPHostname submittedNetworkInfo;
+    private int nrExecutors;
 
-    Predictor(Context[] contexts) throws UnknownHostException {
+    Predictor(Context[] contexts, int nrExecutors) throws UnknownHostException {
         try {
             this.contexts = new OrContext(contexts);
         } catch (IllegalArgumentException e) {
@@ -22,9 +23,10 @@ public class Predictor {
         }
 
         submittedNetworkInfo = new CrunchifyGetIPHostname();
+        this.nrExecutors = nrExecutors;
     }
 
     public void run(Constellation constellation) {
-        logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with contexts: " + contexts + "\n\n");
+        logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with " + nrExecutors + " and with contexts: " + contexts + "\n\n");
     }
 }
