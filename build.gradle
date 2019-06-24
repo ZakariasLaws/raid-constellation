@@ -21,7 +21,11 @@ dependencies {
   implementation 'org.slf4j:slf4j-api:1.7.21'
   implementation 'org.slf4j:slf4j-log4j12:1.7.21'
   implementation 'nl.junglecomputing:constellation:2.0.1'
-  implementation 'org.tensorflow:tensorflow:1.13.1'
+  if (project.hasProperty("aarch64")){
+      compile fileTree(dir: 'tensorflow', include: '*.jar')
+  } else {
+      implementation 'org.tensorflow:tensorflow:1.13.1'
+  }
   testImplementation 'junit:junit:4.12'
 }
 

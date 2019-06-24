@@ -39,6 +39,7 @@ check_env_dir EDGEINFERENCE_DIR
 BIN_DIR=${EDGEINFERENCE_DIR}/bin
 
 check_env CONSTELLATION_PORT
+check_env_dir EDGEINFERENCE_MODEL_DIR
 
 tmpdir=${EDGEINFERENCE_DIR}/.java_io_tmpdir
 mkdir -p ${tmpdir}
@@ -88,7 +89,7 @@ pre="-Dibis.constellation"
 if [[ ${role,,} == "s" ]]; then
     command="\
     ${pre}.queue.limit=1000 "
-elif [[ ${role,,} == "p" ]]; then
+elif [[ ${role,,} == "p" || ${role,,} == "t" ]]; then
     command="\
     ${pre}.remotesteal.throttle=true \
     ${pre}.remotesteal.size=1 \
@@ -96,6 +97,12 @@ elif [[ ${role,,} == "p" ]]; then
 else
     command="\
     "
+fi
+
+# Check if we are running on aarch64 based system
+if [[ ${MACHTYPE} == aarch64-unknown-linux-gnu ]]; then
+    command="${command} \
+    -Djava.library.path=tensorflow/"
 fi
 
 java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
