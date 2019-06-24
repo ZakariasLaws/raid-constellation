@@ -33,3 +33,6 @@ build
 
 # IntelliJ
 .idea
+
+# DO commit aarch64 tensorflow jar
+!libtensorflow.jar
