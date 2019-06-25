@@ -40,6 +40,7 @@ BIN_DIR=${EDGEINFERENCE_DIR}/bin
 
 check_env CONSTELLATION_PORT
 check_env_dir EDGEINFERENCE_MODEL_DIR
+check_env_dir EDGEINFERENCE_TENSORFLOW_DIR
 
 tmpdir=${EDGEINFERENCE_DIR}/.java_io_tmpdir
 mkdir -p ${tmpdir}
@@ -102,7 +103,7 @@ fi
 # Check if we are running on aarch64 based system
 if [[ ${MACHTYPE} == aarch64-unknown-linux-gnu ]]; then
     command="${command} \
-    -Djava.library.path=tensorflow/"
+    -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
 fi
 
 java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
