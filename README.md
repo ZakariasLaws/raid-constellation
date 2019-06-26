@@ -1,4 +1,4 @@
-# Distributed Heterogeneous Inferencing on Edge Devices
+# Distributed Heterogeneous Inference on Edge Devices
 TODO
 
 ### Source
@@ -26,7 +26,7 @@ This will create the distribution in `build/install/edgeinference-constellation`
 
 ## Running
 
-For running the application, Constellation requires the following environment variables to be set on *ALL* devices:
+For running this application, Constellation requires the following environment variables to be set on *ALL* devices. The port number must be the same on all devices, it is used to connect to the server:
 
 ```bash
 export CONSTELLATION_PORT=<unique_port_nmr>
@@ -38,17 +38,17 @@ The `EDGEINFERENCE_DIR` should correspond to the location of your distribution, 
 
 ## Inference Models
 
-### Tensorflow on Arm-based devices
-If running on a system architecture which Tensorflow on Jcenter or Maven does not support, set
-the `EDGEINFERENCE_TENSORFLOW_DIR` to point to the directory containing the bazel-bin dir obtained when 
-compiling TF from source. 
+### TensorFlow on Arm-based devices
+If running on a system architecture which Tensorflow does not [officially support](https://www.tensorflow.org/install/lang_java) (i.e Arm-based devices such as Raspberry Pi or Odroids), set
+the `EDGEINFERENCE_TENSORFLOW_DIR` to point to the parent of the `bazel-bin` directory obtained when 
+compiling TF from source. See [Build TensorFlow Java API for Odroid-N2](https://github.com/ZakariasLaws/TensorFlow-Java-Build-Odroid-N2) for instructions on how to do this on Odroid-N2. If using a different aarch64 based device, the procedure for building from source will still be similar.
 
 ```bash
 EDGEINFERENCE_TENSORFLOW_DIR=/path/to/tensorflow/java/bindings
 ```
 
 In case the `bin/distributed/run.sh` does not automatically identify you're architecture, it will try to build using 
-the TF Java bindings from Maven. This will result in an error looking something like:
+the TensorFlow Java Native Bindings and JAR from Maven. This will result in an error looking something like:
 
 ```bash
 Exception in thread "main" java.lang.UnsatisfiedLinkError: Cannot find TensorFlow native library for OS: linux, architecture: aarch64
