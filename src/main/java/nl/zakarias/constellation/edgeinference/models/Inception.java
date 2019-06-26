@@ -17,7 +17,7 @@ import java.util.List;
 public class Inception implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(Inception.class);
 
-    static private String BASE_DIR = System.getenv("EDGEINFERENCE_MODEL_DIR");
+    static private String BASE_DIR = System.getenv("EDGEINFERENCE_MODEL_DIR/inception");
 
     static private String MODEL_FILENAME = BASE_DIR + "/graph.pb";
     static private String LABEL_FILENAME = BASE_DIR + "/labels.txt";
@@ -66,7 +66,9 @@ public class Inception implements ModelInterface {
             // Since the graph is being constructed once per execution here, we can use a constant for the
             // input image. If the graph were to be re-used for multiple input images, a placeholder would
             // have been more appropriate.
-            // TODO Consider this when executing on Constellation, since multiple images will be used
+            // TODO Consider this when executing on Constellation, since multiple images will be used.
+            // TODO The graph.toGraphDef() and graph.importGraphDef() can be used to these means,
+            // TODO sharing the graph between programs
             final Output<String> input = b.constant("input", imageBytes);
             final Output<Float> output =
                     b.div(

@@ -3,7 +3,9 @@ package nl.zakarias.constellation.edgeinference.activites;
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
 import nl.zakarias.constellation.edgeinference.models.Inception;
+import nl.zakarias.constellation.edgeinference.models.MnistCnn;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
+import nl.zakarias.constellation.edgeinference.models.ModelInterface.InferenceModel;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +21,29 @@ public class InferenceActivity extends Activity {
 
     private CrunchifyGetIPHostname submittedNetworkInfo;
     private CrunchifyGetIPHostname currentNetworkInfo;
+    private ModelInterface model;
 
 
-    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[] data, ActivityIdentifier aid) throws UnknownHostException {
+    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[] data, ActivityIdentifier aid, InferenceModel model) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
         targetIdentifier = aid;
         submittedNetworkInfo = new CrunchifyGetIPHostname();
         result = null;
+
+        // Specify what model to use for classification
+        switch (model) {
+            case INCEPTION:
+                this.model = new Inception();
+                break;
+            case MNIST_CNN:
+                this.model = new MnistCnn();
+                break;
+            default:
+                logger.error("InferenceActivity: Invalid model " + model.toString());
+                throw new IllegalArgumentException("Illegal argument: " + model.toString());
+        }
     }
 
     @Override
@@ -43,11 +59,8 @@ public class InferenceActivity extends Activity {
 
         logger.debug("InferenceActivity: Performing inference with Inception CNN...");
 
-        // Specify what model to use for classification
-        ModelInterface model = new Inception();
-
         try {
-            this.result = model.runClassification(this.data);
+            this.result = this.model.runClassification(this.data);
         } catch (Exception e) {
             logger.error(String.format("InferenceActivity: Error applying model with message: %s", e.getMessage()));
             e.printStackTrace();

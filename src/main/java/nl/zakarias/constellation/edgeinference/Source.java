@@ -4,6 +4,7 @@ import ibis.constellation.*;
 import ibis.constellation.impl.ActivityIdentifierImpl;
 import ibis.constellation.impl.ConstellationIdentifierImpl;
 import nl.zakarias.constellation.edgeinference.activites.InferenceActivity;
+import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +51,11 @@ public class Source {
         for (int i=0; i<100000; i++) {
             // Read input
 
-            byte[] imageBytes = readAllBytesOrExit(Paths.get("/home/zaklaw01/Projects/odroid-constellation/InceptionTFModel/porcupine.jpg"));
+            byte[] imageBytes = readAllBytesOrExit(Paths.get(System.getenv("EDGEINFERENCE_MODEL_DIR/inception") + "images/porcupine.jpg"));
 
             // Generate activity
-            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid);
+//            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
+            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.MNIST_CNN);
 
             // submit activity
             logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
