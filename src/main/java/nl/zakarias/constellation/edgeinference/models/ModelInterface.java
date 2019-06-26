@@ -2,8 +2,10 @@ package nl.zakarias.constellation.edgeinference.models;
 
 import nl.zakarias.constellation.edgeinference.ResultEvent;
 
+import java.io.Serializable;
+
 public interface ModelInterface {
-    enum InferenceModel {
+    enum InferenceModel implements Serializable {
         INCEPTION,
         MNIST_CNN,
     }

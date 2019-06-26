@@ -17,10 +17,10 @@ import java.util.List;
 public class Inception implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(Inception.class);
 
-    static private String BASE_DIR = System.getenv("EDGEINFERENCE_MODEL_DIR/inception");
+    static private String BASE_DIR = System.getenv("EDGEINFERENCE_MODEL_DIR");
 
-    static private String MODEL_FILENAME = BASE_DIR + "/graph.pb";
-    static private String LABEL_FILENAME = BASE_DIR + "/labels.txt";
+    static private String MODEL_FILENAME = BASE_DIR + "/inception/graph.pb";
+    static private String LABEL_FILENAME = BASE_DIR + "/inception/labels.txt";
 
     @Override
     public ResultEvent runClassification(byte[] data) throws Exception {
@@ -30,7 +30,7 @@ public class Inception implements ModelInterface {
 
     private ResultEvent performClassification(byte[] imageBytes) throws Exception {
         ResultEvent result;
-
+        
         byte[] graphDef = readAllBytesOrExit(Paths.get(MODEL_FILENAME));
         List<String> labels =
                 readAllLinesOrExit(Paths.get(LABEL_FILENAME));

@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 public class Source {
     private static final Logger logger = LoggerFactory.getLogger(Source.class);
 
@@ -41,7 +40,7 @@ public class Source {
 
         // Generate activity
         //            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
-        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.MNIST_CNN);
+        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
 
         // submit activity
         logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
@@ -66,7 +65,7 @@ public class Source {
         ActivityIdentifier aid = ActivityIdentifierImpl.createActivityIdentifier(new ConstellationIdentifierImpl(Integer.parseInt(targetIdentifier[0]), Integer.parseInt(targetIdentifier[1])), Integer.parseInt(targetIdentifier[2]), false);
 
         // Go through the source directory and transmit each image
-        Files.walk(sourceDir).forEach(filePath -> {
+        Files.walk(sourceDir).filter(Files::isRegularFile).forEach(filePath -> {
             try {
                 sendImage(filePath, constellation, aid);
             } catch (IOException | NoSuitableExecutorException e) {

@@ -60,7 +60,7 @@ public class EdgeInference {
                     sourceDataDir = Paths.get(args[i]);
                     break;
                 default:
-                    throw new Error("Invalid argument: " + args[i] + " " + usage());
+                    throw new Error("Invalid argument: " + args[i] + "\n\n" + usage());
             }
         }
 

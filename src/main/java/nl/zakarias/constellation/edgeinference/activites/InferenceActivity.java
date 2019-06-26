@@ -21,7 +21,7 @@ public class InferenceActivity extends Activity {
 
     private CrunchifyGetIPHostname submittedNetworkInfo;
     private CrunchifyGetIPHostname currentNetworkInfo;
-    private ModelInterface model;
+    private InferenceModel model;
 
 
     public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[] data, ActivityIdentifier aid, InferenceModel model) throws UnknownHostException {
@@ -31,19 +31,7 @@ public class InferenceActivity extends Activity {
         targetIdentifier = aid;
         submittedNetworkInfo = new CrunchifyGetIPHostname();
         result = null;
-
-        // Specify what model to use for classification
-        switch (model) {
-            case INCEPTION:
-                this.model = new Inception();
-                break;
-            case MNIST_CNN:
-                this.model = new MnistCnn();
-                break;
-            default:
-                logger.error("InferenceActivity: Invalid model " + model.toString());
-                throw new IllegalArgumentException("Illegal argument: " + model.toString());
-        }
+        this.model = model;
     }
 
     @Override
@@ -59,8 +47,23 @@ public class InferenceActivity extends Activity {
 
         logger.debug("InferenceActivity: Performing inference with Inception CNN...");
 
+        ModelInterface model;
+
+        // Specify what model to use for classification
+        switch (this.model) {
+            case INCEPTION:
+                model = new Inception();
+                break;
+            case MNIST_CNN:
+                model = new MnistCnn();
+                break;
+            default:
+                logger.error("InferenceActivity: Invalid model " + this.model.toString());
+                throw new IllegalArgumentException("Illegal argument: " + this.model.toString());
+        }
+
         try {
-            this.result = this.model.runClassification(this.data);
+            this.result = model.runClassification(this.data);
         } catch (Exception e) {
             logger.error(String.format("InferenceActivity: Error applying model with message: %s", e.getMessage()));
             e.printStackTrace();
