@@ -24,6 +24,7 @@ function check_env_dir() {
 
 check_env_dir EDGEINFERENCE_DIR
 BIN_DIR=${EDGEINFERENCE_DIR}/bin
+ROOT=${EDGEINFERENCE_DIR}/../../../
 
 source ${BIN_DIR}/distributed/config
 
@@ -31,22 +32,22 @@ for ip in "${computeAddresses[@]}"
 do
   arrIp=(${ip})
   echo "------ ${arrIp[0]} ------"
-  scp -r ${BIN_DIR}/distributed ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/bin"
-  scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/lib/"
+  scp -r ${ROOT}/src/main ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../src"
+  scp -r ${ROOT}/scripts/* ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../scripts"
   echo ""
 done
 
 arrSource=(${sourceAddress})
 if [[ "${arrSource[0]}" != "self" ]]; then
     echo "------ ${arrSource[0]} ------"
-    scp -r ${BIN_DIR}/distributed ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/bin"
-    scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/lib/"
+    scp -r ${ROOT}/distributed ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../.../src"
+    scp -r ${ROOT}/scripts/* ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../../scripts"
     echo ""
 fi
 
 if [[ "${targetAddress}" != "self" ]]; then
     echo "------ ${targetAddress} ------"
-    scp -r ${BIN_DIR}/distributed ${targetAddress}:"\${EDGEINFERENCE_DIR}/bin"
-    scp -r ${EDGEINFERENCE_DIR}/lib/edgeinference-constellation.jar ${targetAddress}:"\${EDGEINFERENCE_DIR}/lib/"
+    scp -r ${ROOT}/distributed ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../src"
+    scp -r ${ROOT}/scripts/* ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../scripts"
     echo ""
 fi
