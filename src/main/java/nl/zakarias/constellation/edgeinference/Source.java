@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class Source {
     private static final Logger logger = LoggerFactory.getLogger(Source.class);
@@ -37,7 +36,25 @@ public class Source {
         return Files.readAllBytes(path);
     }
 
-    public void run(Constellation constellation, String target) throws NoSuitableExecutorException, IOException {
+    private void sendImage(Path filePath, Constellation constellation, ActivityIdentifier aid) throws IOException, NoSuitableExecutorException {
+        byte[] imageBytes = readAllBytesOrExit(filePath);
+
+        // Generate activity
+        //            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
+        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.MNIST_CNN);
+
+        // submit activity
+        logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
+        constellation.submit(activity);
+
+        try {
+            Thread.sleep(333);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void run(Constellation constellation, String target, Path sourceDir) throws IOException {
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
         // Use existing collectActivity
@@ -48,24 +65,33 @@ public class Source {
         String[] targetIdentifier = target.split(":");
         ActivityIdentifier aid = ActivityIdentifierImpl.createActivityIdentifier(new ConstellationIdentifierImpl(Integer.parseInt(targetIdentifier[0]), Integer.parseInt(targetIdentifier[1])), Integer.parseInt(targetIdentifier[2]), false);
 
-        for (int i=0; i<100000; i++) {
-            // Read input
-
-            byte[] imageBytes = readAllBytesOrExit(Paths.get(System.getenv("EDGEINFERENCE_MODEL_DIR/inception") + "images/porcupine.jpg"));
-
-            // Generate activity
-//            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
-            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.MNIST_CNN);
-
-            // submit activity
-            logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
-            constellation.submit(activity);
-
+        // Go through the source directory and transmit each image
+        Files.walk(sourceDir).forEach(filePath -> {
             try {
-                Thread.sleep(333);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                sendImage(filePath, constellation, aid);
+            } catch (IOException | NoSuitableExecutorException e) {
+                throw new Error("Error when sending image: " + e.getMessage());
             }
-        }
+        });
+
+//        for (int i=0; i<100000; i++) {
+//            // Read input
+//
+//            byte[] imageBytes = readAllBytesOrExit(Paths.get(System.getenv("EDGEINFERENCE_MODEL_DIR/inception") + "images/porcupine.jpg"));
+//
+//            // Generate activity
+////            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
+//            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.MNIST_CNN);
+//
+//            // submit activity
+//            logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
+//            constellation.submit(activity);
+//
+//            try {
+//                Thread.sleep(333);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 }
