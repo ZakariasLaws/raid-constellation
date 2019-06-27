@@ -4,6 +4,7 @@ import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration.NODE_ROLES;
 
+import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,8 @@ public class EdgeInference {
                 + "[ -role [" + Configuration.nodeRoleValues() + "] "
                 + "[ -context <String,String,String...>] "
                 + "[ -target <activity ID>] "
-                + "[ -sourceDataset </source/dataset/path>] ";
+                + "[ -dataDir </source/dataset/path>] "
+                + "[ -modelName [" + Utils.InferenceModelEnumToString() + "] ";
     }
 
     public static void main(String[] args) throws Exception {
@@ -32,6 +34,7 @@ public class EdgeInference {
         Context[] contexts;
         String targetActivity = null;
         Path sourceDataDir = null;
+        String modelName = null;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -55,9 +58,13 @@ public class EdgeInference {
                     i++;
                     targetActivity = args[i];
                     break;
-                case "-sourceDataset":
+                case "-dataDir":
                     i++;
                     sourceDataDir = Paths.get(args[i]);
+                    break;
+                case "-modelName":
+                    i++;
+                    modelName = args[i];
                     break;
                 default:
                     throw new Error("Invalid argument: " + args[i] + "\n\n" + usage());
@@ -92,13 +99,13 @@ public class EdgeInference {
                 Source source = new Source(contexts);
                 if (targetActivity == null) {
                     throw new IllegalArgumentException("Missing activity ID to send results to");
-                }
-
-                if (sourceDataDir == null) {
+                } if (sourceDataDir == null) {
                     throw new IllegalArgumentException("Missing directory to retrieve classification images from");
+                } if (modelName == null) {
+                    throw new IllegalArgumentException("Specify the name of the classification model to use (e.g. inception)");
                 }
 
-                source.run(constellation, targetActivity, sourceDataDir);
+                source.run(constellation, targetActivity, sourceDataDir, modelName.toUpperCase());
                 break;
             case PREDICTOR:
                 Predictor predictor = new Predictor(contexts, nrExecutors);

@@ -35,17 +35,18 @@ public class Source {
         return Files.readAllBytes(path);
     }
 
-    private void sendImage(Path filePath, Constellation constellation, ActivityIdentifier aid) throws IOException, NoSuitableExecutorException {
+    private void sendImage(Path filePath, Constellation constellation, ActivityIdentifier aid, String modelName) throws IOException, NoSuitableExecutorException {
         byte[] imageBytes = readAllBytesOrExit(filePath);
 
         // Generate activity
         //            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
-        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
+        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.valueOf(modelName));
 
         // submit activity
         logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
         constellation.submit(activity);
 
+        logger.debug("----------- Waiting for 333 seconds ---------");
         try {
             Thread.sleep(333);
         } catch (InterruptedException e) {
@@ -53,7 +54,7 @@ public class Source {
         }
     }
 
-    public void run(Constellation constellation, String target, Path sourceDir) throws IOException {
+    public void run(Constellation constellation, String target, Path sourceDir, String modelName) throws IOException {
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
         // Use existing collectActivity
@@ -67,7 +68,7 @@ public class Source {
         // Go through the source directory and transmit each image
         Files.walk(sourceDir).filter(Files::isRegularFile).forEach(filePath -> {
             try {
-                sendImage(filePath, constellation, aid);
+                sendImage(filePath, constellation, aid, modelName);
             } catch (IOException | NoSuitableExecutorException e) {
                 throw new Error("Error when sending image: " + e.getMessage());
             }

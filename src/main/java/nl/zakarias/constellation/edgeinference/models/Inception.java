@@ -30,7 +30,7 @@ public class Inception implements ModelInterface {
 
     private ResultEvent performClassification(byte[] imageBytes) throws Exception {
         ResultEvent result;
-        
+
         byte[] graphDef = readAllBytesOrExit(Paths.get(MODEL_FILENAME));
         List<String> labels =
                 readAllLinesOrExit(Paths.get(LABEL_FILENAME));

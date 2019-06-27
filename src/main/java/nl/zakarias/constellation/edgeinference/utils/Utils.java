@@ -2,6 +2,7 @@ package nl.zakarias.constellation.edgeinference.utils;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
+import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,5 +60,15 @@ public class Utils {
             default:
                 throw new Error("Invalid node role");
         }
+    }
+
+    public static String InferenceModelEnumToString(){
+        StringBuilder result = new StringBuilder();
+
+        for (ModelInterface.InferenceModel model : ModelInterface.InferenceModel.values()){
+            result.append(model.toString()).append(" ");
+        }
+
+        return result.toString();
     }
 }
