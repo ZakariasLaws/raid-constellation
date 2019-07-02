@@ -2,9 +2,12 @@ package nl.zakarias.constellation.edgeinference.utils;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
-import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Utils {
     public static Logger logger = LoggerFactory.getLogger(Utils.class);
@@ -65,10 +68,28 @@ public class Utils {
     public static String InferenceModelEnumToString(){
         StringBuilder result = new StringBuilder();
 
-        for (ModelInterface.InferenceModel model : ModelInterface.InferenceModel.values()){
+        for (Configuration.ModelName model : Configuration.ModelName.values()){
             result.append(model.toString()).append(" ");
         }
 
         return result.toString();
+    }
+
+    public static byte[] readAllBytes(Path path) throws IOException {
+        return Files.readAllBytes(path);
+    }
+
+    public static void prettyPrintMnist(byte[] image){
+        System.out.println("\n");
+        for (int i=0; i<image.length; i++){
+            if (i % 28 == 0){
+                System.out.print("\n");
+            }
+            if ((int)image[i] == 0){
+                System.out.print("0");
+            } else {
+                System.out.print("1");
+            }
+        }
     }
 }

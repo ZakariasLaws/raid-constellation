@@ -16,7 +16,7 @@ public class CollectAndProcessEvents extends Activity {
 
     private int count;
 
-    public CollectAndProcessEvents(AbstractContext c) {
+    public CollectAndProcessEvents(AbstractContext c){
         super(c, false, true);
         count = 1;
     }
@@ -31,7 +31,7 @@ public class CollectAndProcessEvents extends Activity {
         targetIdentifier += identifier[2] + ":";
         targetIdentifier += identifier[3];
 
-        System.out.println("In order to target this activity with classifications add the following as argument " +
+        logger.info("In order to target this activity with classifications add the following as argument " +
                 "(exactly as printed) when initializing the new SOURCE: \"" + targetIdentifier + "\"\n\n");
 
         // Immediately start waiting for events to process
@@ -42,12 +42,19 @@ public class CollectAndProcessEvents extends Activity {
     public synchronized int process(Constellation c, Event e) {
         if (logger.isDebugEnabled()) {
             logger.debug("CollectAndProcessEvents: received event number " + count + " from src id " + e.getSource().toString());
-            // Handle received event
-            ResultEvent result = (ResultEvent) e.getData();
-            if (result.correct.equals(result.classification)) {
-                logger.debug(String.format("CollectAndProcessEvent: Correctly classified as %s with certainty %1.2f", result.classification, result.certainty));
-            } else {
-                logger.debug(String.format("CollectAndProcessEvent: Falsely classified %s as %s with certainty %1.2f", result.correct, result.classification, result.certainty));
+        }
+        // Handle received event
+        ResultEvent result = (ResultEvent) e.getData();
+
+        // Loop through the batch of classifications and print if they were correct
+        for(int i = 0; i<result.predictions.length; i++){
+            // Check that we have correct classifications to compare to
+            if (result.correct != null){
+                if ((int)result.predictions[i] == result.correct[i]) {
+                    logger.info(String.format("CollectAndProcessEvent: Correctly classified as %d with certainty %1.2f", result.predictions[i], result.certainty[i]));
+                } else {
+                    logger.info(String.format("CollectAndProcessEvent: Falsely classified %d as %d with certainty %1.2f", result.correct[i], result.predictions[i], result.certainty[i]));
+                }
             }
         }
 

@@ -1,34 +1,50 @@
 package nl.zakarias.constellation.edgeinference.models;
 
+import com.google.gson.Gson;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
+import nl.zakarias.constellation.edgeinference.modelServing.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tensorflow.*;
-import org.tensorflow.types.UInt8;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-
-public class MnistCnn implements ModelInterface {
+public class MnistCnn {
     private static Logger logger = LoggerFactory.getLogger(MnistCnn.class);
 
-    static private String BASE_DIR = System.getenv("EDGEINFERENCE_MODEL_DIR");
+    static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
 
-
-    @Override
-    public ResultEvent runClassification(byte[] data) throws Exception {
-        ResultEvent result = performClassification(data);
-        return result;
+    private class MnistResult {
+        float[][] predictions;
     }
 
-    private ResultEvent performClassification(byte[] imageBytes) throws Exception {
-        ResultEvent result = null;
+    public ResultEvent runTrainingClassification(byte[][] data, String modelName, int version, byte[] target) throws Exception {
+        if (logger.isDebugEnabled()){
+            logger.debug("MnistCnn: Performing prediction...");
+        }
+        String result = API.predict(PORT, modelName, version, data);
+        Gson g = new Gson();
+        MnistResult mnistResult = g.fromJson(result, MnistResult.class);
 
-        return result;
+        byte[] predictions = new byte[mnistResult.predictions.length];
+        float[] certainty = new float[mnistResult.predictions.length];
+
+        // Check each result
+        for (int i=0; i<mnistResult.predictions.length; i++){
+            float val = 0;
+            int pos = 0;
+            for (int x=0; x<mnistResult.predictions[i].length; x++){
+                if (mnistResult.predictions[i][x] > val){
+                    val = mnistResult.predictions[i][x];
+                    pos = x;
+                }
+            }
+            certainty[i] = val; // Store the certainty of the result
+            predictions[i] = (byte) pos; // Store the predictions, can be 0, 1 ... 8, 9
+
+        }
+
+        return new ResultEvent(target, predictions, certainty);
+    }
+
+    public ResultEvent runClassification(byte[][] data, String modelName, int version) throws Exception {
+        return this.runTrainingClassification(data, modelName, version, null);
     }
 }

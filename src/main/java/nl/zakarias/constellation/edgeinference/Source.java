@@ -4,15 +4,15 @@ import ibis.constellation.*;
 import ibis.constellation.impl.ActivityIdentifierImpl;
 import ibis.constellation.impl.ConstellationIdentifierImpl;
 import nl.zakarias.constellation.edgeinference.activites.InferenceActivity;
-import nl.zakarias.constellation.edgeinference.models.ModelInterface;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
+import nl.zakarias.constellation.edgeinference.models.MnistFileParser;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
 public class Source {
     private static final Logger logger = LoggerFactory.getLogger(Source.class);
 
@@ -30,23 +30,19 @@ public class Source {
         submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
-
-    private static byte[] readAllBytesOrExit(Path path) throws IOException {
-        return Files.readAllBytes(path);
-    }
-
-    private void sendImage(Path filePath, Constellation constellation, ActivityIdentifier aid, String modelName) throws IOException, NoSuitableExecutorException {
-        byte[] imageBytes = readAllBytesOrExit(filePath);
-
+    private void sendMnistImage(byte[][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
         // Generate activity
-        //            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
-        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.valueOf(modelName));
+        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, images, targets, aid, modelName);
 
         // submit activity
-        logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
+        }
         constellation.submit(activity);
 
-        logger.debug("----------- Waiting for 333 seconds ---------");
+        if (logger.isDebugEnabled()) {
+            logger.debug("----------- Waiting for 333 seconds ---------");
+        }
         try {
             Thread.sleep(333);
         } catch (InterruptedException e) {
@@ -54,7 +50,7 @@ public class Source {
         }
     }
 
-    public void run(Constellation constellation, String target, Path sourceDir, String modelName) throws IOException {
+    public void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
         // Use existing collectActivity
@@ -65,33 +61,23 @@ public class Source {
         String[] targetIdentifier = target.split(":");
         ActivityIdentifier aid = ActivityIdentifierImpl.createActivityIdentifier(new ConstellationIdentifierImpl(Integer.parseInt(targetIdentifier[0]), Integer.parseInt(targetIdentifier[1])), Integer.parseInt(targetIdentifier[2]), false);
 
-        // Go through the source directory and transmit each image
-        Files.walk(sourceDir).filter(Files::isRegularFile).forEach(filePath -> {
-            try {
-                sendImage(filePath, constellation, aid, modelName);
-            } catch (IOException | NoSuitableExecutorException e) {
-                throw new Error("Error when sending image: " + e.getMessage());
-            }
-        });
+        switch (modelName) {
+            case MNIST:
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Reading MNIST image and label file...");
+                }
+                byte[][] images = MnistFileParser.readDataFile(sourceDir + "/t10k-images-idx3-ubyte");
+                byte[] targets = MnistFileParser.readLabelFile(sourceDir + "/t10k-labels-idx1-ubyte");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Done importing images");
+                }
 
-//        for (int i=0; i<100000; i++) {
-//            // Read input
-//
-//            byte[] imageBytes = readAllBytesOrExit(Paths.get(System.getenv("EDGEINFERENCE_MODEL_DIR/inception") + "images/porcupine.jpg"));
-//
-//            // Generate activity
-////            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.INCEPTION);
-//            InferenceActivity activity = new InferenceActivity(this.contexts, true, false, imageBytes, aid, ModelInterface.InferenceModel.MNIST_CNN);
-//
-//            // submit activity
-//            logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
-//            constellation.submit(activity);
-//
-//            try {
-//                Thread.sleep(333);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
+                // TODO implement batch size setting, currently sending images one and one
+                for (int i=0; i<images.length; i++) {
+                    sendMnistImage(new byte[][]{images[i]}, new byte[] {targets[i]}, constellation, aid, modelName);
+                }
+
+                break;
+        }
     }
 }
