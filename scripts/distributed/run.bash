@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
-# Executes EdgeInference with Constellation using configurations from
-# bin/distributed/config
+# Executes EdgeInference with Constellation
+
+# Kill all child processes
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+
 function check_env() {
     local name_env_dir=$1
     if [[ -z ${!name_env_dir} ]]
@@ -88,7 +91,28 @@ pre="-Dibis.constellation"
 if [[ ${role,,} == "s" ]]; then
     command="\
     ${pre}.queue.limit=1000 "
-elif [[ ${role,,} == "p" || ${role,,} == "t" ]]; then
+elif [[ ${role,,} == "p" ]]; then
+    if [[ $(ps -C tensorflow_model_server | grep tensorflow_mode) ]]; then
+        echo ""
+        echo "****************"
+        echo "Using existing TensorFlow Model Serving instance, log can be found at: ${EDGEINFERENCE_DIR}/tensorflow_model_server.log"
+        echo "****************"
+        echo ""
+    else
+        # Start model serving in background, stores log in tensorflow_model_server.log
+        echo ""
+        echo "****************"
+        echo "Starting TensorFlow Model Serving, log can be found at: ${EDGEINFERENCE_DIR}/tensorflow_model_server.log"
+        nohup tensorflow_model_server --port=8500 --rest_api_port=8501 --model_config_file=${EDGEINFERENCE_DIR}/../../../tensorflow/tensorflow_serving/ModelServerConfig.conf > ${EDGEINFERENCE_DIR}/tensorflow_model_server.log &
+        echo "****************"
+        echo ""
+    fi
+
+    command="\
+    ${pre}.remotesteal.throttle=true \
+    ${pre}.remotesteal.size=1 \
+    "
+elif [[ ${role,,} == "t" ]]; then
     command="\
     ${pre}.remotesteal.throttle=true \
     ${pre}.remotesteal.size=1 \
