@@ -47,7 +47,7 @@ compiling TF from source. See [Build TensorFlow Java API for Odroid-N2](https://
 EDGEINFERENCE_TENSORFLOW_DIR=/path/to/tensorflow/java/bindings
 ```
 
-In case the `bin/distributed/run.sh` does not automatically identify you're architecture, it will try to build using 
+In case the `bin/distributed/run.sh` does not automatically identify your architecture, it will try to build using 
 the TensorFlow Java Native Bindings and JAR from Maven. This will result in an error looking something like:
 
 ```bash
