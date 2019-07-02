@@ -3,15 +3,10 @@ package nl.zakarias.constellation.edgeinference;
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration.NODE_ROLES;
-
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 
 public class EdgeInference {
 
@@ -33,8 +28,8 @@ public class EdgeInference {
         int nrExecutors = 1;
         Context[] contexts;
         String targetActivity = null;
-        Path sourceDataDir = null;
-        String modelName = null;
+        String sourceDataDir = null;
+        ModelInterface.InferenceModel modelName = null;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -59,12 +54,15 @@ public class EdgeInference {
                     targetActivity = args[i];
                     break;
                 case "-dataDir":
-                    i++;
-                    sourceDataDir = Paths.get(args[i]);
+                    sourceDataDir =args[i];
                     break;
                 case "-modelName":
                     i++;
-                    modelName = args[i];
+                    try {
+                        modelName = ModelInterface.InferenceModel.valueOf(args[i].toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        throw new Error("Invalid model name: " + args[i]);
+                    }
                     break;
                 default:
                     throw new Error("Invalid argument: " + args[i] + "\n\n" + usage());
@@ -105,7 +103,7 @@ public class EdgeInference {
                     throw new IllegalArgumentException("Specify the name of the classification model to use (e.g. inception)");
                 }
 
-                source.run(constellation, targetActivity, sourceDataDir, modelName.toUpperCase());
+                source.run(constellation, targetActivity, sourceDataDir, modelName);
                 break;
             case PREDICTOR:
                 Predictor predictor = new Predictor(contexts, nrExecutors);
@@ -113,7 +111,11 @@ public class EdgeInference {
                 break;
             case TARGET:
                 Target target = new Target();
-                target.run(constellation);
+
+                if (sourceDataDir == null) {
+                    throw new IllegalArgumentException("Missing directory to retrieve classification labels from");
+                }
+                target.run(constellation, sourceDataDir);
                 break;
             default:
                 throw new Error("No matching Java Class found for role: " + role.toString());

@@ -1,34 +1,27 @@
 package nl.zakarias.constellation.edgeinference.models;
 
 import nl.zakarias.constellation.edgeinference.ResultEvent;
+import nl.zakarias.constellation.edgeinference.modelServing.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tensorflow.*;
-import org.tensorflow.types.UInt8;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 
 public class MnistCnn implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(MnistCnn.class);
 
-    static private String BASE_DIR = System.getenv("EDGEINFERENCE_MODEL_DIR");
-
+    static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
 
     @Override
-    public ResultEvent runClassification(byte[] data) throws Exception {
-        ResultEvent result = performClassification(data);
-        return result;
-    }
+    public ResultEvent runClassification(byte[][] data) {
+        String result = "";
+        try {
+            // TODO Use this result
+            result = API.predict(PORT, "mnist", 1, data);
+            System.out.println("PREDICTED: " + result + "\n\n\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-    private ResultEvent performClassification(byte[] imageBytes) throws Exception {
-        ResultEvent result = null;
-
-        return result;
+        // TODO THIS NEEDS TO CHANGE
+        return new ResultEvent(new byte[3], new byte[2], new Float[]{0.32f, 0.35f, 0.35f});
     }
 }

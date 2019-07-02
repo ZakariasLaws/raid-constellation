@@ -6,6 +6,10 @@ import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class Utils {
     public static Logger logger = LoggerFactory.getLogger(Utils.class);
 
@@ -70,5 +74,9 @@ public class Utils {
         }
 
         return result.toString();
+    }
+
+    public static byte[] readAllBytes(Path path) throws IOException {
+        return Files.readAllBytes(path);
     }
 }

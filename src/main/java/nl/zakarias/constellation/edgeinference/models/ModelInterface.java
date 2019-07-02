@@ -6,9 +6,8 @@ import java.io.Serializable;
 
 public interface ModelInterface {
     enum InferenceModel implements Serializable {
-        INCEPTION,
-        MNIST_CNN,
+        MNIST,
     }
 
-    ResultEvent runClassification(byte[] data) throws Exception;
+    ResultEvent runClassification(byte[][] data) throws Exception;
 }

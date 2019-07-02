@@ -2,7 +2,6 @@ package nl.zakarias.constellation.edgeinference.activites;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
-import nl.zakarias.constellation.edgeinference.models.Inception;
 import nl.zakarias.constellation.edgeinference.models.MnistCnn;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface.InferenceModel;
@@ -15,7 +14,9 @@ import java.net.UnknownHostException;
 public class InferenceActivity extends Activity {
     private static Logger logger = LoggerFactory.getLogger(InferenceActivity.class);
 
-    private byte[] data;
+    private byte[][] data;
+    private byte[] targetIndexes; // Possible targets, should be null if labels are unknown
+
     private ResultEvent result;
     private ActivityIdentifier targetIdentifier;
 
@@ -24,10 +25,11 @@ public class InferenceActivity extends Activity {
     private InferenceModel model;
 
 
-    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[] data, ActivityIdentifier aid, InferenceModel model) throws UnknownHostException {
+    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] targetIndexes, ActivityIdentifier aid, InferenceModel model) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
+        this.targetIndexes = targetIndexes;
         targetIdentifier = aid;
         submittedNetworkInfo = new CrunchifyGetIPHostname();
         result = null;
@@ -45,16 +47,12 @@ public class InferenceActivity extends Activity {
         }
         logger.debug("InferenceActivity: Executing on host: " + currentNetworkInfo.hostname());
 
-        logger.debug("InferenceActivity: Performing inference with Inception CNN...");
-
         ModelInterface model;
 
         // Specify what model to use for classification
         switch (this.model) {
-            case INCEPTION:
-                model = new Inception();
-                break;
-            case MNIST_CNN:
+            case MNIST:
+                logger.debug("InferenceActivity: Performing inference with Mnist CNN...");
                 model = new MnistCnn();
                 break;
             default:
@@ -64,6 +62,8 @@ public class InferenceActivity extends Activity {
 
         try {
             this.result = model.runClassification(this.data);
+            this.result.correct = this.targetIndexes;
+
         } catch (Exception e) {
             logger.error(String.format("InferenceActivity: Error applying model with message: %s", e.getMessage()));
             e.printStackTrace();

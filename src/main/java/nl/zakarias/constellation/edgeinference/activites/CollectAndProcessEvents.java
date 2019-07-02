@@ -1,6 +1,7 @@
 package nl.zakarias.constellation.edgeinference.activites;
 
 import nl.zakarias.constellation.edgeinference.ResultEvent;
+import nl.zakarias.constellation.edgeinference.models.MnistFileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,16 +10,21 @@ import ibis.constellation.Activity;
 import ibis.constellation.Constellation;
 import ibis.constellation.Event;
 
+import java.io.IOException;
+
 public class CollectAndProcessEvents extends Activity {
     private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEvents.class);
 
     private static final long serialVersionUID = -538414301465754654L;
 
     private int count;
+    private byte[] labels;
 
-    public CollectAndProcessEvents(AbstractContext c) {
+    public CollectAndProcessEvents(AbstractContext c, String sourceDir) throws IOException {
         super(c, false, true);
         count = 1;
+
+        this.labels = MnistFileParser.readLabelFile(sourceDir + "/t10k-labels-idx3-ubyte");
     }
 
     @Override
