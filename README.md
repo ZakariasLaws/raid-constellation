@@ -59,8 +59,3 @@ To solve this, uncomment the following line in the `scripts/distributed/run.sh` 
 ```bash
 # command="${command} -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
 ```
-
-### TODO
-
-* Build a later version of TensorFlow, currently build from branch r1.11
-* Serialize TensorFlow graph and share the object between activities, in order not to recreate the object in each activities execution.
