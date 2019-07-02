@@ -54,6 +54,7 @@ public class EdgeInference {
                     targetActivity = args[i];
                     break;
                 case "-dataDir":
+                    i++;
                     sourceDataDir =args[i];
                     break;
                 case "-modelName":
