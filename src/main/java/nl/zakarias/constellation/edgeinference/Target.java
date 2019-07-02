@@ -9,7 +9,6 @@ import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 
 public class Target {
@@ -22,12 +21,12 @@ public class Target {
         submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
-    public void run(Constellation constellation, String sourceDir) throws NoSuitableExecutorException, IOException {
+    public void run(Constellation constellation) throws NoSuitableExecutorException {
         logger.info("\n\nStarting Target("+ submittedNetworkInfo.hostname() +") with context: " + TARGET_CONTEXT + "\n\n");
 
         // Will be executed on the Target device
         logger.debug("Submitting CollectAndProcessEvents");
-        CollectAndProcessEvents activity = new CollectAndProcessEvents(Configuration.TARGET_CONTEXT, sourceDir);
+        CollectAndProcessEvents activity = new CollectAndProcessEvents(Configuration.TARGET_CONTEXT);
 
         logger.debug("Submitting CollectAndProcessEvents activity");
         constellation.submit(activity);

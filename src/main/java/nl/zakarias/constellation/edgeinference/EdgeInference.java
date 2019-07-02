@@ -3,7 +3,6 @@ package nl.zakarias.constellation.edgeinference;
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration.NODE_ROLES;
-import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,7 @@ public class EdgeInference {
         Context[] contexts;
         String targetActivity = null;
         String sourceDataDir = null;
-        ModelInterface.InferenceModel modelName = null;
+        Configuration.ModelName modelName = null;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -60,7 +59,7 @@ public class EdgeInference {
                 case "-modelName":
                     i++;
                     try {
-                        modelName = ModelInterface.InferenceModel.valueOf(args[i].toUpperCase());
+                        modelName = Configuration.ModelName.valueOf(args[i].toUpperCase());
                     } catch (IllegalArgumentException e) {
                         throw new Error("Invalid model name: " + args[i]);
                     }
@@ -99,9 +98,9 @@ public class EdgeInference {
                 if (targetActivity == null) {
                     throw new IllegalArgumentException("Missing activity ID to send results to");
                 } if (sourceDataDir == null) {
-                    throw new IllegalArgumentException("Missing directory to retrieve classification images from");
+                    throw new IllegalArgumentException("Missing directory to retrieve predictions images from");
                 } if (modelName == null) {
-                    throw new IllegalArgumentException("Specify the name of the classification model to use (e.g. inception)");
+                    throw new IllegalArgumentException("Specify the name of the predictions model to use (e.g. inception)");
                 }
 
                 source.run(constellation, targetActivity, sourceDataDir, modelName);
@@ -112,11 +111,7 @@ public class EdgeInference {
                 break;
             case TARGET:
                 Target target = new Target();
-
-                if (sourceDataDir == null) {
-                    throw new IllegalArgumentException("Missing directory to retrieve classification labels from");
-                }
-                target.run(constellation, sourceDataDir);
+                target.run(constellation);
                 break;
             default:
                 throw new Error("No matching Java Class found for role: " + role.toString());

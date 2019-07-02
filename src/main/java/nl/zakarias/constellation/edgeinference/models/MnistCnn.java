@@ -1,27 +1,50 @@
 package nl.zakarias.constellation.edgeinference.models;
 
+import com.google.gson.Gson;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
 import nl.zakarias.constellation.edgeinference.modelServing.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MnistCnn implements ModelInterface {
+public class MnistCnn {
     private static Logger logger = LoggerFactory.getLogger(MnistCnn.class);
 
     static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
 
-    @Override
-    public ResultEvent runClassification(byte[][] data) {
-        String result = "";
-        try {
-            // TODO Use this result
-            result = API.predict(PORT, "mnist", 1, data);
-            System.out.println("PREDICTED: " + result + "\n\n\n");
-        } catch (Exception e) {
-            e.printStackTrace();
+    private class MnistResult {
+        float[][] predictions;
+    }
+
+    public ResultEvent runTrainingClassification(byte[][] data, String modelName, int version, byte[] target) throws Exception {
+        if (logger.isDebugEnabled()){
+            logger.debug("MnistCnn: Performing prediction...");
+        }
+        String result = API.predict(PORT, modelName, version, data);
+        Gson g = new Gson();
+        MnistResult mnistResult = g.fromJson(result, MnistResult.class);
+
+        byte[] predictions = new byte[mnistResult.predictions.length];
+        float[] certainty = new float[mnistResult.predictions.length];
+
+        // Check each result
+        for (int i=0; i<mnistResult.predictions.length; i++){
+            float val = 0;
+            int pos = 0;
+            for (int x=0; x<mnistResult.predictions[i].length; x++){
+                if (mnistResult.predictions[i][x] > val){
+                    val = mnistResult.predictions[i][x];
+                    pos = x;
+                }
+            }
+            certainty[i] = val; // Store the certainty of the result
+            predictions[i] = (byte) pos; // Store the predictions, can be 0, 1 ... 8, 9
+
         }
 
-        // TODO THIS NEEDS TO CHANGE
-        return new ResultEvent(new byte[3], new byte[2], new Float[]{0.32f, 0.35f, 0.35f});
+        return new ResultEvent(target, predictions, certainty);
+    }
+
+    public ResultEvent runClassification(byte[][] data, String modelName, int version) throws Exception {
+        return this.runTrainingClassification(data, modelName, version, null);
     }
 }

@@ -2,9 +2,8 @@ package nl.zakarias.constellation.edgeinference.activites;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.models.MnistCnn;
-import nl.zakarias.constellation.edgeinference.models.ModelInterface;
-import nl.zakarias.constellation.edgeinference.models.ModelInterface.InferenceModel;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,21 +14,21 @@ public class InferenceActivity extends Activity {
     private static Logger logger = LoggerFactory.getLogger(InferenceActivity.class);
 
     private byte[][] data;
-    private byte[] targetIndexes; // Possible targets, should be null if labels are unknown
+    private byte[] correctLabels; // Possible targets, should be null if labels are unknown
 
     private ResultEvent result;
     private ActivityIdentifier targetIdentifier;
 
     private CrunchifyGetIPHostname submittedNetworkInfo;
     private CrunchifyGetIPHostname currentNetworkInfo;
-    private InferenceModel model;
+    private Configuration.ModelName model;
 
 
-    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] targetIndexes, ActivityIdentifier aid, InferenceModel model) throws UnknownHostException {
+    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid, Configuration.ModelName model) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
-        this.targetIndexes = targetIndexes;
+        this.correctLabels = correctLabels;
         targetIdentifier = aid;
         submittedNetworkInfo = new CrunchifyGetIPHostname();
         result = null;
@@ -47,26 +46,21 @@ public class InferenceActivity extends Activity {
         }
         logger.debug("InferenceActivity: Executing on host: " + currentNetworkInfo.hostname());
 
-        ModelInterface model;
-
-        // Specify what model to use for classification
+        // Specify what model to use for predictions
         switch (this.model) {
             case MNIST:
                 logger.debug("InferenceActivity: Performing inference with Mnist CNN...");
-                model = new MnistCnn();
+                MnistCnn model = new MnistCnn();
+                try {
+                    this.result = model.runTrainingClassification(this.data, "mnist", 1, this.correctLabels);
+                } catch (Exception e) {
+                    throw new Error(String.format("InferenceActivity: Error applying model with message: %s", e.getMessage()));
+                }
+
                 break;
             default:
                 logger.error("InferenceActivity: Invalid model " + this.model.toString());
                 throw new IllegalArgumentException("Illegal argument: " + this.model.toString());
-        }
-
-        try {
-            this.result = model.runClassification(this.data);
-            this.result.correct = this.targetIndexes;
-
-        } catch (Exception e) {
-            logger.error(String.format("InferenceActivity: Error applying model with message: %s", e.getMessage()));
-            e.printStackTrace();
         }
 
         return FINISH;
@@ -81,8 +75,8 @@ public class InferenceActivity extends Activity {
     public void cleanup(Constellation constellation) {
         logger.debug("InferenceActivity: Sending results to target");
         if (this.result == null) {
-            // Something went wrong during classification
-            logger.error("No classification result transmitted to target " + targetIdentifier + ", result from classification is null. Check that classification executed correctly.");
+            // Something went wrong during predictions
+            logger.error("No predictions result transmitted to target " + targetIdentifier + ", result from predictions is null. Check that predictions executed correctly.");
         } else {
             constellation.send(new Event(identifier(), targetIdentifier, this.result));
         }

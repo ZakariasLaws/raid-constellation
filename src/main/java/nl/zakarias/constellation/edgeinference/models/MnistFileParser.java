@@ -14,7 +14,6 @@ public class MnistFileParser {
         byte[][] images = new byte[imageCount][rows*cols];
 
         for(int i=0; i<imageCount; i++){
-            byte[] image = new byte[rows*cols];
             for(int x=0; x<rows; x++){
                 for(int y=0; y<cols; y++){
                    images[i][(x*cols) + y] = (byte) dataInputStream.readUnsignedByte();

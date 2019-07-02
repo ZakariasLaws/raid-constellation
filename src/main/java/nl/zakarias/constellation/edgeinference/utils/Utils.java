@@ -2,7 +2,6 @@ package nl.zakarias.constellation.edgeinference.utils;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
-import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +68,7 @@ public class Utils {
     public static String InferenceModelEnumToString(){
         StringBuilder result = new StringBuilder();
 
-        for (ModelInterface.InferenceModel model : ModelInterface.InferenceModel.values()){
+        for (Configuration.ModelName model : Configuration.ModelName.values()){
             result.append(model.toString()).append(" ");
         }
 
