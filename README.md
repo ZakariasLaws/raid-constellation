@@ -24,6 +24,32 @@ In order to install everything and compile a distribution run the following in t
 
 This will create the distribution in `build/install/edgeinference-constellation`.
 
+## Configuration
+For running this application, Constellation requires the following environment variables to be set on *ALL* devices. The port number must be the same on all devices, it is used to connect to the server:
+
+```bash
+export CONSTELLATION_PORT=<unique_port_nmr>
+export EDGEINFERENCE_DIR=/build/path/edgeinference-constellation
+```
+
+The `EDGEINFERENCE_DIR` should correspond to the location of your distribution, which should be 
+`build/install/edgeinference-constellation`.
+
+The application use [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) in order to support different TensorFlow ML models. When starting a Predictor with the `run.bash` script, the TensorFlow serving API will start on in the background and run on local host. The configuration file is located at `tensorflow/tensorflow_serving/ModelServerConfig.conf`, it only supports *absolute paths* and **must** therefor be modified with the device system paths.
+
+The config file should look something like this, (see [here](https://www.tensorflow.org/tfx/serving/serving_config) for more options):
+```conf
+model_config_list {
+  config {
+    name: 'mnist'
+    base_path: '/path/to/model/dir/mnist'
+    model_platform: 'tensorflow'
+  }
+  config {
+  ....
+}
+```
+
 ## Running
 
 For running this application, Constellation requires the following environment variables to be set on *ALL* devices. The port number must be the same on all devices, it is used to connect to the server:
