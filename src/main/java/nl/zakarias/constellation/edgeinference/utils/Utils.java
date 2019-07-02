@@ -78,4 +78,18 @@ public class Utils {
     public static byte[] readAllBytes(Path path) throws IOException {
         return Files.readAllBytes(path);
     }
+
+    public static void prettyPrintMnist(byte[] image){
+        System.out.println("\n");
+        for (int i=0; i<image.length; i++){
+            if (i % 28 == 0){
+                System.out.print("\n");
+            }
+            if ((int)image[i] == 0){
+                System.out.print("0");
+            } else {
+                System.out.print("1");
+            }
+        }
+    }
 }

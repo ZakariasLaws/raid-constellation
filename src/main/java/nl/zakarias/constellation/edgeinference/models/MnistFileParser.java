@@ -4,7 +4,7 @@ import java.io.*;
 
 public class MnistFileParser {
     public static byte[][] readDataFile(String filePath) throws IOException {
-        DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(filePath)));
+        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath));
 
         dataInputStream.readInt(); // Magic number
         int imageCount = dataInputStream.readInt();
@@ -14,10 +14,8 @@ public class MnistFileParser {
         byte[][] images = new byte[imageCount][rows*cols];
 
         for(int i=0; i<imageCount; i++){
-            for(int x=0; x<rows; x++){
-                for(int y=0; y<cols; y++){
-                   images[i][(x*cols) + y] = (byte) dataInputStream.readUnsignedByte();
-                }
+            for(int x=0; x<rows*cols; x++){
+               images[i][x] = (byte) dataInputStream.readUnsignedByte();
             }
         }
 

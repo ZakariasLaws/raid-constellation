@@ -1,7 +1,6 @@
 package nl.zakarias.constellation.edgeinference.activites;
 
 import nl.zakarias.constellation.edgeinference.ResultEvent;
-import nl.zakarias.constellation.edgeinference.models.MnistFileParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public class CollectAndProcessEvents extends Activity {
         targetIdentifier += identifier[2] + ":";
         targetIdentifier += identifier[3];
 
-        System.out.println("In order to target this activity with classifications add the following as argument " +
+        logger.info("In order to target this activity with classifications add the following as argument " +
                 "(exactly as printed) when initializing the new SOURCE: \"" + targetIdentifier + "\"\n\n");
 
         // Immediately start waiting for events to process

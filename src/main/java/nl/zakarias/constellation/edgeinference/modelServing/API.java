@@ -2,7 +2,6 @@ package nl.zakarias.constellation.edgeinference.modelServing;
 
 import com.google.gson.Gson;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -15,24 +14,35 @@ public class API {
 
     public static class Content{
         String signature_name;
-        byte[][] instances;
-
-        private void createInstances(byte[][] image){
-            instances = new byte[image.length][784];
-            for(int i=0; i<image.length; i++){
-                System.arraycopy(image[0], 0, instances[i], 0, 784);
-            }
-        }
+        int[][] instances;
 
         private Content(String signature_string, byte[][] image){
             this.signature_name = signature_string;
-            createInstances(image);
+
+            instances = new int[image.length][image[0].length];
+
+            for (int i=0; i<image.length; i++){
+                for(int x=0; x<image[i].length; x++){
+                    instances[i][x] = image[i][x] & 0xff; // Convert to int
+                }
+            }
         }
     }
 
 
-    private static String handleResponse(HttpURLConnection con){
-        return "";
+    private static String responseError(HttpURLConnection con, int code) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuilder result = new StringBuilder();
+
+        result.append(String.format("Response code %d \n", code));
+
+        while ((inputLine = in.readLine()) != null) {
+            result.append(inputLine);
+        }
+        in.close();
+
+        return result.toString();
     }
 
     public static String predict(int port, String modelName, int version, byte[][] image) throws Exception {
@@ -46,19 +56,18 @@ public class API {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type","application/json");
-        String test = gson.toJson(data);
+
         connection.setDoOutput(true);
         connection.setDoInput(true);
         DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-        wr.writeBytes(test);
+        wr.writeBytes(gson.toJson(data));
         wr.flush();
         wr.close();
 
         int responseCode = connection.getResponseCode();
 
-        // TODO Extend this to cover more codes and display more meaningful errors
-        if (responseCode == 404){
-            throw new Error("Received 404 on TF serving predict with model " + modelName + "/" + version);
+        if (!(responseCode == 200 || responseCode == 202)) {
+            throw new Error(responseError(connection, responseCode));
         }
 
         BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -92,8 +101,6 @@ public class API {
     }
 
     public static String getModelMetadata(int port, String modelName, int version) throws Exception {
-//        GET http://host:port/v1/models/${MODEL_NAME}[/versions/${MODEL_VERSION}]/metadata
-
         StringBuilder result = new StringBuilder();
 
         URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/metadata");

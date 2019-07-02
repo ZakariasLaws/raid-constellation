@@ -35,10 +35,14 @@ public class Source {
         InferenceActivity activity = new InferenceActivity(this.contexts, true, false, images, targets, aid, modelName);
 
         // submit activity
-        logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
+        }
         constellation.submit(activity);
 
-        logger.debug("----------- Waiting for 333 seconds ---------");
+        if (logger.isDebugEnabled()) {
+            logger.debug("----------- Waiting for 333 seconds ---------");
+        }
         try {
             Thread.sleep(333);
         } catch (InterruptedException e) {
@@ -59,10 +63,16 @@ public class Source {
 
         switch (modelName) {
             case MNIST:
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Reading MNIST image and label file...");
+                }
                 byte[][] images = MnistFileParser.readDataFile(sourceDir + "/t10k-images-idx3-ubyte");
                 byte[] targets = MnistFileParser.readLabelFile(sourceDir + "/t10k-labels-idx1-ubyte");
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Done importing images");
+                }
 
-                // TODO implement batch size setting, currently sending images one and onej
+                // TODO implement batch size setting, currently sending images one and one
                 for (int i=0; i<images.length; i++) {
                     sendMnistImage(new byte[][]{images[i]}, new byte[] {targets[i]}, constellation, aid, modelName);
                 }
