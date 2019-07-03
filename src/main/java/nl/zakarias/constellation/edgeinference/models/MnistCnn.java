@@ -6,6 +6,11 @@ import nl.zakarias.constellation.edgeinference.modelServing.API;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
+/**
+ * Specific class used for classifying Mnist images. It uses the {@link API} for connecting to tensorflow model server
+ */
 public class MnistCnn {
     private static Logger logger = LoggerFactory.getLogger(MnistCnn.class);
 
@@ -15,7 +20,18 @@ public class MnistCnn {
         float[][] predictions;
     }
 
-    public ResultEvent runTrainingClassification(byte[][] data, String modelName, int version, byte[] target) throws Exception {
+    /**
+     * Run a classification on an image which already has a target label.
+     *
+     * @param data The batch of images we wish to classify
+     * @param modelName The name of the model
+     * @param version The version number
+     * @param target The target Identifier of where to send the result.
+     *
+     * @return ResultEvent(...) containing the certainty, prediction and correct label (if existing)
+     * @throws IOException If something goes wrong with the connection to the server
+     */
+    public static ResultEvent classify(byte[][] data, String modelName, int version, byte[] target) throws IOException {
         if (logger.isDebugEnabled()){
             logger.debug("MnistCnn: Performing prediction...");
         }
@@ -44,7 +60,17 @@ public class MnistCnn {
         return new ResultEvent(target, predictions, certainty);
     }
 
-    public ResultEvent runClassification(byte[][] data, String modelName, int version) throws Exception {
-        return this.runTrainingClassification(data, modelName, version, null);
+    /**
+     * Run a classification on an image which does not have a target.
+     *
+     * @param data The batch of images we wish to classify
+     * @param modelName The name of the model
+     * @param version The version number
+     *
+     * @return ResultEvent(...) containing the certainty, prediction and correct label (if existing)
+     * @throws IOException If something goes wrong with the connection to the server
+     */
+    public static ResultEvent runClassification(byte[][] data, String modelName, int version) throws Exception {
+        return classify(data, modelName, version, null);
     }
 }

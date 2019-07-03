@@ -10,8 +10,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ * An API allowing the user to interface with the tensorflow model server, in order to make predictions.
+ */
 public class API {
 
+    /**
+     * Inner class used for automatic JSON <-> String conversion and access
+     */
     public static class Content{
         String signature_name;
         int[][] instances;
@@ -30,6 +36,13 @@ public class API {
     }
 
 
+    /**
+     * @param con Connection to tensorflow model serving
+     * @param code Response code of the request
+     *
+     * @return A String containing the result of the response
+     * @throws IOException If something goes wrong with the connection to the server
+     */
     private static String responseError(HttpURLConnection con, int code) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
@@ -45,7 +58,20 @@ public class API {
         return result.toString();
     }
 
-    public static String predict(int port, String modelName, int version, byte[][] image) throws Exception {
+    /**
+     * Make a prediction using tensorflow serving and the given model. Any number of images can be supplied as a batch,
+     * with the first dimension representing each individual image. For example,
+     * batch size 1 would correspond to the following image: byte[1][784] image.
+     *
+     * @param port Port number on which the tensorflow model server is listening
+     * @param modelName Model name
+     * @param version Model version number
+     * @param image A batch of images to classify
+     *
+     * @return A String containing the result of the response.
+     * @throws IOException If something goes wrong with the connection to the server
+     */
+    public static String predict(int port, String modelName, int version, byte[][] image) throws IOException {
         URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName + ":predict");
         if (version > 0){
             url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/versions/" + version + ":predict");
@@ -82,7 +108,17 @@ public class API {
         return result.toString();
     }
 
-    public static String getStatus(int port, String modelName, int version) throws Exception {
+    /**
+     * Get the status of a certain model running on the tensorflow model serving
+     *
+     * @param port Port number on which the tensorflow model server is listening
+     * @param modelName Model name
+     * @param version Model version number
+     *
+     * @return Status of the model
+     * @throws IOException If something goes wrong with the connection to the server
+     */
+    public static String getStatus(int port, String modelName, int version) throws IOException {
         StringBuilder result = new StringBuilder();
 
         URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName);
@@ -100,7 +136,17 @@ public class API {
         return result.toString();
     }
 
-    public static String getModelMetadata(int port, String modelName, int version) throws Exception {
+    /**
+     * Get model metadata, containing information on model input tensor dimensions, status, output format etc
+     *
+     * @param port Port number on which the tensorflow model server is listening
+     * @param modelName Model name
+     * @param version Model version number
+     *
+     * @return Metadata of the model
+     * @throws IOException If something goes wrong with the connection to the server
+     */
+    public static String getModelMetadata(int port, String modelName, int version) throws IOException {
         StringBuilder result = new StringBuilder();
 
         URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/metadata");

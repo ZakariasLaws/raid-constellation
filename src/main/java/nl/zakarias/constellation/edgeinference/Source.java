@@ -3,17 +3,18 @@ package nl.zakarias.constellation.edgeinference;
 import ibis.constellation.*;
 import ibis.constellation.impl.ActivityIdentifierImpl;
 import ibis.constellation.impl.ConstellationIdentifierImpl;
-import nl.zakarias.constellation.edgeinference.activites.InferenceActivity;
+import nl.zakarias.constellation.edgeinference.activites.inferencing.MnistActivity;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.models.MnistFileParser;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
+import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
 
-public class Source {
+class Source {
     private static final Logger logger = LoggerFactory.getLogger(Source.class);
 
     private AbstractContext contexts;
@@ -30,13 +31,13 @@ public class Source {
         submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
-    private void sendMnistImage(byte[][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
+    private void sendMnistImageBatch(byte[][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
         // Generate activity
-        InferenceActivity activity = new InferenceActivity(this.contexts, true, false, images, targets, aid, modelName);
+        MnistActivity activity = new MnistActivity(this.contexts, true, false, images, targets, aid, modelName);
 
         // submit activity
         if (logger.isDebugEnabled()) {
-            logger.debug("Submitting InferenceActivity with contexts " + this.contexts.toString());
+            logger.debug("Submitting MnistActivity with contexts " + this.contexts.toString());
         }
         constellation.submit(activity);
 
@@ -50,7 +51,24 @@ public class Source {
         }
     }
 
-    public void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
+    private void runMnist(Constellation constellation, ActivityIdentifier target, String sourceDir, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Reading MNIST image and label file...");
+        }
+        byte[][] images = MnistFileParser.readDataFile(sourceDir + "/t10k-images-idx3-ubyte");
+        byte[] targets = MnistFileParser.readLabelFile(sourceDir + "/t10k-labels-idx1-ubyte");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Done importing images");
+        }
+
+        // TODO implement batch size setting, currently sending images one and one
+        for (int i=0; i<images.length; i++) {
+            sendMnistImageBatch(new byte[][]{images[i]}, new byte[] {targets[i]}, constellation, target, modelName);
+        }
+    }
+
+
+    void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
         // Use existing collectActivity
@@ -61,23 +79,10 @@ public class Source {
         String[] targetIdentifier = target.split(":");
         ActivityIdentifier aid = ActivityIdentifierImpl.createActivityIdentifier(new ConstellationIdentifierImpl(Integer.parseInt(targetIdentifier[0]), Integer.parseInt(targetIdentifier[1])), Integer.parseInt(targetIdentifier[2]), false);
 
-        switch (modelName) {
-            case MNIST:
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Reading MNIST image and label file...");
-                }
-                byte[][] images = MnistFileParser.readDataFile(sourceDir + "/t10k-images-idx3-ubyte");
-                byte[] targets = MnistFileParser.readLabelFile(sourceDir + "/t10k-labels-idx1-ubyte");
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Done importing images");
-                }
-
-                // TODO implement batch size setting, currently sending images one and one
-                for (int i=0; i<images.length; i++) {
-                    sendMnistImage(new byte[][]{images[i]}, new byte[] {targets[i]}, constellation, aid, modelName);
-                }
-
-                break;
+        if (modelName == Configuration.ModelName.MNIST) {
+            runMnist(constellation, aid, sourceDir, modelName);
+        } else {
+            logger.error("Could not identify a valid model, options are: " + Utils.InferenceModelEnumToString());
         }
     }
 }

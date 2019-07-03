@@ -14,8 +14,6 @@ public class Configuration {
     }
 
     public static final Context TARGET_CONTEXT = new Context("target");
-    public static final StealPool RESULT_POOL = new StealPool("result_pool");
-    public static final StealPool SOURCE_POOL = new StealPool("source_pool");
 
     public static String nodeRoleValues(){
         StringBuilder result = new StringBuilder();

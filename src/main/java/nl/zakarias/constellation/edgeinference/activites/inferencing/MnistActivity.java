@@ -1,4 +1,4 @@
-package nl.zakarias.constellation.edgeinference.activites;
+package nl.zakarias.constellation.edgeinference.activites.inferencing;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 
-public class InferenceActivity extends Activity {
-    private static Logger logger = LoggerFactory.getLogger(InferenceActivity.class);
+public class MnistActivity extends Activity {
+    private static Logger logger = LoggerFactory.getLogger(MnistActivity.class);
 
     private byte[][] data;
     private byte[] correctLabels; // Possible targets, should be null if labels are unknown
@@ -24,7 +24,7 @@ public class InferenceActivity extends Activity {
     private Configuration.ModelName model;
 
 
-    public InferenceActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid, Configuration.ModelName model) throws UnknownHostException {
+    public MnistActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
@@ -32,7 +32,6 @@ public class InferenceActivity extends Activity {
         targetIdentifier = aid;
         submittedNetworkInfo = new CrunchifyGetIPHostname();
         result = null;
-        this.model = model;
     }
 
     @Override
@@ -41,26 +40,16 @@ public class InferenceActivity extends Activity {
         try {
             currentNetworkInfo = new CrunchifyGetIPHostname();
         } catch (UnknownHostException e) {
-            logger.error("InferenceActivity: Could not find host information");
+            logger.error("MnistActivity: Could not find host information");
             e.printStackTrace();
         }
-        logger.debug("InferenceActivity: Executing on host: " + currentNetworkInfo.hostname());
-
-        // Specify what model to use for predictions
-        switch (this.model) {
-            case MNIST:
-                logger.debug("InferenceActivity: Performing inference with Mnist CNN...");
-                MnistCnn model = new MnistCnn();
-                try {
-                    this.result = model.runTrainingClassification(this.data, "mnist", 1, this.correctLabels);
-                } catch (Exception e) {
-                    throw new Error(String.format("InferenceActivity: Error applying model with message: %s", e.getMessage()));
-                }
-
-                break;
-            default:
-                logger.error("InferenceActivity: Invalid model " + this.model.toString());
-                throw new IllegalArgumentException("Illegal argument: " + this.model.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("MnistActivity: Executing on host: " + currentNetworkInfo.hostname());
+        }
+        try {
+            this.result = MnistCnn.classify(this.data, "mnist", 1, this.correctLabels);
+        } catch (Exception e) {
+            throw new Error(String.format("MnistActivity: Error applying model with message: %s", e.getMessage()));
         }
 
         return FINISH;
@@ -73,7 +62,10 @@ public class InferenceActivity extends Activity {
 
     @Override
     public void cleanup(Constellation constellation) {
-        logger.debug("InferenceActivity: Sending results to target");
+        if (logger.isDebugEnabled()){
+            logger.debug("MnistActivity: Sending results to target");
+        }
+
         if (this.result == null) {
             // Something went wrong during predictions
             logger.error("No predictions result transmitted to target " + targetIdentifier + ", result from predictions is null. Check that predictions executed correctly.");
