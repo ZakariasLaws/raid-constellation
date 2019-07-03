@@ -122,13 +122,6 @@ else
     "
 fi
 
-# Check if we are running on aarch64 based system
-if [[ ${MACHTYPE} == aarch64-unknown-linux-gnu ]]; then
-    check_env_dir EDGEINFERENCE_TENSORFLOW_DIR
-    command="${command} \
-    -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
-fi
-
 ######################### UNCOMMENT THE FOLLOWING LINE TO COMPILE WITH LOCAL TF JAVA BINDINGS #########################
 # command="${command} -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
 
