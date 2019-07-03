@@ -92,6 +92,12 @@ if [[ ${role,,} == "s" ]]; then
     command="\
     ${pre}.queue.limit=1000 "
 elif [[ ${role,,} == "p" ]]; then
+    tfServer=`which tensorflow_model_server`
+    if [[ ${tfServer} == "" ]]; then
+        echo "Add tensorflow_server_binary to PATH"
+        exit 1
+    fi
+
     if [[ $(ps -C tensorflow_model_server | grep tensorflow_mode) ]]; then
         echo ""
         echo "****************"
