@@ -1,9 +1,7 @@
-package nl.zakarias.constellation.edgeinference.activites.inferencing;
+package nl.zakarias.constellation.edgeinference.models.mnist;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
-import nl.zakarias.constellation.edgeinference.configuration.Configuration;
-import nl.zakarias.constellation.edgeinference.models.MnistCnn;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,18 +17,15 @@ public class MnistActivity extends Activity {
     private ResultEvent result;
     private ActivityIdentifier targetIdentifier;
 
-    private CrunchifyGetIPHostname submittedNetworkInfo;
     private CrunchifyGetIPHostname currentNetworkInfo;
-    private Configuration.ModelName model;
 
 
-    public MnistActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid) throws UnknownHostException {
+    MnistActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
         this.correctLabels = correctLabels;
         targetIdentifier = aid;
-        submittedNetworkInfo = new CrunchifyGetIPHostname();
         result = null;
     }
 
@@ -47,7 +42,7 @@ public class MnistActivity extends Activity {
             logger.debug("MnistActivity: Executing on host: " + currentNetworkInfo.hostname());
         }
         try {
-            this.result = MnistCnn.classify(this.data, "mnist", 1, this.correctLabels);
+            this.result = MnistClassifier.classify(this.data, 1, this.correctLabels, currentNetworkInfo);
         } catch (Exception e) {
             throw new Error(String.format("MnistActivity: Error applying model with message: %s", e.getMessage()));
         }

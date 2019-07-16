@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 
-public class Predictor {
+class Predictor {
     private static final Logger logger = LoggerFactory.getLogger(Predictor.class);
 
     private AbstractContext contexts;
@@ -26,7 +26,7 @@ public class Predictor {
         this.nrExecutors = nrExecutors;
     }
 
-    public void run(Constellation constellation) {
+    void run(Constellation constellation) {
         logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with " + nrExecutors + " and with contexts: " + contexts + "\n\n");
     }
 }

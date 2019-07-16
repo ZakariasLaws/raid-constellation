@@ -9,21 +9,21 @@ import ibis.constellation.Activity;
 import ibis.constellation.Constellation;
 import ibis.constellation.Event;
 
-public class CollectAndProcessEvents extends Activity {
-    private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEvents.class);
+public class CollectAndProcessEventsNumeric extends Activity {
+    private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEventsNumeric.class);
 
     private static final long serialVersionUID = -538414301465754654L;
 
     private int count;
 
-    public CollectAndProcessEvents(AbstractContext c){
+    public CollectAndProcessEventsNumeric(AbstractContext c){
         super(c, false, true);
         count = 1;
     }
 
     @Override
     public int initialize(Constellation c) {
-        logger.debug("\nCollectAndProcessEvents: initialized\n");
+        logger.debug("\nCollectAndProcessEventsNumeric: initialized\n");
 
         String targetIdentifier = "";
         String[] identifier = identifier().toString().split(":");
@@ -40,21 +40,24 @@ public class CollectAndProcessEvents extends Activity {
 
     @Override
     public synchronized int process(Constellation c, Event e) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("CollectAndProcessEvents: received event number " + count + " from src id " + e.getSource().toString());
-        }
         // Handle received event
         ResultEvent result = (ResultEvent) e.getData();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("CollectAndProcessEventsNumeric: received event number " + count + " from host " + result.host.hostname());
+        }
 
         // Loop through the batch of classifications and print if they were correct
         for(int i = 0; i<result.predictions.length; i++){
             // Check that we have correct classifications to compare to
             if (result.correct != null){
                 if ((int)result.predictions[i] == result.correct[i]) {
-                    logger.info(String.format("CollectAndProcessEvent: Correctly classified as %d with certainty %1.2f", result.predictions[i], result.certainty[i]));
+                    logger.info(String.format("CollectAndProcessEvent: Correctly classified as %d", result.predictions[i]));
                 } else {
-                    logger.info(String.format("CollectAndProcessEvent: Falsely classified %d as %d with certainty %1.2f", result.correct[i], result.predictions[i], result.certainty[i]));
+                    logger.info(String.format("CollectAndProcessEvent: Falsely classified %d as %d", result.correct[i], result.predictions[i]));
                 }
+            } else {
+                logger.info(String.format("CollectAndProcessEvent: Classified as %d", result.predictions[i]));
             }
         }
 
@@ -69,7 +72,7 @@ public class CollectAndProcessEvents extends Activity {
 
     @Override
     public String toString() {
-        return "CollectAndProcessEvents(" + identifier() + ")";
+        return "CollectAndProcessEventsNumeric(" + identifier() + ")";
     }
 
     public synchronized void waitToFinish(){

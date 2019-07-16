@@ -71,12 +71,12 @@ public class API {
      * @return A String containing the result of the response.
      * @throws IOException If something goes wrong with the connection to the server
      */
-    public static String predict(int port, String modelName, int version, byte[][] image) throws IOException {
+    public static String predict(int port, String modelName, int version, byte[][] image, String signatureString) throws IOException {
         URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName + ":predict");
         if (version > 0){
             url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/versions/" + version + ":predict");
         }
-        Content data = new Content("predict_images", image);
+        Content data = new Content(signatureString, image);
         Gson gson = new Gson();
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

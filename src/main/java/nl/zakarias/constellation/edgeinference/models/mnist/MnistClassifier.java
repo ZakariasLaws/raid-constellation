@@ -1,8 +1,9 @@
-package nl.zakarias.constellation.edgeinference.models;
+package nl.zakarias.constellation.edgeinference.models.mnist;
 
 import com.google.gson.Gson;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
 import nl.zakarias.constellation.edgeinference.modelServing.API;
+import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,8 @@ import java.io.IOException;
 /**
  * Specific class used for classifying Mnist images. It uses the {@link API} for connecting to tensorflow model server
  */
-public class MnistCnn {
-    private static Logger logger = LoggerFactory.getLogger(MnistCnn.class);
+public class MnistClassifier {
+    private static Logger logger = LoggerFactory.getLogger(MnistClassifier.class);
 
     static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
 
@@ -24,18 +25,17 @@ public class MnistCnn {
      * Run a classification on an image which already has a target label.
      *
      * @param data The batch of images we wish to classify
-     * @param modelName The name of the model
      * @param version The version number
-     * @param target The target Identifier of where to send the result.
+     * @param target The target label of a correct classification, use _null_ if nonexistent
      *
      * @return ResultEvent(...) containing the certainty, prediction and correct label (if existing)
      * @throws IOException If something goes wrong with the connection to the server
      */
-    public static ResultEvent classify(byte[][] data, String modelName, int version, byte[] target) throws IOException {
+    static ResultEvent classify(byte[][] data, int version, byte[] target, CrunchifyGetIPHostname host) throws IOException {
         if (logger.isDebugEnabled()){
-            logger.debug("MnistCnn: Performing prediction...");
+            logger.debug("MnistClassifier: Performing prediction...");
         }
-        String result = API.predict(PORT, modelName, version, data);
+        String result = API.predict(PORT, Mnist.modelName, version, data, Mnist.signatureString);
         Gson g = new Gson();
         MnistResult mnistResult = g.fromJson(result, MnistResult.class);
 
@@ -57,20 +57,6 @@ public class MnistCnn {
 
         }
 
-        return new ResultEvent(target, predictions, certainty);
-    }
-
-    /**
-     * Run a classification on an image which does not have a target.
-     *
-     * @param data The batch of images we wish to classify
-     * @param modelName The name of the model
-     * @param version The version number
-     *
-     * @return ResultEvent(...) containing the certainty, prediction and correct label (if existing)
-     * @throws IOException If something goes wrong with the connection to the server
-     */
-    public static ResultEvent runClassification(byte[][] data, String modelName, int version) throws Exception {
-        return classify(data, modelName, version, null);
+        return new ResultEvent(target, predictions, certainty, host);
     }
 }

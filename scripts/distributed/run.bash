@@ -94,7 +94,7 @@ if [[ ${role,,} == "s" ]]; then
 elif [[ ${role,,} == "p" ]]; then
     tfServer=`which tensorflow_model_server`
     if [[ ${tfServer} == "" ]]; then
-        echo "Add tensorflow_server_binary to PATH"
+        echo "Add tensorflow_model_server to PATH"
         exit 1
     fi
 

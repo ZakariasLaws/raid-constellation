@@ -10,7 +10,7 @@ public class Configuration {
     }
 
     public enum ModelName implements Serializable {
-        MNIST,
+        MNIST, YOLO
     }
 
     public static final Context TARGET_CONTEXT = new Context("target");
