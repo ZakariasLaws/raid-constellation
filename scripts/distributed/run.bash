@@ -131,6 +131,9 @@ fi
 ######################### UNCOMMENT THE FOLLOWING LINE TO COMPILE WITH LOCAL TF JAVA BINDINGS #########################
 # command="${command} -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
 
+# To allow tensorflow serving to startup entirely
+sleep 1
+
 java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Djava.rmi.server.hostname=localhost \
         -Djava.io.tmpdir=${tmpdir} \

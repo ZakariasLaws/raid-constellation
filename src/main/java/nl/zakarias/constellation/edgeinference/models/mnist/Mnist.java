@@ -13,7 +13,7 @@ public class Mnist implements ModelInterface {
     static String modelName = "mnist";
     static String signatureString = "predict";
 
-    static byte[][] readDataFile(String filePath) throws IOException {
+    public static byte[][] readDataFile(String filePath) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath));
 
         dataInputStream.readInt(); // Magic number
@@ -34,7 +34,7 @@ public class Mnist implements ModelInterface {
         return images;
     }
 
-    static byte[] readLabelFile(String filePath) throws IOException {
+    public static byte[] readLabelFile(String filePath) throws IOException {
         DataInputStream labelInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(filePath)));
 
         labelInputStream.readInt(); // Magic number

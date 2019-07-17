@@ -18,7 +18,7 @@ public class EdgeInference {
                 + "[ -context <String,String,String...>] "
                 + "[ -target <activity ID>] "
                 + "[ -dataDir </source/dataset/path>] "
-                + "[ -modelName [" + Utils.InferenceModelEnumToString() + "] ";
+                + "[ -modelName [" + Configuration.InferenceModelEnumToString() + "] ";
     }
 
     public static void main(String[] args) throws Exception {

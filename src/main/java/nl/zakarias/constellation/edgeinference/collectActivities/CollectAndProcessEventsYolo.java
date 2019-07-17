@@ -1,29 +1,28 @@
-package nl.zakarias.constellation.edgeinference.activites;
-
-import nl.zakarias.constellation.edgeinference.ResultEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package nl.zakarias.constellation.edgeinference.collectActivities;
 
 import ibis.constellation.AbstractContext;
 import ibis.constellation.Activity;
 import ibis.constellation.Constellation;
 import ibis.constellation.Event;
+import nl.zakarias.constellation.edgeinference.ResultEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class CollectAndProcessEventsNumeric extends Activity {
-    private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEventsNumeric.class);
+public class CollectAndProcessEventsYolo extends Activity {
+    private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEventsYolo.class);
 
     private static final long serialVersionUID = -538414301465754654L;
 
     private int count;
 
-    public CollectAndProcessEventsNumeric(AbstractContext c){
+    public CollectAndProcessEventsYolo(AbstractContext c){
         super(c, false, true);
         count = 1;
     }
 
     @Override
     public int initialize(Constellation c) {
-        logger.debug("\nCollectAndProcessEventsNumeric: initialized\n");
+        logger.debug("\ninitialized\n");
 
         String targetIdentifier = "";
         String[] identifier = identifier().toString().split(":");
@@ -44,21 +43,13 @@ public class CollectAndProcessEventsNumeric extends Activity {
         ResultEvent result = (ResultEvent) e.getData();
 
         if (logger.isDebugEnabled()) {
-            logger.debug("CollectAndProcessEventsNumeric: received event number " + count + " from host " + result.host.hostname());
+            logger.debug("received event number " + count + " from host " + result.host.hostname());
         }
 
-        // Loop through the batch of classifications and print if they were correct
+        // Loop through the batch of classifications
         for(int i = 0; i<result.predictions.length; i++){
-            // Check that we have correct classifications to compare to
-            if (result.correct != null){
-                if ((int)result.predictions[i] == result.correct[i]) {
-                    logger.info(String.format("CollectAndProcessEvent: Correctly classified as %d", result.predictions[i]));
-                } else {
-                    logger.info(String.format("CollectAndProcessEvent: Falsely classified %d as %d", result.correct[i], result.predictions[i]));
-                }
-            } else {
-                logger.info(String.format("CollectAndProcessEvent: Classified as %d", result.predictions[i]));
-            }
+            // TODO Do something yolo specific
+
         }
 
         count++;

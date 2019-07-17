@@ -65,16 +65,6 @@ public class Utils {
         }
     }
 
-    public static String InferenceModelEnumToString(){
-        StringBuilder result = new StringBuilder();
-
-        for (Configuration.ModelName model : Configuration.ModelName.values()){
-            result.append(model.toString()).append(" ");
-        }
-
-        return result.toString();
-    }
-
     public static byte[] readAllBytes(Path path) throws IOException {
         return Files.readAllBytes(path);
     }

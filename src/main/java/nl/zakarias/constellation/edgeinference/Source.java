@@ -4,11 +4,8 @@ import ibis.constellation.*;
 import ibis.constellation.impl.ActivityIdentifierImpl;
 import ibis.constellation.impl.ConstellationIdentifierImpl;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
-import nl.zakarias.constellation.edgeinference.models.mnist.Mnist;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
-import nl.zakarias.constellation.edgeinference.models.yolo.Yolo;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
-import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,17 +40,13 @@ class Source {
         String[] targetIdentifier = target.split(":");
         ActivityIdentifier aid = ActivityIdentifierImpl.createActivityIdentifier(new ConstellationIdentifierImpl(Integer.parseInt(targetIdentifier[0]), Integer.parseInt(targetIdentifier[1])), Integer.parseInt(targetIdentifier[2]), false);
 
-
-        //TODO Loop through all folders in models/ in a dynamic way instead of using configuration enum
-
-        if (modelName == Configuration.ModelName.MNIST) {
-            ModelInterface model = new Mnist();
-            model.run(constellation, aid, sourceDir, this.contexts);
-        } else if (modelName == Configuration.ModelName.YOLO) {
-            ModelInterface model = new Yolo();
-            model.run(constellation, aid, sourceDir, this.contexts);
-        } else {
-            logger.error("Could not identify a valid model, options are: " + Utils.InferenceModelEnumToString());
+        // Could be for example MNIST or YOLO
+        ModelInterface model = Configuration.getModel(modelName);
+        if (model == null){
+            logger.error("Could not identify a valid model, options are: " + Configuration.InferenceModelEnumToString());
+            return;
         }
+
+        model.run(constellation, aid, sourceDir, this.contexts);
     }
 }

@@ -1,4 +1,4 @@
-package nl.zakarias.constellation.edgeinference.models.yolo;
+package nl.zakarias.constellation.edgeinference.models.mnist_cnn;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
@@ -8,10 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 
-public class YoloActivity extends Activity {
-    private static Logger logger = LoggerFactory.getLogger(YoloActivity.class);
+public class MnistCnnActivity extends Activity {
+    private static Logger logger = LoggerFactory.getLogger(MnistCnnActivity.class);
 
-    private byte[][] data;
+    private byte[][][][] data;
+    private byte[] correctLabels; // Possible targets, should be null if labels are unknown
 
     private ResultEvent result;
     private ActivityIdentifier targetIdentifier;
@@ -19,10 +20,11 @@ public class YoloActivity extends Activity {
     private CrunchifyGetIPHostname currentNetworkInfo;
 
 
-    YoloActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, ActivityIdentifier aid) {
+    MnistCnnActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][][][] data, byte[] correctLabels, ActivityIdentifier aid) {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
+        this.correctLabels = correctLabels;
         targetIdentifier = aid;
         result = null;
     }
@@ -40,7 +42,7 @@ public class YoloActivity extends Activity {
             logger.debug("Executing on host: " + currentNetworkInfo.hostname());
         }
         try {
-            this.result = YoloClassifier.classify(this.data, 1, null, currentNetworkInfo);
+            this.result = MnistCnnClassifier.classify(this.data, 1, this.correctLabels, currentNetworkInfo);
         } catch (Exception e) {
             throw new Error(String.format("Error applying model with message: %s", e.getMessage()));
         }

@@ -3,7 +3,7 @@ package nl.zakarias.constellation.edgeinference;
 import ibis.constellation.Constellation;
 import ibis.constellation.Context;
 import ibis.constellation.NoSuitableExecutorException;
-import nl.zakarias.constellation.edgeinference.activites.CollectAndProcessEventsNumeric;
+import nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEventsNumeric;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
@@ -24,8 +24,6 @@ class Target {
     void run(Constellation constellation) throws NoSuitableExecutorException {
         logger.info("\n\nStarting Target("+ submittedNetworkInfo.hostname() +") with context: " + TARGET_CONTEXT + "\n\n");
 
-        // Will be executed on the Target device
-        logger.debug("Submitting CollectAndProcessEventsNumeric");
         CollectAndProcessEventsNumeric activity = new CollectAndProcessEventsNumeric(Configuration.TARGET_CONTEXT);
 
         logger.debug("Submitting CollectAndProcessEventsNumeric activity");

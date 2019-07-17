@@ -20,7 +20,7 @@ public class MnistActivity extends Activity {
     private CrunchifyGetIPHostname currentNetworkInfo;
 
 
-    MnistActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid) throws UnknownHostException {
+    MnistActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid) {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
@@ -35,16 +35,16 @@ public class MnistActivity extends Activity {
         try {
             currentNetworkInfo = new CrunchifyGetIPHostname();
         } catch (UnknownHostException e) {
-            logger.error("MnistActivity: Could not find host information");
+            logger.error("Could not find host information");
             e.printStackTrace();
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("MnistActivity: Executing on host: " + currentNetworkInfo.hostname());
+            logger.debug("Executing on host: " + currentNetworkInfo.hostname());
         }
         try {
             this.result = MnistClassifier.classify(this.data, 1, this.correctLabels, currentNetworkInfo);
         } catch (Exception e) {
-            throw new Error(String.format("MnistActivity: Error applying model with message: %s", e.getMessage()));
+            throw new Error(String.format("Error applying model with message: %s", e.getMessage()));
         }
 
         return FINISH;
@@ -58,7 +58,7 @@ public class MnistActivity extends Activity {
     @Override
     public void cleanup(Constellation constellation) {
         if (logger.isDebugEnabled()){
-            logger.debug("MnistActivity: Sending results to target");
+            logger.debug("Sending results to target");
         }
 
         if (this.result == null) {

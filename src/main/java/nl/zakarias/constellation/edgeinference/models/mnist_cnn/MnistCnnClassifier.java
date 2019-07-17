@@ -1,8 +1,9 @@
-package nl.zakarias.constellation.edgeinference.models.mnist;
+package nl.zakarias.constellation.edgeinference.models.mnist_cnn;
 
 import com.google.gson.Gson;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
 import nl.zakarias.constellation.edgeinference.modelServing.API;
+import nl.zakarias.constellation.edgeinference.models.mnist.Mnist;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,8 @@ import java.io.IOException;
 /**
  * Specific class used for classifying Mnist images. It uses the {@link API} for connecting to tensorflow model server
  */
-class MnistClassifier {
-    private static Logger logger = LoggerFactory.getLogger(MnistClassifier.class);
+class MnistCnnClassifier {
+    private static Logger logger = LoggerFactory.getLogger(MnistCnnClassifier.class);
 
     static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
 
@@ -31,11 +32,12 @@ class MnistClassifier {
      * @return ResultEvent(...) containing the certainty, prediction and correct label (if existing)
      * @throws IOException If something goes wrong with the connection to the server
      */
-    static ResultEvent classify(byte[][] data, int version, byte[] target, CrunchifyGetIPHostname host) throws IOException {
+    static ResultEvent classify(byte[][][][] data, int version, byte[] target, CrunchifyGetIPHostname host) throws IOException {
         if (logger.isDebugEnabled()){
             logger.debug("Performing prediction...");
         }
-        String result = API.predict(PORT, Mnist.modelName, version, data, Mnist.signatureString);
+
+        String result = API.predict(PORT, MnistCnn.modelName, version, data, MnistCnn.signatureString);
         Gson g = new Gson();
         MnistResult mnistResult = g.fromJson(result, MnistResult.class);
 

@@ -18,11 +18,13 @@ public class API {
     /**
      * Inner class used for automatic JSON <-> String conversion and access
      */
-    public static class Content{
+    interface Content {}
+
+    public static class Content_1D implements Content{
         String signature_name;
         int[][] instances;
 
-        private Content(String signature_string, byte[][] image){
+        private Content_1D(String signature_string, byte[][] image){
             this.signature_name = signature_string;
 
             instances = new int[image.length][image[0].length];
@@ -30,6 +32,27 @@ public class API {
             for (int i=0; i<image.length; i++){
                 for(int x=0; x<image[i].length; x++){
                     instances[i][x] = image[i][x] & 0xff; // Convert to int
+                }
+            }
+        }
+    }
+
+    public static class Content_3D implements Content{
+        String signature_name;
+        int[][][][] instances;
+
+        private Content_3D(String signature_string, byte[][][][] image){
+            this.signature_name = signature_string;
+
+            instances = new int[image.length][image[0].length][image[0][0].length][image[0][0][0].length];
+
+            for (int batch=0; batch<image.length; batch++){
+                for(int row=0; row<image[0].length; row++){
+                    for(int col=0; col<image[0][0].length; col++) {
+                        for(int inner=0; inner<image[0][0][0].length; inner++) {
+                            instances[batch][row][col][inner] = image[batch][row][col][inner] & 0xff; // Convert to int
+                        }
+                    }
                 }
             }
         }
@@ -44,42 +67,30 @@ public class API {
      * @throws IOException If something goes wrong with the connection to the server
      */
     private static String responseError(HttpURLConnection con, int code) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
         String inputLine;
         StringBuilder result = new StringBuilder();
 
-        result.append(String.format("Response code %d \n", code));
+        result.append(String.format("HTTP Error Response Code %d \n", code));
 
         while ((inputLine = in.readLine()) != null) {
             result.append(inputLine);
         }
         in.close();
+        result.append("\n");
 
         return result.toString();
     }
 
-    /**
-     * Make a prediction using tensorflow serving and the given model. Any number of images can be supplied as a batch,
-     * with the first dimension representing each individual image. For example,
-     * batch size 1 would correspond to the following image: byte[1][784] image.
-     *
-     * @param port Port number on which the tensorflow model server is listening
-     * @param modelName Model name
-     * @param version Model version number
-     * @param image A batch of images to classify
-     *
-     * @return A String containing the result of the response.
-     * @throws IOException If something goes wrong with the connection to the server
-     */
-    public static String predict(int port, String modelName, int version, byte[][] image, String signatureString) throws IOException {
-        URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName + ":predict");
-        if (version > 0){
-            url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/versions/" + version + ":predict");
-        }
-        Content data = new Content(signatureString, image);
+    private static String makePrediction(URL url, Content data) throws IOException {
         Gson gson = new Gson();
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        HttpURLConnection connection;
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+        } catch (IOException e){
+            throw new Error("Could not contact TF model server, check that the version number and modelName is correct\n" + e.getMessage());
+        }
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type","application/json");
 
@@ -92,7 +103,7 @@ public class API {
 
         int responseCode = connection.getResponseCode();
 
-        if (!(responseCode == 200 || responseCode == 202)) {
+        if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
             throw new Error(responseError(connection, responseCode));
         }
 
@@ -106,6 +117,55 @@ public class API {
         in.close();
 
         return result.toString();
+    }
+
+    /**
+     * Make a prediction using tensorflow serving and the given model. Any number of images can be supplied as a batch,
+     * with the first dimension representing each individual image. For example,
+     * batch size 1 would correspond to the following image: byte[1][rows*cols] image.
+     *
+     * @param port Port number on which the tensorflow model server is listening
+     * @param modelName Model name
+     * @param version Model version number
+     * @param image A batch of images to classify, each in a 1 dimensional array
+     *
+     * @return A String containing the result of the response.
+     * @throws IOException If something goes wrong with the connection to the server
+     */
+    public static String predict(int port, String modelName, int version, byte[][] image, String signatureString) throws IOException {
+        URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName + ":predict");
+        if (version > 0){
+            url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/versions/" + version + ":predict");
+        }
+        Content_1D data = new Content_1D(signatureString, image);
+
+        return makePrediction(url, data);
+    }
+
+    /**
+     * Make a prediction using tensorflow serving and the given model. Any number of images can be supplied as a batch,
+     * with the first dimension representing each individual image. For example,
+     * batch size 1 would correspond to the following image: byte[1][rows][cols][values] image.
+     *
+     * @param port Port number on which the tensorflow model server is listening
+     * @param modelName Model name
+     * @param version Model version number
+     * @param image A batch of images to classify, each in a 3 dimensional array
+     *
+     * @return A String containing the result of the response.
+     * @throws IOException If something goes wrong with the connection to the server
+     */
+    public static String predict(int port, String modelName, int version, byte[][][][] image, String signatureString) throws IOException {
+        URL url = new URL("http://localhost:" + port + "/v1/models/" + modelName + ":predict");
+        if (version > 0){
+            url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/versions/" + version + ":predict");
+        }
+        System.out.println("before\n\n");
+
+        Content_3D data = new Content_3D(signatureString, image);
+        System.out.println("kalle\n\n");
+
+        return makePrediction(url, data);
     }
 
     /**
