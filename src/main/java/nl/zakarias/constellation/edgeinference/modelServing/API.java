@@ -160,10 +160,7 @@ public class API {
         if (version > 0){
             url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/versions/" + version + ":predict");
         }
-        System.out.println("before\n\n");
-
         Content_3D data = new Content_3D(signatureString, image);
-        System.out.println("kalle\n\n");
 
         return makePrediction(url, data);
     }
