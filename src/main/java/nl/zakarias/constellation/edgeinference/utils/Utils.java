@@ -1,7 +1,6 @@
 package nl.zakarias.constellation.edgeinference.utils;
 
 import ibis.constellation.*;
-import nl.zakarias.constellation.edgeinference.ResultEvent;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,13 +10,15 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 public class Utils {
     public static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     public static final String DEFAULT_OUTPUT_FILE = "output.log";
+    public static final int CIFAR_10_FILE_LENGTH = 10000;
+    public static final int CIFAR_IMAGE_WIDTH = 32;
+    public static final int CIFAR_IMAGE_HEIGHT = 32;
 
     public static String printArray(String[] contexts){
         StringBuilder result = new StringBuilder();
@@ -109,7 +110,7 @@ public class Utils {
     }
 
 
-    public static byte[][] MNISTReadDataFile_1D(String filePath) throws IOException {
+    public static byte[][] readMnist_1D(String filePath) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath));
 
         dataInputStream.readInt(); // Magic number
@@ -130,7 +131,7 @@ public class Utils {
         return images;
     }
 
-    public static byte[][][][] MNISTReadDataFile_3D(String filePath) throws IOException {
+    public static byte[][][][] readMnist_3D(String filePath) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath));
 
         dataInputStream.readInt(); // Magic number
@@ -154,7 +155,7 @@ public class Utils {
         return images;
     }
 
-    public static byte[] MNISTReadLabelFile(String filePath) throws IOException {
+    public static byte[] readLabelsMnist(String filePath) throws IOException {
         DataInputStream labelInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(filePath)));
 
         labelInputStream.readInt(); // Magic number
@@ -169,6 +170,27 @@ public class Utils {
         return labels;
     }
 
+    public static byte[][][][] readCifar10(String filePath) throws IOException {
+        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath));
+
+        byte[][][][] images = new byte[CIFAR_10_FILE_LENGTH][CIFAR_IMAGE_WIDTH][CIFAR_IMAGE_HEIGHT][3]; //RGB
+
+        for(int i=0; i<CIFAR_10_FILE_LENGTH; i++) {
+            byte label = (byte) dataInputStream.readUnsignedByte();
+
+            // Read red values
+            for(int rgb = 0; rgb < 3; rgb++) {
+                for(int row = 0; row < CIFAR_IMAGE_HEIGHT; row++){
+                    for (int col = 0; col < CIFAR_IMAGE_WIDTH; col++) {
+                        images[i][row][col][rgb] = (byte) dataInputStream.readUnsignedByte();
+                    }
+                }
+            }
+        }
+
+        return images;
+    }
+
     public static BufferedImage readJPG(String filePath, int rows, int cols) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath));
 
@@ -176,12 +198,6 @@ public class Utils {
         byte[][][] image = new byte[rows][cols][3];
 
         BufferedImage bImage = ImageIO.read(new File(filePath));
-
-//        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//        ImageIO.write( bImage, "jpg", baos );
-//        baos.flush();
-//        byte[] imageInByte = baos.toByteArray();
-//        baos.close();
 
         return bImage;
     }

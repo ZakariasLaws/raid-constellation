@@ -2,6 +2,7 @@ package nl.zakarias.constellation.edgeinference.configuration;
 
 import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
+import nl.zakarias.constellation.edgeinference.models.cifar10.Cifar10;
 import nl.zakarias.constellation.edgeinference.models.mnist.Mnist;
 import nl.zakarias.constellation.edgeinference.models.mnist_cnn.MnistCnn;
 import nl.zakarias.constellation.edgeinference.models.yolo.Yolo;
@@ -18,7 +19,7 @@ public class Configuration {
      * added to this enum, as well as returned from {@link #getModel(ModelName) getModel}.
      */
     public enum ModelName implements Serializable {
-        MNIST, MNIST_CNN, YOLO
+        MNIST, MNIST_CNN, YOLO, CIFAR10
     }
 
     /**
@@ -37,6 +38,8 @@ public class Configuration {
                 return new MnistCnn();
             case YOLO:
                 return new Yolo();
+            case CIFAR10:
+                return new Cifar10();
             default:
                 return null;
         }

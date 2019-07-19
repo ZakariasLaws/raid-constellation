@@ -41,6 +41,7 @@ public class CollectAndProcessEvents extends Activity {
         StringBuilder str = new StringBuilder();
 
         for(int i=0; i<result.predictions_yolo.length; i++) {
+            logger.info(String.format("Src %s classified at %s using model %s: %s", result.src.hostname(), result.host.hostname(), result.modelName, "TEMP"));
             str.append("[");
             for (int z = 0; z < result.predictions_yolo[i].length; z++) {
                 str.append("[");
@@ -74,17 +75,27 @@ public class CollectAndProcessEvents extends Activity {
             }
         }
 
+//        return str.toString();
         return str.toString();
     }
 
     private void writeOutput(FileOutputStream fw, ResultEvent result) throws IOException {
         LocalDateTime now = LocalDateTime.now();
 
-        // Build prediction string
-        StringBuilder predStr = new StringBuilder();
+        String predStr;
 
-        for (byte prediction : result.predictions) {
-            predStr.append(String.format("%s", prediction));
+        if (result.predictions_yolo != null ){ // YOLO
+            predStr = getYoloClassificationString(result);
+        } else {
+            // Build prediction string
+            StringBuilder str = new StringBuilder();
+
+            for (byte prediction : result.predictions) {
+                logger.info(String.format("Src %s classified at %s using model %s: %d", result.src.hostname(), result.host.hostname(), result.modelName, prediction));
+
+                str.append(String.format("%s", prediction));
+            }
+            predStr = str.toString();
         }
 
         // Timestamp:src_host:IMG_ID:inference_host:model:prediction
@@ -101,16 +112,11 @@ public class CollectAndProcessEvents extends Activity {
         }
 
         fw.write(String.format("%s|%s|", result.host.hostname(), result.modelName).getBytes());
-        fw.write(predStr.toString().getBytes());
+        fw.write(predStr.getBytes());
         fw.write("\n".getBytes());
     }
 
     private void handleResult(ResultEvent result){
-        for(int i = 0; i<result.predictions.length; i++){
-            logger.info(String.format("Src %s classified at %s using model %s: %d", result.src.hostname(), result.host.hostname(), result.modelName, result.predictions[i]));
-
-        }
-
         // Write result to file
         try {
             writeOutput(fw, result);

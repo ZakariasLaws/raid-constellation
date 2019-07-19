@@ -19,7 +19,7 @@ public class EdgeInference {
                 + "[ (target only) -outputFile </path/to/store/output> ] "
                 + "[ (source only) -target <activity ID>] "
                 + "[ (source only) -dataDir </source/dataset/path>] "
-                + "[ (source/target only) -modelName [" + Configuration.InferenceModelEnumToString() + "] ";
+                + "[ (source only) -modelName [" + Configuration.InferenceModelEnumToString() + "] ";
     }
 
     static void start(String[] args) throws Exception {
@@ -116,9 +116,6 @@ public class EdgeInference {
                 predictor.run(constellation);
                 break;
             case TARGET:
-                if (modelName == null) {
-                    throw new IllegalArgumentException("Specify the name of the model to gather data from");
-                }
                 Target target = new Target();
                 target.run(constellation, outputFile, modelName);
                 break;

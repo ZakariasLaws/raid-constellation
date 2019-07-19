@@ -121,16 +121,24 @@ public class Yolo implements ModelInterface {
                 imageIdentifiers[i] = Utils.imageIdentifier(images[i]);
             }
 
+            System.out.println(files[pos] + " - " + imageIdentifiers[0]);
+
             // Generate activity
             YoloActivity activity = new YoloActivity(contexts, true, false, images, aid, imageIdentifiers);
 
             // submit activity
             if (logger.isDebugEnabled()) {
-                logger.debug("Submitting MnistActivity with contexts " + contexts.toString());
+                logger.debug("Submitting YoloActivity with contexts " + contexts.toString());
             }
             constellation.submit(activity);
 
             pos = min;
+
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
     }

@@ -36,8 +36,8 @@ public class Mnist implements ModelInterface {
         if (logger.isDebugEnabled()) {
             logger.debug("Reading MNIST image and label file...");
         }
-        byte[][] images = Utils.MNISTReadDataFile_1D(sourceDir + "/t10k-images-idx3-ubyte");
-        byte[] targets = Utils.MNISTReadLabelFile(sourceDir + "/t10k-labels-idx1-ubyte");
+        byte[][] images = Utils.readMnist_1D(sourceDir + "/t10k-images-idx3-ubyte");
+        byte[] targets = Utils.readLabelsMnist(sourceDir + "/t10k-labels-idx1-ubyte");
         if (logger.isDebugEnabled()) {
             logger.debug("Done importing images");
         }
