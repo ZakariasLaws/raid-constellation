@@ -34,7 +34,7 @@ class Source {
 
         // Use existing collectActivity
         // This is a "hackish" way of mimicking the activityID generated when submitting
-        // the CollectAndProcessEventsNumeric activity. Perhaps Constellation should add some type of support
+        // the CollectAndProcessEvents activity. Perhaps Constellation should add some type of support
         // for targeting running activities when dynamically adding new nodes.
 
         String[] targetIdentifier = target.split(":");

@@ -1,27 +1,28 @@
 package nl.zakarias.constellation.edgeinference.collectActivities;
 
-import ibis.constellation.AbstractContext;
-import ibis.constellation.Activity;
-import ibis.constellation.Constellation;
-import ibis.constellation.Event;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ibis.constellation.AbstractContext;
+import ibis.constellation.Activity;
+import ibis.constellation.Constellation;
+import ibis.constellation.Event;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class CollectAndProcessEventsYolo extends Activity {
-    private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEventsYolo.class);
+public class CollectAndProcessEvents extends Activity {
+    private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEvents.class);
 
     private static final long serialVersionUID = -538414301465754654L;
     private FileOutputStream fw;
 
     private int count;
 
-    public CollectAndProcessEventsYolo(AbstractContext c, String filePath){
+    public CollectAndProcessEvents(AbstractContext c, String filePath){
         super(c, false, true);
         count = 1;
 
@@ -73,14 +74,18 @@ public class CollectAndProcessEventsYolo extends Activity {
             }
         }
 
-//        return str.toString();
-        return "TEMP";
+        return str.toString();
     }
 
     private void writeOutput(FileOutputStream fw, ResultEvent result) throws IOException {
         LocalDateTime now = LocalDateTime.now();
 
-        String predStr = getYoloClassificationString(result);
+        // Build prediction string
+        StringBuilder predStr = new StringBuilder();
+
+        for (byte prediction : result.predictions) {
+            predStr.append(String.format("%s", prediction));
+        }
 
         // Timestamp:src_host:IMG_ID:inference_host:model:prediction
         fw.write(String.format("%s|%s|[", now.toString(), result.src.hostname()).getBytes()); // Timestamp:src_host
@@ -96,13 +101,14 @@ public class CollectAndProcessEventsYolo extends Activity {
         }
 
         fw.write(String.format("%s|%s|", result.host.hostname(), result.modelName).getBytes());
-        fw.write(predStr.getBytes());
+        fw.write(predStr.toString().getBytes());
         fw.write("\n".getBytes());
     }
 
     private void handleResult(ResultEvent result){
-        for(int i = 0; i<result.predictions_yolo.length; i++){
-            logger.info(String.format("Src %s classified at %s using model %s: %s", result.src.hostname(), result.host.hostname(), result.modelName, "TEMP"));
+        for(int i = 0; i<result.predictions.length; i++){
+            logger.info(String.format("Src %s classified at %s using model %s: %d", result.src.hostname(), result.host.hostname(), result.modelName, result.predictions[i]));
+
         }
 
         // Write result to file

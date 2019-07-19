@@ -84,13 +84,12 @@ When starting one of the agents, the first, second and third argument follows th
 #### Target
 When starting the _target_, the ID of the activity collecting the results will be printed to the screen. Use this ID when starting up a _source_ agent.
 ```bash
-./bin/distributed/run.bash t 10.72.152.146 test.pool.name 
+./bin/distributed/run.bash t 10.72.152.146 test.pool.name -modelName mnist
 
 ...
-09:57:35,085 INFO  [CID:0:1] nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEventsNumeric - In order to target this activity with classifications add the following as argument (exactly as printed) when initializing the new SOURCE: "0:1:0"
+09:57:35,085 INFO  [CID:0:1] nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEvents - In order to target this activity with classifications add the following as argument (exactly as printed) when initializing the new SOURCE: "0:1:0"
 ...
 ```
-
 
 
 #### Predictor

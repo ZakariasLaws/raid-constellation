@@ -3,7 +3,8 @@ package nl.zakarias.constellation.edgeinference;
 import ibis.constellation.Constellation;
 import ibis.constellation.Context;
 import ibis.constellation.NoSuitableExecutorException;
-import nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEventsNumeric;
+import nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEvents;
+import nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEventsYolo;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
@@ -21,15 +22,29 @@ class Target {
         submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
-    void run(Constellation constellation) throws NoSuitableExecutorException {
+    void run(Constellation constellation, String outputFile, Configuration.ModelName modelName) throws NoSuitableExecutorException {
         logger.info("\n\nStarting Target("+ submittedNetworkInfo.hostname() +") with context: " + TARGET_CONTEXT + "\n\n");
 
-        CollectAndProcessEventsNumeric activity = new CollectAndProcessEventsNumeric(Configuration.TARGET_CONTEXT);
+        switch (modelName) {
+            case MNIST_CNN:
+            case MNIST:
+                CollectAndProcessEvents aid = new CollectAndProcessEvents(Configuration.TARGET_CONTEXT, outputFile);
 
-        logger.debug("Submitting CollectAndProcessEventsNumeric activity");
-        constellation.submit(activity);
+                logger.debug("Submitting CollectAndProcessEvents activity");
+                constellation.submit(aid);
 
-        // Wait until activity is done
-        activity.waitToFinish();
+                // Wait until activity is done
+                aid.waitToFinish();
+                break;
+            case YOLO:
+                CollectAndProcessEventsYolo aidYolo = new CollectAndProcessEventsYolo(Configuration.TARGET_CONTEXT, outputFile);
+
+                logger.debug("Submitting CollectAndProcessEvents activity");
+                constellation.submit(aidYolo);
+
+                // Wait until activity is done
+                aidYolo.waitToFinish();
+                break;
+        }
     }
 }

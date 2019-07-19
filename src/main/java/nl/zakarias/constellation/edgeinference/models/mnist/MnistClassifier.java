@@ -2,8 +2,8 @@ package nl.zakarias.constellation.edgeinference.models.mnist;
 
 import com.google.gson.Gson;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.modelServing.API;
-import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ class MnistClassifier {
      * @return ResultEvent(...) containing the certainty, prediction and correct label (if existing)
      * @throws IOException If something goes wrong with the connection to the server
      */
-    static ResultEvent classify(byte[][] data, int version, byte[] target, CrunchifyGetIPHostname host) throws IOException {
+    static ResultEvent classify(byte[][] data, int version, byte[] target) throws IOException {
         if (logger.isDebugEnabled()){
             logger.debug("Performing prediction...");
         }
@@ -57,6 +57,6 @@ class MnistClassifier {
 
         }
 
-        return new ResultEvent(target, predictions, certainty, host);
+        return new ResultEvent(Configuration.ModelName.MNIST, target, predictions, certainty);
     }
 }

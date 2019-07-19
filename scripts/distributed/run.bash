@@ -32,6 +32,7 @@ function usage() {
     echo ""
     echo "For example, in order to start a predictor with contexts A, B and C:"
     echo "./bin/distributed/run.bash p 10.72.34.117 my.pool.name A,B,C"
+    echo ""
     echo "To start a source targeting activity 0:1:0 with results:"
     echo "./bin/distributed/run.bash s 10.72.34.117 my.pool.name A,B,C -target 0:1:0"
     echo ""
@@ -49,7 +50,6 @@ mkdir -p ${tmpdir}
 role=$1; shift
 serverAddress=$1; shift
 poolName=$1; shift
-context=$1; shift
 
 if [[ -z ${role} || -z ${serverAddress} || -z ${poolName} ]]; then
     usage
@@ -58,6 +58,7 @@ fi
 
 roleFull=""
 if [[ ${role,,} == "p" ]]; then
+    context=$1; shift
     if [[ -z ${context} ]]; then
         usage
         exit 1
@@ -66,6 +67,7 @@ if [[ ${role,,} == "p" ]]; then
     args="-role PREDICTOR -context ${context} $@"
     roleFull="Predictor"
 elif [[ ${role,,} == "s" ]]; then
+    context=$1; shift
     if [[ -z ${context} ]]; then
         usage
         exit 1
@@ -112,6 +114,8 @@ elif [[ ${role,,} == "p" ]]; then
         nohup tensorflow_model_server --port=8500 --rest_api_port=8501 --model_config_file=${EDGEINFERENCE_DIR}/../../../tensorflow/tensorflow_serving/ModelServerConfig.conf > ${EDGEINFERENCE_DIR}/tensorflow_model_server.log &
         echo "****************"
         echo ""
+
+        sleep 5
     fi
 
     command="\
@@ -130,9 +134,6 @@ fi
 
 ######################### UNCOMMENT THE FOLLOWING LINE TO COMPILE WITH LOCAL TF JAVA BINDINGS #########################
 # command="${command} -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
-
-# To allow tensorflow serving to startup entirely
-sleep 1
 
 java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Djava.rmi.server.hostname=localhost \

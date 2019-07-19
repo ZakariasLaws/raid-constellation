@@ -11,20 +11,24 @@ import java.net.UnknownHostException;
 public class YoloActivity extends Activity {
     private static Logger logger = LoggerFactory.getLogger(YoloActivity.class);
 
-    private byte[][] data;
+    private byte[][][][] data;
 
     private ResultEvent result;
     private ActivityIdentifier targetIdentifier;
+    private int[] imageIdentifiers;
 
     private CrunchifyGetIPHostname currentNetworkInfo;
+    private CrunchifyGetIPHostname sourceNetworkInfo;
 
 
-    YoloActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, ActivityIdentifier aid) {
+    YoloActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][][][] data, ActivityIdentifier aid, int[] imageIdentifiers) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
         targetIdentifier = aid;
         result = null;
+        this.imageIdentifiers = imageIdentifiers;
+        this.sourceNetworkInfo = new CrunchifyGetIPHostname();
     }
 
     @Override
@@ -40,7 +44,7 @@ public class YoloActivity extends Activity {
             logger.debug("Executing on host: " + currentNetworkInfo.hostname());
         }
         try {
-            this.result = YoloClassifier.classify(this.data, 1, null, currentNetworkInfo);
+            this.result = YoloClassifier.classify(this.data, 1, null);
         } catch (Exception e) {
             throw new Error(String.format("Error applying model with message: %s", e.getMessage()));
         }
@@ -63,6 +67,10 @@ public class YoloActivity extends Activity {
             // Something went wrong during predictions
             logger.error("No predictions result transmitted to target " + targetIdentifier + ", result from predictions is null. Check that predictions executed correctly.");
         } else {
+            // Set network src and host
+            this.result.host = this.currentNetworkInfo;
+            this.result.src = this.sourceNetworkInfo;
+            this.result.imageIdentifiers = this.imageIdentifiers;
             constellation.send(new Event(identifier(), targetIdentifier, this.result));
         }
     }

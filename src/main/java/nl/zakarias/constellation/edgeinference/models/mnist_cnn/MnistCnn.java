@@ -5,12 +5,10 @@ import ibis.constellation.ActivityIdentifier;
 import ibis.constellation.Constellation;
 import ibis.constellation.NoSuitableExecutorException;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
-import nl.zakarias.constellation.edgeinference.models.mnist.Mnist;
+import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 public class MnistCnn implements ModelInterface {
@@ -19,33 +17,16 @@ public class MnistCnn implements ModelInterface {
     static String modelName = "mnist_cnn";
     static String signatureString = "predict";
 
-    static byte[][][][] readDataFile(String filePath) throws IOException {
-        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(filePath));
-
-        dataInputStream.readInt(); // Magic number
-        int imageCount = dataInputStream.readInt();
-        int rows = dataInputStream.readInt();
-        int cols = dataInputStream.readInt();
-
-        // Data must be structured as a matrix, with each number in a 1-digit array
-        byte[][][][] images = new byte[imageCount][rows][cols][1];
-
-        for(int image=0; image<imageCount; image++){
-            for(int row=0; row<rows; row++){
-                for(int col=0; col<cols; col++) {
-                    images[image][row][col][0] = (byte) dataInputStream.readUnsignedByte();
-                }
-            }
+    private void sendMnistImageBatch(byte[][][][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
+        // Generate imageIdentifiers in order to link back the result to the image CURRENTLY DISCARDED UPON METHOD EXIT
+        int[] imageIdentifiers = new int[images.length];
+        // Create imageIdentifiers
+        for(int i=0; i<imageIdentifiers.length; i++){
+            imageIdentifiers[i] = Utils.imageIdentifier(images[i]);
         }
 
-        dataInputStream.close();
-
-        return images;
-    }
-
-    private void sendMnistImageBatch(byte[][][][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
         // Generate activity
-        MnistCnnActivity activity = new MnistCnnActivity(contexts, true, false, images, targets, aid);
+        MnistCnnActivity activity = new MnistCnnActivity(contexts, true, false, images, targets, aid, imageIdentifiers);
 
         // submit activity
         if (logger.isDebugEnabled()) {
@@ -58,8 +39,8 @@ public class MnistCnn implements ModelInterface {
         if (logger.isDebugEnabled()) {
             logger.debug("Reading MNIST image and label file...");
         }
-        byte[][][][] images = readDataFile(sourceDir + "/t10k-images-idx3-ubyte");
-        byte[] targets = Mnist.readLabelFile(sourceDir + "/t10k-labels-idx1-ubyte");
+        byte[][][][] images = Utils.MNISTReadDataFile_3D(sourceDir + "/t10k-images-idx3-ubyte");
+        byte[] targets = Utils.MNISTReadLabelFile(sourceDir + "/t10k-labels-idx1-ubyte");
         if (logger.isDebugEnabled()) {
             logger.debug("Done importing images");
         }

@@ -36,3 +36,6 @@ build
 
 # DO commit aarch64 tensorflow jar
 !libtensorflow.jar
+
+# Tensorflow models
+tensorflow/tensorflow_serving/models

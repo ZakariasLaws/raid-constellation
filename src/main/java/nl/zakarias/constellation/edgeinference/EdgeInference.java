@@ -16,18 +16,20 @@ public class EdgeInference {
                 + "[ -nrExecutors <num> ] "
                 + "[ -role [" + Configuration.nodeRoleValues() + "] "
                 + "[ -context <String,String,String...>] "
-                + "[ -target <activity ID>] "
-                + "[ -dataDir </source/dataset/path>] "
-                + "[ -modelName [" + Configuration.InferenceModelEnumToString() + "] ";
+                + "[ (target only) -outputFile </path/to/store/output> ] "
+                + "[ (source only) -target <activity ID>] "
+                + "[ (source only) -dataDir </source/dataset/path>] "
+                + "[ (source/target only) -modelName [" + Configuration.InferenceModelEnumToString() + "] ";
     }
 
-    public static void main(String[] args) throws Exception {
+    static void start(String[] args) throws Exception {
         NODE_ROLES role = null;
         String[] contextString = new String[0];
         int nrExecutors = 1;
         Context[] contexts;
         String targetActivity = null;
         String sourceDataDir = null;
+        String outputFile = null;
         Configuration.ModelName modelName = null;
 
         for (int i = 0; i < args.length; i++) {
@@ -54,7 +56,11 @@ public class EdgeInference {
                     break;
                 case "-dataDir":
                     i++;
-                    sourceDataDir =args[i];
+                    sourceDataDir = args[i];
+                    break;
+                case "-outputFile":
+                    i++;
+                    outputFile = args[i];
                     break;
                 case "-modelName":
                     i++;
@@ -98,10 +104,10 @@ public class EdgeInference {
                 if (targetActivity == null) {
                     throw new IllegalArgumentException("Missing activity ID to send results to");
                 } if (sourceDataDir == null) {
-                    throw new IllegalArgumentException("Missing directory to retrieve predictions images from");
-                } if (modelName == null) {
-                    throw new IllegalArgumentException("Specify the name of the predictions model to use (e.g. inception)");
-                }
+                throw new IllegalArgumentException("Missing directory to retrieve predictions images from");
+            } if (modelName == null) {
+                throw new IllegalArgumentException("Specify the name of the predictions model to use (e.g. inception)");
+            }
 
                 source.run(constellation, targetActivity, sourceDataDir, modelName);
                 break;
@@ -110,8 +116,11 @@ public class EdgeInference {
                 predictor.run(constellation);
                 break;
             case TARGET:
+                if (modelName == null) {
+                    throw new IllegalArgumentException("Specify the name of the model to gather data from");
+                }
                 Target target = new Target();
-                target.run(constellation);
+                target.run(constellation, outputFile, modelName);
                 break;
             default:
                 throw new Error("No matching Java Class found for role: " + role.toString());
@@ -119,5 +128,14 @@ public class EdgeInference {
 
         logger.debug("calling Constellation.done()");
         constellation.done();
+    }
+
+    public static void main(String[] args) {
+        try {
+            start(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(usage());
+        }
     }
 }

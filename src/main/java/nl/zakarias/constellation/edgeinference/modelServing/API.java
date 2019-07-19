@@ -1,6 +1,7 @@
 package nl.zakarias.constellation.edgeinference.modelServing;
 
 import com.google.gson.Gson;
+import nl.zakarias.constellation.edgeinference.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
