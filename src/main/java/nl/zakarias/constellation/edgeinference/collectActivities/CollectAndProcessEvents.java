@@ -1,5 +1,7 @@
 package nl.zakarias.constellation.edgeinference.collectActivities;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import ibis.constellation.Activity;
 import ibis.constellation.Constellation;
 import ibis.constellation.Event;
 
+import javax.xml.transform.Result;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -79,40 +82,67 @@ public class CollectAndProcessEvents extends Activity {
         return str.toString();
     }
 
+    private JsonArray getPredictionYolo(ResultEvent result, int index){
+        JsonArray data = new JsonArray();
+
+        for (int z = 0; z < result.predictions_yolo[index].length; z++) {
+            JsonArray arr = new JsonArray();
+            for (int x = 0; x < result.predictions_yolo[index][z].length; x++) {
+                JsonArray arr2 = new JsonArray();
+                for (int y = 0; y < result.predictions_yolo[index][z][x].length; y++) {
+                    arr2.add(result.predictions_yolo[index][z][x][y]);
+                }
+                arr.add(arr2);
+            }
+            data.add(arr);
+        }
+
+        return data;
+    }
+
     private void writeOutput(FileOutputStream fw, ResultEvent result) throws IOException {
         LocalDateTime now = LocalDateTime.now();
 
-        String predStr;
+        JsonObject json = new JsonObject();
+        json.addProperty ("timestamp", now.toString());
+        json.addProperty("src", result.src.hostname());
+        json.addProperty("model", result.modelName.toString());
+        json.addProperty("prediction_location", result.host.hostname());
 
-        if (result.predictions_yolo != null ){ // YOLO
-            predStr = getYoloClassificationString(result);
-        } else {
-            // Build prediction string
-            StringBuilder str = new StringBuilder();
-
-            for (byte prediction : result.predictions) {
-                logger.info(String.format("Src %s classified at %s using model %s: %d", result.src.hostname(), result.host.hostname(), result.modelName, prediction));
-
-                str.append(String.format("%s", prediction));
+        JsonArray predictions = new JsonArray();
+        for(int i = 0; i < result.imageIdentifiers.length; i++){
+            if (logger.isDebugEnabled()) {
+                if (result.predictions != null) {
+                    logger.debug(String.format("Src %s classified at %s using model %s: %d", result.src.hostname(), result.host.hostname(), result.modelName, result.predictions[i]));
+                } else {
+                    logger.debug(String.format("Src %s classified at %s using model %s", result.src.hostname(), result.host.hostname(), result.modelName));
+                }
             }
-            predStr = str.toString();
-        }
 
-        // Timestamp:src_host:IMG_ID:inference_host:model:prediction
-        fw.write(String.format("%s|%s|[", now.toString(), result.src.hostname()).getBytes()); // Timestamp:src_host
+            JsonObject item = new JsonObject();
+            item.addProperty("image_id", result.imageIdentifiers[i]);
+            if ( result.predictions != null ){
+                item.addProperty("prediction", result.predictions[i]);
+            } else { // YOLO
+                item.add("prediction", getPredictionYolo(result, i));
+            }
 
-        // Add all identifiers
-        for(int i=0; i<result.imageIdentifiers.length; i++){
-            fw.write(String.format("%d", result.imageIdentifiers[i]).getBytes());
-            if(i == result.imageIdentifiers.length-1){
-                fw.write("]|".getBytes());
+            if (result.certainty != null){
+                item.addProperty("certainty", result.certainty[i]);
             } else {
-                fw.write(",".getBytes());
+                item.addProperty("certainty", "");
             }
-        }
 
-        fw.write(String.format("%s|%s|", result.host.hostname(), result.modelName).getBytes());
-        fw.write(predStr.getBytes());
+            if (result.correct != null){
+                item.addProperty("target_label", result.correct[i]);
+            } else {
+                item.addProperty("target_label", "");
+            }
+            predictions.add(item);
+        }
+        json.add("predictions", predictions);
+
+        fw.write(json.toString().getBytes());
         fw.write("\n".getBytes());
     }
 
