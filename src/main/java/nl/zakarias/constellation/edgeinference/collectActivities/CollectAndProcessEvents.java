@@ -157,7 +157,7 @@ public class CollectAndProcessEvents extends Activity {
 
     @Override
     public int initialize(Constellation c) {
-        logger.debug("\ninitialized\n");
+        logger.debug("initialized\n");
 
         String targetIdentifier = "";
         String[] identifier = identifier().toString().split(":");

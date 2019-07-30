@@ -16,11 +16,22 @@ repositories {
   mavenLocal()
 }
 
-dependencies { 
+dependencies {
+    compile 'nl.junglecomputing.ipl:ipl:2.3.1'
+    compile 'nl.junglecomputing.ipl:ibis-util:2.3.1'
+    compile 'com.google.guava:guava:17.0'
+
+    implementation 'nl.junglecomputing.ipl:ipl-impl-smartsockets:2.3.1'
+    implementation 'nl.junglecomputing.ipl:ipl-impl-tcp:2.3.1'
+
+    testCompile 'nl.junglecomputing.ipl:ipl-support:2.3.1'
+    testCompile 'junit:junit:4.11'
+
+    compile fileTree(dir: 'Constellation/lib', include: 'Constellation-2.0.1.jar')
+//    implementation 'nl.junglecomputing:constellation:2.0.1'
     implementation 'com.google.guava:guava:27.0.1-jre'
     implementation 'org.slf4j:slf4j-api:1.7.21'
     implementation 'org.slf4j:slf4j-log4j12:1.7.21'
-    implementation 'nl.junglecomputing:constellation:2.0.1'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
     testImplementation 'junit:junit:4.12'
 }

@@ -92,7 +92,7 @@ command=""
 pre="-Dibis.constellation"
 if [[ ${role,,} == "s" ]]; then
     command="\
-    ${pre}.queue.limit=1000 "
+    ${pre}.queue.limit=1 "
 elif [[ ${role,,} == "p" ]]; then
     tfServer=`which tensorflow_model_server`
     if [[ ${tfServer} == "" ]]; then
@@ -115,16 +115,19 @@ elif [[ ${role,,} == "p" ]]; then
         echo "****************"
         echo ""
 
-        sleep 5
+        sleep 3
     fi
 
+    # Predictor will steal activities and should be allowed to leave the pool
     command="\
-    ${pre}.remotesteal.throttle=true \
+    ${pre}.remotesteal.throttle=false \
     ${pre}.remotesteal.size=1 \
+    ${pre}.allowLeave=true \
     "
 elif [[ ${role,,} == "t" ]]; then
+    # Target will never steal activities, but only process events
     command="\
-    ${pre}.remotesteal.throttle=true \
+    ${pre}.remotesteal.throttle=false \
     ${pre}.remotesteal.size=1 \
     "
 else
@@ -143,7 +146,8 @@ java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Dibis.server.port=${CONSTELLATION_PORT} \
         -Dibis.pool.name=${poolName} \
         -Dibis.constellation.closed=false \
-        -Dibis.constelaltion.distributed=true \
+        -Dibis.constellation.distributed=true \
+        -Dibis.constellation.ignoreEmptyReplies=true \
         -Dibis.io.serialization.object.default=sun \
         ${command} \
         ${classname} \

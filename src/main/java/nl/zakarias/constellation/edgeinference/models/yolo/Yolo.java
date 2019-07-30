@@ -133,6 +133,15 @@ public class Yolo implements ModelInterface {
             constellation.submit(activity);
 
             pos = min;
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (pos == 100){
+                break;
+            }
         }
 
     }

@@ -2,3 +2,4 @@
 
 kill -9 `ps aux | grep 'SOURCE' | grep -v 'grep' | awk '{print $2}'`
 kill -9 `ps aux | grep 'TARGET' | grep -v 'grep' | awk '{print $2}'`
+kill -9 `ps aux | grep 'PREDICTOR' | grep -v 'grep' | awk '{print $2}'`

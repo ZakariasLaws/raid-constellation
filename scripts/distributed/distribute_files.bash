@@ -34,20 +34,23 @@ do
   echo "------ ${arrIp[0]} ------"
   scp -r ${ROOT}/src/main ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../src"
   scp -r ${ROOT}/scripts/* ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../scripts"
+  scp -r ${ROOT}/Constellation/lib/* ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../Constellation/lib"
   echo ""
 done
 
 arrSource=(${sourceAddress})
 if [[ "${arrSource[0]}" != "self" ]]; then
     echo "------ ${arrSource[0]} ------"
-    scp -r ${ROOT}/distributed ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../.../src"
+    scp -r ${ROOT}/src/main ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../.../src"
     scp -r ${ROOT}/scripts/* ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../../scripts"
+    scp -r ${ROOT}/Constellation/lib/* ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../../Constellation/lib"
     echo ""
 fi
 
 if [[ "${targetAddress}" != "self" ]]; then
     echo "------ ${targetAddress} ------"
-    scp -r ${ROOT}/distributed ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../src"
+    scp -r ${ROOT}/src/main ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../src"
     scp -r ${ROOT}/scripts/* ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../scripts"
+    scp -r ${ROOT}/Constellation/lib/* ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../Constellation/lib"
     echo ""
 fi

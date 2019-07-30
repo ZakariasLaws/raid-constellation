@@ -1,12 +1,10 @@
 package nl.zakarias.constellation.edgeinference;
 
 import ibis.constellation.*;
-import nl.zakarias.constellation.edgeinference.modelServing.API;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 
 class Predictor {
@@ -14,7 +12,8 @@ class Predictor {
 
     private AbstractContext contexts;
     private CrunchifyGetIPHostname submittedNetworkInfo;
-    private int nrExecutors;
+
+    private boolean done;
 
     Predictor(Context[] contexts, int nrExecutors) throws UnknownHostException {
         try {
@@ -24,17 +23,35 @@ class Predictor {
             this.contexts = contexts[0];
         }
 
+        done = false;
         submittedNetworkInfo = new CrunchifyGetIPHostname();
-        this.nrExecutors = nrExecutors;
+    }
+
+    private boolean isDone(){
+        return this.done;
+    }
+
+    public void done(){
+        done = true;
     }
 
     void run(Constellation constellation) {
-//        try {
-//            System.out.println("mnist-cnn " + API.getModelMetadata(Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT")), "yolo", 1));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        System.out.println(constellation);
 
-        logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with " + nrExecutors + " and with contexts: " + contexts + "\n\n");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Shutdown hook leaving Constellation gracefully");
+                constellation.done();
+            }
+        ));
+
+        logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with contexts: " + contexts + "\n\n");
+
+        while (!isDone()){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
