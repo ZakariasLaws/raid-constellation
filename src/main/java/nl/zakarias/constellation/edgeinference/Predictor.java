@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class Predictor {
     private static final Logger logger = LoggerFactory.getLogger(Predictor.class);
@@ -31,18 +32,41 @@ class Predictor {
         return this.done;
     }
 
-    public void done(){
-        done = true;
-    }
-
     void run(Constellation constellation) {
-        System.out.println(constellation);
-
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                logger.info("Shutdown hook leaving Constellation gracefully");
-                constellation.done();
+            logger.info("Shutdown hook leaving Constellation gracefully");
+            AtomicInteger done = new AtomicInteger();
+
+            new Thread((new Runnable() {
+                AtomicInteger x;
+                Constellation constellation1;
+                public void run() {
+                    constellation.done();
+                    x.set(1);
+                }
+                Runnable pass(AtomicInteger x, Constellation constellation1) {
+                    this.x = x;
+                    this.constellation1 = constellation1;
+                    return this;
+                }
+            }).pass(done, constellation)).start();
+
+            int counter = 0;
+            while (done.get() == 0) {
+                // Wait for 60 seconds before timeout
+                if (counter > 30) {
+                    logger.info("Shutdown hook timeout");
+                    break;
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                counter++;
             }
-        ));
+        }));
 
         logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with contexts: " + contexts + "\n\n");
 
