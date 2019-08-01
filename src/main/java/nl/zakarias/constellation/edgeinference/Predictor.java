@@ -1,6 +1,7 @@
 package nl.zakarias.constellation.edgeinference;
 
 import ibis.constellation.*;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ class Predictor {
         return this.done;
     }
 
-    void run(Constellation constellation) {
+    public void addShutdownHook(Constellation constellation){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutdown hook leaving Constellation gracefully");
             AtomicInteger done = new AtomicInteger();
@@ -51,12 +52,14 @@ class Predictor {
                 }
             }).pass(done, constellation)).start();
 
+            // Wait for 60 seconds before timeout
             int counter = 0;
             while (done.get() == 0) {
-                // Wait for 60 seconds before timeout
-                if (counter > 30) {
+                if (counter > Configuration.SHUTDOWN_HOOK_TIMEOUT) {
                     logger.info("Shutdown hook timeout");
                     break;
+                } else if (counter % 10 == 0) {
+                    System.out.println("Timeout in: " + (Configuration.SHUTDOWN_HOOK_TIMEOUT - counter) + " seconds");
                 }
 
                 try {
@@ -66,7 +69,12 @@ class Predictor {
                 }
                 counter++;
             }
+            this.done = true;
         }));
+    }
+
+    void run(Constellation constellation) {
+        addShutdownHook(constellation);
 
         logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with contexts: " + contexts + "\n\n");
 

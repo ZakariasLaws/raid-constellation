@@ -14,29 +14,29 @@ function isNumber {
 
 echo "This script will set the necessary configurations, the config file will be placed in the provided bin dir."
 
-read -p "Constellation port: " constPort
+read -rp "Constellation port: " constPort
 
 isNumber $constPort
 
-read -ep "Edgeinference build location: " binDir
+read -rep "Edgeinference build location (dir where bin is located): " binDir
 
 if ! [[ -d $binDir ]]; then
   echo "$binDir is not a directory"
   exit 1
 fi  
 
-read -ep "TensorFlow serving config: " tfConf
+read -rep "TensorFlow serving config: " tfConf
 
 if ! [[ -f $tfConf ]]; then
   echo "$tfConf does not exist"
   exit 1
 fi
 
-read -p "TensorFlow serving port: " tfPort
+read -rp "TensorFlow serving port: " tfPort
 
 isNumber $tfPort
 
-CONFIG_FILE="configuration/config.RAID"
+CONFIG_FILE="$binDir/config.RAID"
 
 echo "CONSTELLATION_PORT=$constPort" > $CONFIG_FILE
 echo "EDGEINFERENCE_DIR=$binDir" >> $CONFIG_FILE

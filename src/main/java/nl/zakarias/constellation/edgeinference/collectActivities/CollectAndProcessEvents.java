@@ -2,17 +2,13 @@ package nl.zakarias.constellation.edgeinference.collectActivities;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import ibis.constellation.*;
 import nl.zakarias.constellation.edgeinference.ResultEvent;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ibis.constellation.AbstractContext;
-import ibis.constellation.Activity;
-import ibis.constellation.Constellation;
-import ibis.constellation.Event;
-
-import javax.xml.transform.Result;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -37,49 +33,6 @@ public class CollectAndProcessEvents extends Activity {
         } catch (IOException ex) {
             logger.error("Could not open file " + path + " for writing");
         }
-    }
-
-    private String getYoloClassificationString(ResultEvent result){
-        // TODO FIGURE OUT WHAT WE WANT TO OUTPUT
-        StringBuilder str = new StringBuilder();
-
-        for(int i=0; i<result.predictions_yolo.length; i++) {
-            logger.info(String.format("Src %s classified at %s using model %s: %s", result.src.hostname(), result.host.hostname(), result.modelName, "TEMP"));
-            str.append("[");
-            for (int z = 0; z < result.predictions_yolo[i].length; z++) {
-                str.append("[");
-
-                for (int x = 0; x < result.predictions_yolo[i][z].length; x++) {
-                    str.append("[");
-                    for (int y = 0; y < result.predictions_yolo[i][z][x].length; y++) {
-                        str.append(result.predictions_yolo[i][z][x][y]);
-                        if (y != result.predictions_yolo[i][z][x].length-1) {
-                            str.append(", ");
-                        }
-                    }
-                    if (x == result.predictions_yolo[i][z].length-1) {
-                        str.append("]");
-                    } else {
-                        str.append("],");
-                    }
-                }
-
-                if (z == result.predictions_yolo[i].length-1) {
-                    str.append("]");
-                } else {
-                    str.append("],");
-                }
-            }
-
-            if (i == result.predictions_yolo.length-1) {
-                str.append("]");
-            } else {
-                str.append("],");
-            }
-        }
-
-//        return str.toString();
-        return str.toString();
     }
 
     private JsonArray getPredictionYolo(ResultEvent result, int index){
@@ -140,7 +93,12 @@ public class CollectAndProcessEvents extends Activity {
             }
             predictions.add(item);
         }
-        json.add("predictions", predictions);
+
+        if (Configuration.LOG_PREDICTIONS) {
+            json.add("predictions", predictions);
+        } else {
+            json.add("predictions", new JsonArray());
+        }
 
         fw.write(json.toString().getBytes());
         fw.write("\n".getBytes());
@@ -174,6 +132,9 @@ public class CollectAndProcessEvents extends Activity {
 
     @Override
     public synchronized int process(Constellation c, Event e) {
+        Timer timer = c.getTimer("java", c.identifier().toString(), "Process Result");
+        int timing = timer.start();
+
         // Handle received event
         ResultEvent result = (ResultEvent) e.getData();
 
@@ -184,6 +145,9 @@ public class CollectAndProcessEvents extends Activity {
         handleResult(result);
 
         count++;
+
+        timer.stop(timing);
+
         return SUSPEND;
     }
 
@@ -202,7 +166,7 @@ public class CollectAndProcessEvents extends Activity {
         return "CollectAndProcessEventsYolo(" + identifier() + ")";
     }
 
-    public synchronized void waitToFinish(){
+    public synchronized void wakeOnEvent(){
         try {
             wait();
         } catch (Exception e) {
