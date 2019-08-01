@@ -3,6 +3,7 @@ package nl.zakarias.constellation.edgeinference;
 import ibis.constellation.Constellation;
 import ibis.constellation.Context;
 import ibis.constellation.NoSuitableExecutorException;
+import ibis.constellation.Timer;
 import nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEvents;
 import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.utils.CrunchifyGetIPHostname;
@@ -20,12 +21,17 @@ class Target {
 
     private boolean done = false;
 
+    private Timer timer;
+    private int timing;
+
     Target() throws UnknownHostException {
         submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
     private void addShutdownHook(Constellation constellation){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            timer.stop(timing);
+
             logger.info("Shutdown hook leaving Constellation gracefully");
             AtomicInteger done = new AtomicInteger();
 
@@ -71,10 +77,15 @@ class Target {
 
         CollectAndProcessEvents aid = new CollectAndProcessEvents(Configuration.TARGET_CONTEXT, outputFile);
 
+        timer = constellation.getOverallTimer();
+        timing = timer.start();
+
         logger.debug("Submitting CollectAndProcessEvents activity");
         constellation.submit(aid);
 
         // Wait until shutdown hook has run
         aid.wakeOnEvent();
+
+        timer.stop(timing);
     }
 }
