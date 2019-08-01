@@ -2,27 +2,6 @@
 
 # This script is a convenience script to start the Constellation registry server
 
-function check_env() {
-    local name_env_dir=$1
-    if [[ -z ${!name_env_dir} ]]
-    then
-	echo "Environment variable $name_env_dir has not been set"
-	exit 1
-    fi
-}
-
-function check_env_dir() {
-    local name_env_dir=$1
-
-    check_env ${name_env_dir}
-
-    if [[ ! -d ${!name_env_dir} ]]
-    then
-	echo "Environment variable $name_env_dir does not represent a directory"
-	exit 1
-    fi
-}
-
 createClassPath() {
     basedir=$1
     jar=$2
@@ -37,11 +16,25 @@ createClassPath() {
     fi
 }
 
-check_env_dir EDGEINFERENCE_DIR
+# READ CONFIG FILE
+CONF_FILE="./config.RAID"
+CONSTELLATION_PORT="$( cut -d'=' -f2 <<< "$(sed -n '1p' $CONF_FILE)")"
+EDGEINFERENCE_DIR="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
+EDGEINFERENCE_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
+EDGEINFERENCE_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '4p' $CONF_FILE)")"
 
-BIN_DIR=$EDGEINFERENCE_DIR/bin
+if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${EDGEINFERENCE_DIR} ]] || [[ -z ${EDGEINFERENCE_SERVING_PORT} ]] || [[ -z ${EDGEINFERENCE_SERVING_CONFIG} ]]; then
+  echo "Config file either missing or corrupted"
+  exit 1
+fi
 
-check_env CONSTELLATION_PORT
+BIN_DIR=""
+
+if [[ "${EDGEINFERENCE_DIR: -1}" == "/" ]]; then
+  BIN_DIR="${EDGEINFERENCE_DIR}bin"
+else
+  BIN_DIR="${EDGEINFERENCE_DIR}/bin"
+fi
 
 source ${BIN_DIR}/create_class_path.bash
 CLASSPATH=$(createClassPath ${EDGEINFERENCE_DIR} "lib/ipl-support-2.3.1.jar")

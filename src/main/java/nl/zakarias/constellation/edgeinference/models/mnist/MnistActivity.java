@@ -35,6 +35,9 @@ public class MnistActivity extends Activity {
 
     @Override
     public int initialize(Constellation constellation) {
+        Timer timer = constellation.getTimer("java", constellation.identifier().toString(), "MNIST");
+        int timing = timer.start();
+
         // Get the location of where we are currently executing
         try {
             currentNetworkInfo = new CrunchifyGetIPHostname();
@@ -50,6 +53,8 @@ public class MnistActivity extends Activity {
         } catch (Exception e) {
             throw new Error(String.format("Error applying model with message: %s", e.getMessage()));
         }
+
+        timer.stop(timing);
 
         return FINISH;
     }

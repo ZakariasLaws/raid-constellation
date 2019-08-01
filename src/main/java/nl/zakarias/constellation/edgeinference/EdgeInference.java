@@ -22,6 +22,38 @@ public class EdgeInference {
                 + "[ (source only) -modelName [" + Configuration.InferenceModelEnumToString() + "] ";
     }
 
+    /***
+     * Generate ConstellationConfiguration based on what role the device calling this method
+     * has. The configuration will identify if the executors will transmit new data (SOURCE)
+     * compute results (PREDICTOR) or receive and display results (TARGET).
+     * @param role The role of this node/device, must exist in NODE_ROLES
+     * @param contexts An array of contexts to use
+     * @return ConstellationConfiguration depending on the role of this instance
+     * @throws Error Throws error when no role or an invalid one was provided
+     */
+    public static ConstellationConfiguration createRoleBasedConfig(Configuration.NODE_ROLES role, Context[] contexts) throws Error{
+        logger.debug("Generating a new configuration based on role: " + role.toString() + " with contexts: " + Utils.printArray(contexts));
+
+        if (contexts.length == 0 && !role.equals(Configuration.NODE_ROLES.TARGET)) {
+            throw new Error("No context for executors");
+        }
+        switch (role){
+            case SOURCE:
+                // Configuration which can produce Activities to WORLD but may not steal from anywhere
+                return new ConstellationConfiguration(Context.DEFAULT, StealPool.WORLD, StealPool.NONE, StealStrategy.SMALLEST, StealStrategy.SMALLEST, StealStrategy.SMALLEST);
+            case PREDICTOR:
+                // Configuration steals from WORLD and submits new Activities to WORLD using configurations from config file
+                if (contexts.length == 1){
+                    return new ConstellationConfiguration(contexts[0], StealPool.NONE, StealPool.WORLD, StealStrategy.SMALLEST, StealStrategy.BIGGEST, StealStrategy.BIGGEST);
+                }
+                return new ConstellationConfiguration(new OrContext(contexts), StealPool.NONE, StealPool.WORLD, StealStrategy.SMALLEST, StealStrategy.BIGGEST, StealStrategy.BIGGEST);
+            case TARGET:
+                return new ConstellationConfiguration(Configuration.TARGET_CONTEXT, StealPool.NONE, StealPool.NONE, StealStrategy.SMALLEST, StealStrategy.BIGGEST, StealStrategy.BIGGEST);
+            default:
+                throw new Error("Invalid node role");
+        }
+    }
+
     static void start(String[] args) throws Exception {
         NODE_ROLES role = null;
         String[] contextString = new String[0];
@@ -91,7 +123,7 @@ public class EdgeInference {
             }
         }
 
-        ConstellationConfiguration config = Utils.createRoleBasedConfig(role, contexts);
+        ConstellationConfiguration config = createRoleBasedConfig(role, contexts);
         Constellation constellation = ConstellationFactory.createConstellation(config, nrExecutors);
         logger.debug("Created Constellation with " + nrExecutors + " executor(s)");
 
@@ -114,7 +146,8 @@ public class EdgeInference {
             case PREDICTOR:
                 Predictor predictor = new Predictor(contexts, nrExecutors);
                 predictor.run(constellation);
-                break;
+                // Constellation.done() is called from inside predictor.run(..)
+                return;
             case TARGET:
                 Target target = new Target();
                 target.run(constellation, outputFile, modelName);

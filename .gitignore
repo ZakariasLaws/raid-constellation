@@ -42,3 +42,6 @@ tensorflow/tensorflow_serving/models
 
 # Constellation git
 Constellation
+
+# Configuration file
+config.RAID

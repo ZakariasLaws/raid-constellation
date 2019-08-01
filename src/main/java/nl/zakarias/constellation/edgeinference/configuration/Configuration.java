@@ -11,15 +11,51 @@ import java.io.Serializable;
 
 public class Configuration {
     public enum NODE_ROLES {
-        SOURCE, TARGET, PREDICTOR
+        SOURCE("SOURCE"),
+        TARGET("TARGET"),
+        PREDICTOR("PREDICTOR");
+
+        private final String name;
+
+        NODE_ROLES(String s){
+            name = s;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
+
+    /**
+     * Whether to write the prediction results to the log file
+     */
+    public static final boolean LOG_PREDICTIONS = false;
+
+    public static final String DEFAULT_OUTPUT_FILE = "output.log";
+    public static final int CIFAR_10_FILE_LENGTH = 10000;
+    public static final int CIFAR_IMAGE_WIDTH = 32;
+    public static final int CIFAR_IMAGE_HEIGHT = 32;
+
+    public static final int SHUTDOWN_HOOK_TIMEOUT = 60; // Seconds
 
     /**
      * All available models. If manually adding a new model to tensorflow/tensorflow_serving/models/ it must be
      * added to this enum, as well as returned from {@link #getModel(ModelName) getModel}.
      */
     public enum ModelName implements Serializable {
-        MNIST, MNIST_CNN, YOLO, CIFAR10
+        MNIST("MNIST"), MNIST_CNN("MNIST_CNN"), YOLO("YOLO"), CIFAR10("CIFAR10");
+
+        private final String name;
+
+        ModelName(String s){
+            name = s;
+        }
+
+        @Override
+        public String toString(){
+            return this.name;
+        }
     }
 
     /**

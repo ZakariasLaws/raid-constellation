@@ -45,7 +45,11 @@ class Source {
             logger.error("Could not identify a valid model, options are: " + Configuration.InferenceModelEnumToString());
             return;
         }
+        Timer timer = constellation.getTimer("java", constellation.identifier().toString(), "Source using model: " + modelName.toString());
+        int timing = timer.start();
 
         model.run(constellation, aid, sourceDir, this.contexts);
+
+        timer.stop(timing);
     }
 }

@@ -3,28 +3,7 @@
 # Executes EdgeInference with Constellation
 
 # Kill all child processes
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
-
-function check_env() {
-    local name_env_dir=$1
-    if [[ -z ${!name_env_dir} ]]
-    then
-	echo "Environment variable $name_env_dir has not been set"
-	exit 1
-    fi
-}
-
-function check_env_dir() {
-    local name_env_dir=$1
-
-    check_env ${name_env_dir}
-
-    if [[ ! -d ${!name_env_dir} ]]
-    then
-	echo "Environment variable $name_env_dir does not represent a directory"
-	exit 1
-    fi
-}
+trap 'trap - SIGTERM && kill -- -$$' SIGINT SIGTERM EXIT
 
 function usage() {
     echo "Usage:"
@@ -39,10 +18,22 @@ function usage() {
     echo "Remember to start Constellation server first"
 }
 
-check_env_dir EDGEINFERENCE_DIR
-BIN_DIR=${EDGEINFERENCE_DIR}/bin
+# READ CONFIG FILE
 
-check_env CONSTELLATION_PORT
+CONF_FILE="./config.RAID"
+CONSTELLATION_PORT="$( cut -d'=' -f2 <<< "$(sed -n '1p' $CONF_FILE)")"
+EDGEINFERENCE_DIR="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
+EDGEINFERENCE_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
+EDGEINFERENCE_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '4p' $CONF_FILE)")"
+
+if [[ ! "${EDGEINFERENCE_DIR: -1}" == "/" ]]; then
+  EDGEINFERENCE_DIR="${EDGEINFERENCE_DIR}/"
+fi
+
+if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${EDGEINFERENCE_DIR} ]] || [[ -z ${EDGEINFERENCE_SERVING_PORT} ]] || [[ -z ${EDGEINFERENCE_SERVING_CONFIG} ]]; then
+  echo "Config file either missing or corrupted"
+  exit 1
+fi
 
 tmpdir=${EDGEINFERENCE_DIR}/.java_io_tmpdir
 mkdir -p ${tmpdir}
@@ -56,7 +47,6 @@ if [[ -z ${role} || -z ${serverAddress} || -z ${poolName} ]]; then
     exit 1
 fi
 
-roleFull=""
 if [[ ${role,,} == "p" ]]; then
     context=$1; shift
     if [[ -z ${context} ]]; then
@@ -64,8 +54,7 @@ if [[ ${role,,} == "p" ]]; then
         exit 1
     fi
 
-    args="-role PREDICTOR -context ${context} $@"
-    roleFull="Predictor"
+    args="-role PREDICTOR -context ${context} $*"
 elif [[ ${role,,} == "s" ]]; then
     context=$1; shift
     if [[ -z ${context} ]]; then
@@ -73,11 +62,9 @@ elif [[ ${role,,} == "s" ]]; then
         exit 1
     fi
 
-    args="-role SOURCE -context ${context} $@"
-    roleFull="Source"
+    args="-role SOURCE -context ${context} $*"
 else
-    args="-role TARGET $@"
-    roleFull="Target"
+    args="-role TARGET $*"
 fi
 
 classname="nl.zakarias.constellation.edgeinference.EdgeInference"
@@ -111,7 +98,7 @@ elif [[ ${role,,} == "p" ]]; then
         echo ""
         echo "****************"
         echo "Starting TensorFlow Model Serving, log can be found at: ${EDGEINFERENCE_DIR}/tensorflow_model_server.log"
-        nohup tensorflow_model_server --port=8500 --rest_api_port=8501 --model_config_file=${EDGEINFERENCE_DIR}/../../../tensorflow/tensorflow_serving/ModelServerConfig.conf > ${EDGEINFERENCE_DIR}/tensorflow_model_server.log &
+        nohup tensorflow_model_server --port=$((${EDGEINFERENCE_SERVING_PORT} - 1)) --rest_api_port=${EDGEINFERENCE_SERVING_PORT} --model_config_file=${EDGEINFERENCE_SERVING_CONFIG} > ${EDGEINFERENCE_DIR}/tensorflow_model_server.log &
         echo "****************"
         echo ""
 
@@ -135,9 +122,6 @@ else
     "
 fi
 
-######################### UNCOMMENT THE FOLLOWING LINE TO COMPILE WITH LOCAL TF JAVA BINDINGS #########################
-# command="${command} -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
-
 java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Djava.rmi.server.hostname=localhost \
         -Djava.io.tmpdir=${tmpdir} \
@@ -145,6 +129,8 @@ java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Dibis.server.address=${serverAddress}:${CONSTELLATION_PORT} \
         -Dibis.server.port=${CONSTELLATION_PORT} \
         -Dibis.pool.name=${poolName} \
+        -Dibis.constellation.profile=true \
+        -Dibis.constellation.profile.output=gantt \
         -Dibis.constellation.closed=false \
         -Dibis.constellation.distributed=true \
         -Dibis.constellation.ignoreEmptyReplies=true \
