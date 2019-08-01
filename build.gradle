@@ -19,13 +19,9 @@ repositories {
 dependencies {
     compile 'nl.junglecomputing.ipl:ipl:2.3.1'
     compile 'nl.junglecomputing.ipl:ibis-util:2.3.1'
-    compile 'com.google.guava:guava:17.0'
-
     implementation 'nl.junglecomputing.ipl:ipl-impl-smartsockets:2.3.1'
     implementation 'nl.junglecomputing.ipl:ipl-impl-tcp:2.3.1'
-
     testCompile 'nl.junglecomputing.ipl:ipl-support:2.3.1'
-    testCompile 'junit:junit:4.11'
 
     compile fileTree(dir: 'Constellation/lib', include: 'Constellation-2.0.1.jar')
 //    implementation 'nl.junglecomputing:constellation:2.0.1'
