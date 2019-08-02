@@ -36,8 +36,8 @@ public class Configuration {
     public static final int CIFAR_10_FILE_LENGTH = 10000;
     public static final int CIFAR_IMAGE_WIDTH = 32;
     public static final int CIFAR_IMAGE_HEIGHT = 32;
-
     public static final int SHUTDOWN_HOOK_TIMEOUT = 60; // Seconds
+    public static final int BATCH_SIZE = 1;
 
     /**
      * All available models. If manually adding a new model to tensorflow/tensorflow_serving/models/ it must be

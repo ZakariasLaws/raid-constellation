@@ -12,8 +12,8 @@ function usage() {
     echo "For example, in order to start a predictor with contexts A, B and C:"
     echo "./bin/distributed/run.bash p 10.72.34.117 my.pool.name A,B,C"
     echo ""
-    echo "To start a source targeting activity 0:1:0 with results:"
-    echo "./bin/distributed/run.bash s 10.72.34.117 my.pool.name A,B,C -target 0:1:0"
+    echo "To start a source targeting activity 0:1:0 with results, sending batches of 10 images per time:"
+    echo "./bin/distributed/run.bash s 10.72.34.117 my.pool.name A,B,C -target 0:1:0 -batchSize 10"
     echo ""
     echo "Remember to start Constellation server first"
 }

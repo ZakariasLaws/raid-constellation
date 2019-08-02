@@ -29,7 +29,7 @@ class Source {
         submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
-    void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName) throws IOException, NoSuitableExecutorException {
+    void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName, int batchSize) throws IOException, NoSuitableExecutorException {
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
         // Use existing collectActivity
@@ -48,7 +48,7 @@ class Source {
         Timer timer = constellation.getTimer("java", constellation.identifier().toString(), "Source using model: " + modelName.toString());
         int timing = timer.start();
 
-        model.run(constellation, aid, sourceDir, this.contexts);
+        model.run(constellation, aid, sourceDir, this.contexts, batchSize);
 
         timer.stop(timing);
     }

@@ -17,6 +17,8 @@ public class Cifar10 implements ModelInterface {
     static String modelName = "cifar10";
     static String signatureString = "predict";
 
+    private int batchSize = 1;
+
     private void sendCifar10ImageBatch(byte[][][][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
         // Generate imageIdentifiers in order to link back the result to the image CURRENTLY DISCARDED UPON METHOD EXIT
         int[] imageIdentifiers = new int[images.length];
@@ -42,14 +44,22 @@ public class Cifar10 implements ModelInterface {
 
         byte[][][][] images = Utils.readCifar10(sourceDir + "/data_batch_1.bin");
 
-        // TODO implement batch size setting, currently sending images one and one
-        for (int i=0; i<images.length; i++) {
-            sendCifar10ImageBatch(new byte[][][][]{images[i]}, null, constellation, target, contexts);
+        for (int i = 0; i < images.length; i += batchSize) {
+            byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
+//            byte[] targetBatch = new byte[batchSize];
+
+            for (int x = 0; x < batchSize; x++){
+                imageBatch[x] = images[i+x];
+//                targetBatch[x] = targets[i+x];
+            }
+
+            sendCifar10ImageBatch(imageBatch, null, constellation, target, contexts);
         }
     }
 
     @Override
-    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
+    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts, int batchSize) throws IOException, NoSuitableExecutorException {
+        this.batchSize = batchSize;
         runMnist(constellation, targetActivityIdentifier, sourceDir, contexts);
     }
 }

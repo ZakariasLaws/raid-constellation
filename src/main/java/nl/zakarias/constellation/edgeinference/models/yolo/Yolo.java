@@ -22,13 +22,13 @@ public class Yolo implements ModelInterface {
 
     static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
     static public String modelName = "yolo";
-    static public String signatureString = "predict";
+    static String signatureString = "predict";
 
-    static public int yoloImgRowLen = 608;
-    static public int yoloImgColLen = 608;
-    static public int yoloRGBColors = 3;
+    private static int yoloImgRowLen = 608;
+    private static int yoloImgColLen = 608;
+    private static int yoloRGBColors = 3;
 
-    static int batchSize = 1;
+    private int batchSize = 1;
 
     /** Fit the image to the yolo TF model input tensor dimensions by adding padding if necessary and otherwise
      * cropping. Padding is added on the right side and the bottom.
@@ -106,7 +106,7 @@ public class Yolo implements ModelInterface {
         int pos = 0;
         while (pos < files.length){
             byte[][][][] images = new byte[batchSize][yoloImgRowLen][yoloImgColLen][yoloRGBColors];
-            int min = pos + batchSize < files.length ? pos + batchSize : files.length;
+            int min = Math.min(pos + batchSize, files.length);
 
             for (int i=pos; i<min; i++){
                 BufferedImage image = fitImageToYolo(Utils.readJPG(files[i].toString(), yoloImgRowLen, yoloImgColLen));
@@ -147,7 +147,8 @@ public class Yolo implements ModelInterface {
     }
 
     @Override
-    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
+    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts, int batchSize) throws IOException, NoSuitableExecutorException {
+        this.batchSize = batchSize;
         runYolo(constellation, targetActivityIdentifier, sourceDir, contexts);
     }
 }

@@ -1,5 +1,5 @@
 # Modify this IP to match your server
-serverAddress="10.72.21.42"
+serverAddress="self"
 
 # Add all SSH addresses on which constellation will run.
 # To  avoid being asked for a password each time, setup SSH keys.
@@ -21,6 +21,9 @@ computeAddresses=(\
     "odroid-5 A,B" \
     "odroid-6 A,B" \
     "odroid-7 A,B" \
+    "odroid-8 A,B" \
+    "odroid-9 A,B" \
+    "odroid-10 A,B" \
 )
 
 

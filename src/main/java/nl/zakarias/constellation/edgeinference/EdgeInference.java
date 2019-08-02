@@ -12,14 +12,37 @@ public class EdgeInference {
     private static Logger logger = LoggerFactory.getLogger(EdgeInference.class);
 
     private static String usage(){
-        return "Usage: java EdgeInference "
+        return "Provide a role to get the usage of that specific role\n "
+                + "java EdgeInference "
+                + "-role [ " + Configuration.nodeRoleValues() + "] ";
+    }
+
+    private static String usageSource(){
+        return "Usage for Source:\n"
+                + "java EdgeInference "
+                + "-role SOURCE "
+                + "-target <activity ID> "
+                + "-modelName [ " + Configuration.InferenceModelEnumToString() + "] "
                 + "[ -nrExecutors <num> ] "
-                + "[ -role [" + Configuration.nodeRoleValues() + "] "
-                + "[ -context <String,String,String...>] "
-                + "[ (target only) -outputFile </path/to/store/output> ] "
-                + "[ (source only) -target <activity ID>] "
-                + "[ (source only) -dataDir </source/dataset/path>] "
-                + "[ (source only) -modelName [" + Configuration.InferenceModelEnumToString() + "] ";
+                + "[ -context <String,String,String...> ] "
+                + "[ -dataDir </source/dataset/path> ] "
+                + "[ -batchSize <int> ] ";
+    }
+
+    private static String usagePredictor(){
+        return "Usage for Predictor:\n"
+                + "java EdgeInference "
+                + "-role PREDICTOR "
+                + "[ -nrExecutors <num> ] "
+                + "[ -context <String,String,String...>] ";
+    }
+
+    private static String usageTarget(){
+        return "Usage for Predictor:\n"
+                + "java EdgeInference "
+                + "-role TARGET "
+                + "[ -nrExecutors <num> ] "
+                + "[ -outputFile </path/to/store/output> ] ";
     }
 
     /***
@@ -62,6 +85,7 @@ public class EdgeInference {
         String targetActivity = null;
         String sourceDataDir = null;
         String outputFile = null;
+        int batchSize = Configuration.BATCH_SIZE;
         Configuration.ModelName modelName = null;
 
         for (int i = 0; i < args.length; i++) {
@@ -102,8 +126,28 @@ public class EdgeInference {
                         throw new Error("Invalid model name: " + args[i]);
                     }
                     break;
+                case "-batchSize":
+                    i++;
+                    batchSize = Integer.parseInt(args[i]);
+                    break;
                 default:
-                    throw new Error("Invalid argument: " + args[i] + "\n\n" + usage());
+                    if (role == null){
+                        System.out.println("Invalid argument: " + args[i] + "\n\n" + usage());
+                        System.exit(1);
+                    }
+                    else if (role.equals(NODE_ROLES.PREDICTOR)) {
+                        System.exit(1);
+                        System.out.println("Invalid argument: " + args[i] + "\n\n" + usagePredictor());
+                    }
+                    else if (role.equals(NODE_ROLES.SOURCE)) {
+                        System.out.println("Invalid argument: " + args[i] + "\n\n" + usageSource() + "\n");
+                        System.exit(1);
+                    }
+                    else if (role.equals(NODE_ROLES.TARGET)) {
+                        System.out.println("Invalid argument: " + args[i] + "\n\n" + usageTarget());
+                        System.exit(1);
+                    }
+                    return;
             }
         }
 
@@ -136,14 +180,15 @@ public class EdgeInference {
                 if (targetActivity == null) {
                     throw new IllegalArgumentException("Missing activity ID to send results to");
                 } if (sourceDataDir == null) {
-                throw new IllegalArgumentException("Missing directory to retrieve predictions images from");
-            } if (modelName == null) {
-                throw new IllegalArgumentException("Specify the name of the predictions model to use (e.g. inception)");
-            }
+                    throw new IllegalArgumentException("Missing directory to retrieve predictions images from");
+                } if (modelName == null) {
+                    throw new IllegalArgumentException("Specify the name of the predictions model to use (e.g. inception)");
+                }
 
-                source.run(constellation, targetActivity, sourceDataDir, modelName);
+                source.run(constellation, targetActivity, sourceDataDir, modelName, batchSize);
                 break;
             case PREDICTOR:
+                System.out.println("Before starting predictor");
                 Predictor predictor = new Predictor(contexts, nrExecutors);
                 predictor.run(constellation);
                 // Constellation.done() is called from inside predictor.run(..)
