@@ -7,24 +7,25 @@ trap 'trap - SIGTERM && kill -- -$$' SIGINT SIGTERM EXIT
 
 function usage() {
     echo "Usage:"
-    echo "./bin/distributed/run.bash <role[s/p/t]> <server_address> <poolname> <possible_contexts>"
+    echo "./bin/distributed/run.bash <role[s/p/t]> <server_address> <poolname> <possible_contexts> <others>"
     echo ""
     echo "For example, in order to start a predictor with contexts A, B and C:"
-    echo "./bin/distributed/run.bash p 10.72.34.117 my.pool.name A,B,C"
+    echo "./bin/distributed/run.bash p 10.72.34.117 my.pool.name -context A,B,C"
     echo ""
     echo "To start a source targeting activity 0:1:0 with results, sending batches of 10 images per time:"
-    echo "./bin/distributed/run.bash s 10.72.34.117 my.pool.name A,B,C -target 0:1:0 -batchSize 10"
+    echo "./bin/distributed/run.bash s 10.72.34.117 my.pool.name -context A,B,C -target 0:1:0 -batchSize 10"
     echo ""
     echo "Remember to start Constellation server first"
 }
 
 # READ CONFIG FILE
 
-CONF_FILE="./config.RAID"
+CONF_FILE="${EDGEINFERENCE_DIR}/config.RAID"
 CONSTELLATION_PORT="$( cut -d'=' -f2 <<< "$(sed -n '1p' $CONF_FILE)")"
 EDGEINFERENCE_DIR="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
-EDGEINFERENCE_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
-EDGEINFERENCE_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '4p' $CONF_FILE)")"
+TENSORFLOW_SERVING="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
+EDGEINFERENCE_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '4p' $CONF_FILE)")"
+EDGEINFERENCE_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '5p' $CONF_FILE)")"
 
 if [[ ! "${EDGEINFERENCE_DIR: -1}" == "/" ]]; then
   EDGEINFERENCE_DIR="${EDGEINFERENCE_DIR}/"
@@ -41,6 +42,7 @@ mkdir -p ${tmpdir}
 role=$1; shift
 serverAddress=$1; shift
 poolName=$1; shift
+params="$@"
 
 if [[ -z ${role} || -z ${serverAddress} || -z ${poolName} ]]; then
     usage
@@ -48,23 +50,11 @@ if [[ -z ${role} || -z ${serverAddress} || -z ${poolName} ]]; then
 fi
 
 if [[ ${role,,} == "p" ]]; then
-    context=$1; shift
-    if [[ -z ${context} ]]; then
-        usage
-        exit 1
-    fi
-
-    args="-role PREDICTOR -context ${context} $*"
+    args="-role PREDICTOR ${params}"
 elif [[ ${role,,} == "s" ]]; then
-    context=$1; shift
-    if [[ -z ${context} ]]; then
-        usage
-        exit 1
-    fi
-
-    args="-role SOURCE -context ${context} $*"
+    args="-role SOURCE ${params}"
 else
-    args="-role TARGET $*"
+    args="-role TARGET ${params}"
 fi
 
 classname="nl.zakarias.constellation.edgeinference.EdgeInference"
@@ -72,7 +62,7 @@ classname="nl.zakarias.constellation.edgeinference.EdgeInference"
 echo "**** Starting with following config ****"
 echo "Poolname: ${poolName}"
 echo "Server address: ${serverAddress}:${CONSTELLATION_PORT}"
-echo "Context: ${context}"
+echo "Params: ${params}"
 
 # Add system properties specific for each instance
 command=""
@@ -81,9 +71,8 @@ if [[ ${role,,} == "s" ]]; then
     command="\
     ${pre}.queue.limit=1 "
 elif [[ ${role,,} == "p" ]]; then
-    tfServer=`which tensorflow_model_server`
-    if [[ ${tfServer} == "" ]]; then
-        echo "Add tensorflow_model_server to PATH"
+    if [[ ! -f ${TENSORFLOW_SERVING} ]]; then
+        echo "Could not read tensorflow serving binary, check that the config file has the correct path"
         exit 1
     fi
 
@@ -98,7 +87,7 @@ elif [[ ${role,,} == "p" ]]; then
         echo ""
         echo "****************"
         echo "Starting TensorFlow Model Serving, log can be found at: ${EDGEINFERENCE_DIR}/tensorflow_model_server.log"
-        nohup tensorflow_model_server --port=$((${EDGEINFERENCE_SERVING_PORT} - 1)) --rest_api_port=${EDGEINFERENCE_SERVING_PORT} --model_config_file=${EDGEINFERENCE_SERVING_CONFIG} > ${EDGEINFERENCE_DIR}/tensorflow_model_server.log &
+        nohup ${TENSORFLOW_SERVING} --port=$((${EDGEINFERENCE_SERVING_PORT} - 1)) --rest_api_port=${EDGEINFERENCE_SERVING_PORT} --model_config_file=${EDGEINFERENCE_SERVING_CONFIG} > ${EDGEINFERENCE_DIR}/tensorflow_model_server.log &
         echo "****************"
         echo ""
 

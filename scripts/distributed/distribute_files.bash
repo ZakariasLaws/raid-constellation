@@ -25,6 +25,7 @@ function check_env_dir() {
 check_env_dir EDGEINFERENCE_DIR
 BIN_DIR=${EDGEINFERENCE_DIR}/bin
 ROOT=${EDGEINFERENCE_DIR}/../../../
+LOC='/Constellation/edgeinference-constellation'
 
 source ${BIN_DIR}/distributed/config
 
@@ -32,25 +33,25 @@ for ip in "${computeAddresses[@]}"
 do
   arrIp=(${ip})
   echo "------ ${arrIp[0]} ------"
-  scp -r ${ROOT}/src/main ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../src"
-  scp -r ${ROOT}/scripts/* ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../scripts"
-  scp -r ${ROOT}/Constellation/lib/* ${arrIp[0]}:"\${EDGEINFERENCE_DIR}/../../../Constellation/lib"
+  scp -r ${ROOT}/src/main ${arrIp[0]}:"~$LOC/src"
+  scp -r ${ROOT}/scripts/* ${arrIp[0]}:"~$LOC/scripts"
+  scp -r ${ROOT}/Constellation/lib/* ${arrIp[0]}:"~$LOC/Constellation/lib"
   echo ""
 done
 
 arrSource=(${sourceAddress})
 if [[ "${arrSource[0]}" != "self" ]]; then
     echo "------ ${arrSource[0]} ------"
-    scp -r ${ROOT}/src/main ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../.../src"
-    scp -r ${ROOT}/scripts/* ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../../scripts"
-    scp -r ${ROOT}/Constellation/lib/* ${arrSource[0]}:"\${EDGEINFERENCE_DIR}/../../../Constellation/lib"
+    scp -r ${ROOT}/src/main ${arrSource[0]}:"~$LOC/src"
+    scp -r ${ROOT}/scripts/* ${arrSource[0]}:"~$LOC/scripts"
+    scp -r ${ROOT}/Constellation/lib/* ${arrSource[0]}:"~$LOC/Constellation/lib"
     echo ""
 fi
 
 if [[ "${targetAddress}" != "self" ]]; then
     echo "------ ${targetAddress} ------"
-    scp -r ${ROOT}/src/main ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../src"
-    scp -r ${ROOT}/scripts/* ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../scripts"
-    scp -r ${ROOT}/Constellation/lib/* ${targetAddress}:"\${EDGEINFERENCE_DIR}/../../../Constellation/lib"
+    scp -r ${ROOT}/src/main ${targetAddress}:"~$LOC/src"
+    scp -r ${ROOT}/scripts/* ${targetAddress}:"~$LOC/scripts"
+    scp -r ${ROOT}/Constellation/lib/* ${targetAddress}:"~$LOC/Constellation/lib"
     echo ""
 fi

@@ -25,6 +25,13 @@ if ! [[ -d $binDir ]]; then
   exit 1
 fi  
 
+read -rep "Tensorflow Serving Binary location: " tfBin
+
+if ! [[ -f $tfBin ]]; then
+  echo "$binDir does not exist"
+  exit 1
+fi
+
 read -rep "TensorFlow serving config: " tfConf
 
 if ! [[ -f $tfConf ]]; then
@@ -40,6 +47,7 @@ CONFIG_FILE="$binDir/config.RAID"
 
 echo "CONSTELLATION_PORT=$constPort" > $CONFIG_FILE
 echo "EDGEINFERENCE_DIR=$binDir" >> $CONFIG_FILE
+echo "TENSORFLOW_BIN=$tfBin" >> $CONFIG_FILE
 echo "EDGEINFERENCE_SERVING_PORT=$tfPort" >> $CONFIG_FILE
 echo "EDGEINFERENCE_SERVING_CONFIG=$tfConf" >> $CONFIG_FILE
 
