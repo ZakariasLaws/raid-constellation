@@ -22,5 +22,4 @@ if [[ ${hostName} == `echo ${USER}` ]]; then
     exit
 fi
 
-ssh -t ${address} "\${EDGEINFERENCE_DIR}/bin/distributed/run.bash ${role} ${serverIp} ${poolName}} ${params}
-${params}"
+ssh -t ${address} "\${EDGEINFERENCE_DIR}/bin/distributed/run.bash ${role} ${serverIp} ${poolName} ${params}"
