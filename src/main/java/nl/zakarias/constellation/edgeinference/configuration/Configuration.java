@@ -5,6 +5,7 @@ import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.models.cifar10.Cifar10;
 import nl.zakarias.constellation.edgeinference.models.mnist.Mnist;
 import nl.zakarias.constellation.edgeinference.models.mnist_cnn.MnistCnn;
+import nl.zakarias.constellation.edgeinference.models.tiny_yolo.TinyYolo;
 import nl.zakarias.constellation.edgeinference.models.yolo.Yolo;
 
 import java.io.Serializable;
@@ -44,7 +45,7 @@ public class Configuration {
      * added to this enum, as well as returned from {@link #getModel(ModelName) getModel}.
      */
     public enum ModelName implements Serializable {
-        MNIST("MNIST"), MNIST_CNN("MNIST_CNN"), YOLO("YOLO"), CIFAR10("CIFAR10");
+        MNIST("MNIST"), MNIST_CNN("MNIST_CNN"), YOLO("YOLO"), TINY_YOLO("TINY_YOLO"), CIFAR10("CIFAR10");
 
         private final String name;
 
@@ -76,6 +77,8 @@ public class Configuration {
                 return new Yolo();
             case CIFAR10:
                 return new Cifar10();
+            case TINY_YOLO:
+                return new TinyYolo();
             default:
                 return null;
         }

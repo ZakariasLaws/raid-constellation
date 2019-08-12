@@ -1,4 +1,4 @@
-package nl.zakarias.constellation.edgeinference.models.yolo;
+package nl.zakarias.constellation.edgeinference.models.tiny_yolo;
 
 import ibis.constellation.AbstractContext;
 import ibis.constellation.ActivityIdentifier;
@@ -17,11 +17,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 
-public class Yolo implements ModelInterface {
-    private static Logger logger = LoggerFactory.getLogger(Yolo.class);
+public class TinyYolo implements ModelInterface {
+    private static Logger logger = LoggerFactory.getLogger(TinyYolo.class);
 
     static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
-    static public String modelName = "yolo";  // Matches tensorflow_serving
+    static public String modelName = "tiny_yolo"; // Matches tensorflow_serving
     static String signatureString = "predict";  // Matches tensorflow_serving
 
     private static int yoloImgRowLen = 608;
@@ -124,7 +124,7 @@ public class Yolo implements ModelInterface {
             System.out.println(files[pos] + " - " + imageIdentifiers[0]);
 
             // Generate activity
-            YoloActivity activity = new YoloActivity(constellation.identifier().toString(), contexts, true, false, images, aid, imageIdentifiers);
+            TinyYoloActivity activity = new TinyYoloActivity(constellation.identifier().toString(), contexts, true, false, images, aid, imageIdentifiers);
 
             // submit activity
             if (logger.isDebugEnabled()) {

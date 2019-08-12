@@ -11,8 +11,8 @@ import java.io.*;
 public class Mnist implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(Mnist.class);
 
-    static String modelName = "mnist";
-    static String signatureString = "predict";
+    static String modelName = "mnist";  // Matches tensorflow_serving
+    static String signatureString = "predict";  // Matches tensorflow_serving
 
     private int batchSize = 1;
 

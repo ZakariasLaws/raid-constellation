@@ -17,7 +17,7 @@ createClassPath() {
 }
 
 # READ CONFIG FILE
-CONF_FILE=$1
+CONF_FILE="${EDGEINFERENCE_DIR}/config.RAID"
 CONSTELLATION_PORT="$( cut -d'=' -f2 <<< "$(sed -n '1p' $CONF_FILE)")"
 EDGEINFERENCE_DIR="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
 EDGEINFERENCE_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"

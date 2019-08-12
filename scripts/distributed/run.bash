@@ -140,7 +140,7 @@ java -cp ${EDGEINFERENCE_DIR}/lib/*:${CLASSPATH} \
         -Dibis.server.port=${CONSTELLATION_PORT} \
         -Dibis.pool.name=${poolName} \
         -Dibis.constellation.profile=true \
-        -Dibis.constellation.profile.output=gantt \
+        -Dibis.constellation.profile.output=${profileOutput} \
         -Dibis.constellation.closed=false \
         -Dibis.constellation.distributed=true \
         -Dibis.constellation.ignoreEmptyReplies=true \

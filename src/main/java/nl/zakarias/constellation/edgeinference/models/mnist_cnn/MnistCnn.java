@@ -14,8 +14,8 @@ import java.io.IOException;
 public class MnistCnn implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(MnistCnn.class);
 
-    static String modelName = "mnist_cnn";
-    static String signatureString = "predict";
+    static String modelName = "mnist_cnn";  // Matches tensorflow_serving
+    static String signatureString = "predict";  // Matches tensorflow_serving
 
     private int batchSize;
 
