@@ -58,17 +58,17 @@ public class CollectAndProcessEvents extends Activity {
 
         JsonObject json = new JsonObject();
         json.addProperty ("timestamp", now.toString());
-        json.addProperty("src", result.src.hostname());
+        json.addProperty("src", result.src.uniqueHostname());
         json.addProperty("model", result.modelName.toString());
-        json.addProperty("prediction_location", result.host.hostname());
+        json.addProperty("prediction_location", result.host.uniqueHostname());
 
         JsonArray predictions = new JsonArray();
         for(int i = 0; i < result.imageIdentifiers.length; i++){
             if (logger.isDebugEnabled()) {
                 if (result.predictions != null) {
-                    logger.debug(String.format("Src %s classified at %s using model %s: %d", result.src.hostname(), result.host.hostname(), result.modelName, result.predictions[i]));
+                    logger.debug(String.format("Src %s classified at %s using model %s: %d", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName, result.predictions[i]));
                 } else {
-                    logger.debug(String.format("Src %s classified at %s using model %s", result.src.hostname(), result.host.hostname(), result.modelName));
+                    logger.debug(String.format("Src %s classified at %s using model %s", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName));
                 }
             }
 

@@ -22,7 +22,7 @@ public class MnistActivity extends Activity {
     private CrunchifyGetIPHostname sourceNetworkInfo;
 
 
-    MnistActivity(AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid, int[] imageIdentifiers) throws UnknownHostException {
+    MnistActivity(String constellationId, AbstractContext context, boolean mayBeStolen, boolean expectsEvents, byte[][] data, byte[] correctLabels, ActivityIdentifier aid, int[] imageIdentifiers) throws UnknownHostException {
         super(context, mayBeStolen, expectsEvents);
 
         this.data = data;
@@ -30,7 +30,7 @@ public class MnistActivity extends Activity {
         targetIdentifier = aid;
         result = null;
         this.imageIdentifiers = imageIdentifiers;
-        this.sourceNetworkInfo = new CrunchifyGetIPHostname();
+        this.sourceNetworkInfo = new CrunchifyGetIPHostname(constellationId);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class MnistActivity extends Activity {
 
         // Get the location of where we are currently executing
         try {
-            currentNetworkInfo = new CrunchifyGetIPHostname();
+            currentNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
         } catch (UnknownHostException e) {
             logger.error("Could not find host information");
             e.printStackTrace();

@@ -25,7 +25,7 @@ public class Mnist implements ModelInterface {
         }
 
         // Generate activity
-        MnistActivity activity = new MnistActivity(contexts, true, false, images, targets, aid, imageIdentifiers);
+        MnistActivity activity = new MnistActivity(constellation.identifier().toString(), contexts, true, false, images, targets, aid, imageIdentifiers);
 
         // submit activity
         if (logger.isDebugEnabled()) {

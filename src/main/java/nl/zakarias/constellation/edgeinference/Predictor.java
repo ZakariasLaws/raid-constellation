@@ -17,7 +17,7 @@ class Predictor {
 
     private boolean done;
 
-    Predictor(Context[] contexts, int nrExecutors) throws UnknownHostException {
+    Predictor(Context[] contexts, int nrExecutors) {
         try {
             this.contexts = new OrContext(contexts);
         } catch (IllegalArgumentException e) {
@@ -26,7 +26,6 @@ class Predictor {
         }
 
         done = false;
-        submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
     private boolean isDone(){
@@ -73,7 +72,9 @@ class Predictor {
         }));
     }
 
-    void run(Constellation constellation) {
+    void run(Constellation constellation)  throws UnknownHostException{
+        submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
+
         addShutdownHook(constellation);
 
         logger.info("\n\nStarting Predictor("+ submittedNetworkInfo.hostname() +") with contexts: " + contexts + "\n\n");

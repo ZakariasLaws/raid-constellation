@@ -124,7 +124,7 @@ public class Yolo implements ModelInterface {
             System.out.println(files[pos] + " - " + imageIdentifiers[0]);
 
             // Generate activity
-            YoloActivity activity = new YoloActivity(contexts, true, false, images, aid, imageIdentifiers);
+            YoloActivity activity = new YoloActivity(constellation.identifier().toString(), contexts, true, false, images, aid, imageIdentifiers);
 
             // submit activity
             if (logger.isDebugEnabled()) {

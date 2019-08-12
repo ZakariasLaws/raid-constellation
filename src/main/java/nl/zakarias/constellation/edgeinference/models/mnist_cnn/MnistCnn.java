@@ -28,7 +28,7 @@ public class MnistCnn implements ModelInterface {
         }
 
         // Generate activity
-        MnistCnnActivity activity = new MnistCnnActivity(contexts, true, false, images, targets, aid, imageIdentifiers);
+        MnistCnnActivity activity = new MnistCnnActivity(constellation.identifier().toString(), contexts, true, false, images, targets, aid, imageIdentifiers);
 
         // submit activity
         if (logger.isDebugEnabled()) {

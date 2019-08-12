@@ -49,6 +49,27 @@ if [[ -z ${role} || -z ${serverAddress} || -z ${poolName} ]]; then
     exit 1
 fi
 
+# Test if profile output file was provides, HAS TO BE LAST ARGUMENT
+# -profileOutput <path>
+profileOutput="gantt"
+
+str=${params}
+delimiter="-profileOutput "
+s=${str}${delimiter}
+array=();
+while [[ $s ]]; do
+    array+=( "${s%%"${delimiter}"*}" );
+    s=${s#*"${delimiter}"};
+done;
+
+if [[ ${#array[1]} -gt 0 ]]; then
+    IFS=' '
+    read -ra ADDR <<< "${array[1]}"
+    profileOutput=${ADDR[0]}
+fi
+
+params=${array[0]}
+
 if [[ ${role,,} == "p" ]]; then
     args="-role PREDICTOR ${params}"
 elif [[ ${role,,} == "s" ]]; then

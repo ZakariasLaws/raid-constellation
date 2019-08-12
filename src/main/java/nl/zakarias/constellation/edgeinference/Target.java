@@ -24,10 +24,6 @@ class Target {
     private Timer timer;
     private int timing;
 
-    Target() throws UnknownHostException {
-        submittedNetworkInfo = new CrunchifyGetIPHostname();
-    }
-
     private void addShutdownHook(Constellation constellation){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             timer.stop(timing);
@@ -70,7 +66,8 @@ class Target {
         }));
     }
 
-    void run(Constellation constellation, String outputFile, Configuration.ModelName modelName) throws NoSuitableExecutorException {
+    void run(Constellation constellation, String outputFile, Configuration.ModelName modelName) throws NoSuitableExecutorException, UnknownHostException {
+        submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
         addShutdownHook(constellation);
 
         logger.info("\n\nStarting Target("+ submittedNetworkInfo.hostname() +") with context: " + TARGET_CONTEXT + "\n\n");

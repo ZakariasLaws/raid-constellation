@@ -28,7 +28,7 @@ public class Cifar10 implements ModelInterface {
         }
 
         // Generate activity
-        Cifar10Activity activity = new Cifar10Activity(contexts, true, false, images, targets, aid, imageIdentifiers);
+        Cifar10Activity activity = new Cifar10Activity(constellation.identifier().toString(), contexts, true, false, images, targets, aid, imageIdentifiers);
 
         // submit activity
         if (logger.isDebugEnabled()) {

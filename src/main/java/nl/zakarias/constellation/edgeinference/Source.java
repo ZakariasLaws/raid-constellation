@@ -25,11 +25,10 @@ class Source {
             // Contexts.length < 2
             this.contexts = contexts[0];
         }
-
-        submittedNetworkInfo = new CrunchifyGetIPHostname();
     }
 
     void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName, int batchSize) throws IOException, NoSuitableExecutorException {
+        submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
         // Use existing collectActivity
