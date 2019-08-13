@@ -18,7 +18,7 @@ read -rp "Constellation port: " constPort
 
 isNumber $constPort
 
-read -rep "Edgeinference build location (dir where bin is located): " binDir
+read -rep "RaidConstellation build location (dir where bin is located): " binDir
 
 if ! [[ -d $binDir ]]; then
   echo "$binDir is not a directory"
@@ -46,9 +46,9 @@ isNumber $tfPort
 CONFIG_FILE="$binDir/config.RAID"
 
 echo "CONSTELLATION_PORT=$constPort" > $CONFIG_FILE
-echo "EDGEINFERENCE_DIR=$binDir" >> $CONFIG_FILE
+echo "RAID_DIR=$binDir" >> $CONFIG_FILE
 echo "TENSORFLOW_BIN=$tfBin" >> $CONFIG_FILE
-echo "EDGEINFERENCE_SERVING_PORT=$tfPort" >> $CONFIG_FILE
-echo "EDGEINFERENCE_SERVING_CONFIG=$tfConf" >> $CONFIG_FILE
+echo "TENSORFLOW_SERVING_PORT=$tfPort" >> $CONFIG_FILE
+echo "TENSORFLOW_SERVING_CONFIG=$tfConf" >> $CONFIG_FILE
 
-echo "Created config file succesfully"
+echo "Created config file successfully"

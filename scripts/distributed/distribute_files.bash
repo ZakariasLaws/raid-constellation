@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Executes EdgeInference with Constellation using configurations from config.bash
+# Executes RaidConstellation with Constellation using configurations from config.bash
 function check_env() {
     local name_env_dir=$1
     if [[ -z ${!name_env_dir} ]]
@@ -22,10 +22,10 @@ function check_env_dir() {
     fi
 }
 
-check_env_dir EDGEINFERENCE_DIR
-BIN_DIR=${EDGEINFERENCE_DIR}/bin
-ROOT=${EDGEINFERENCE_DIR}/../../../
-LOC='/Constellation/edgeinference-constellation'
+check_env_dir RAID_DIR
+BIN_DIR=${RAID_DIR}/bin
+ROOT=${RAID_DIR}/../../../
+LOC='/Constellation/raid-constellation'
 
 source ${BIN_DIR}/distributed/config
 

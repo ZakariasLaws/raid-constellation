@@ -17,34 +17,37 @@ createClassPath() {
 }
 
 # READ CONFIG FILE
-CONF_FILE="${EDGEINFERENCE_DIR}/config.RAID"
+CONF_FILE="${RAID_DIR}/config.RAID"
 CONSTELLATION_PORT="$( cut -d'=' -f2 <<< "$(sed -n '1p' $CONF_FILE)")"
-EDGEINFERENCE_DIR="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
-EDGEINFERENCE_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
-EDGEINFERENCE_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '4p' $CONF_FILE)")"
+RAID_DIR="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
+RAID_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
+RAID_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '4p' $CONF_FILE)")"
 
-if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${EDGEINFERENCE_DIR} ]] || [[ -z ${EDGEINFERENCE_SERVING_PORT} ]] || [[ -z ${EDGEINFERENCE_SERVING_CONFIG} ]]; then
+if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${RAID_DIR} ]] || [[ -z ${RAID_SERVING_PORT} ]] || [[ -z ${RAID_SERVING_CONFIG} ]]; then
   echo "Config file either missing or corrupted"
   exit 1
 fi
 
 BIN_DIR=""
 
-if [[ "${EDGEINFERENCE_DIR: -1}" == "/" ]]; then
-  BIN_DIR="${EDGEINFERENCE_DIR}bin"
+if [[ "${RAID_DIR: -1}" == "/" ]]; then
+  BIN_DIR="${RAID_DIR}bin"
 else
-  BIN_DIR="${EDGEINFERENCE_DIR}/bin"
+  BIN_DIR="${RAID_DIR}/bin"
 fi
 
-source ${BIN_DIR}/create_class_path.bash
-CLASSPATH=$(createClassPath ${EDGEINFERENCE_DIR} "lib/ipl-support-2.3.1.jar")
+echo ${RAID_DIR}
+echo ${BIN_DIR}
 
-exec java -cp $CLASSPATH \
+source ${BIN_DIR}/create_class_path.bash
+CLASSPATH=$(createClassPath ${RAID_DIR} "lib/ipl-support-2.3.1.jar")
+
+exec java -cp ${CLASSPATH} \
      -Dgat.adapter.path \
      -Dibis.io.buffer.size=65536 \
      -Dibis.io.conversion.buffer.size=65536 \
      -Dibis.registry.central.server.connect.timeout=300 \
-     -Dlog4j.configuration=file:${EDGEINFERENCE_DIR}/log4j.properties \
+     -Dlog4j.configuration=file:${RAID_DIR}/log4j.properties \
      -Xmx256M \
-     ibis.ipl.server.Server --events --port $CONSTELLATION_PORT
+     ibis.ipl.server.Server --events --port ${CONSTELLATION_PORT}
 

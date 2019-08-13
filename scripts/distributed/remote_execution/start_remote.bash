@@ -18,8 +18,8 @@ hostName=`echo ${address} | awk -F'@' '{print $1}'`
 
 # Check if we are on local machine
 if [[ ${hostName} == `echo ${USER}` ]]; then
-    cd ${EDGEINFERENCE_DIR} && ${EDGEINFERENCE_DIR}/bin/distributed/run.bash ${role} ${serverIp} ${poolName} ${params}
+    cd ${RAID_DIR} && ${RAID_DIR}/bin/distributed/run.bash ${role} ${serverIp} ${poolName} ${params}
     exit
 fi
 
-ssh -t ${address} "\${EDGEINFERENCE_DIR}/bin/distributed/run.bash ${role} ${serverIp} ${poolName} ${params}"
+ssh -t ${address} "\${RAID_DIR}/bin/distributed/run.bash ${role} ${serverIp} ${poolName} ${params}"

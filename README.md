@@ -25,12 +25,12 @@ task.
 In order to install everything and compile a distribution run the following in the root directory:
 
 ```bash
-git clone https://github.com/ZakariasLaws/edgeinference-constellation
-cd edgeinference-constellation
+git clone https://github.com/ZakariasLaws/raid-constellation
+cd raid-constellation
 ./gradlew installDist
 ```
 
-This will create the distribution in `build/install/edgeinference-constellation`.
+This will create the distribution in `build/install/raid-constellation`.
 
 #### Edge Devices
 \- When installing on edge devices, only copy the distribution directory, the TensorFlow Model Serving config file and 
@@ -42,13 +42,14 @@ gradle.
 For running this application, Constellation requires the following environment variable to be set on *ALL* devices.
 
 ```bash
-export EDGEINFERENCE_DIR=/build/path/edgeinference-constellation
+export RAID_DIR=/build/path/raid-constellation
+export TENSORFLOW_SERVING_PORT=8000
 ```
 
 #### TensorFlow Serving
 
-The `EDGEINFERENCE_DIR` should point to the location of your distribution, which should be 
-`build/install/edgeinference-constellation`. The bin and lib directory must be in this location.
+The `RAID_DIR` should point to the location of your distribution, which should be 
+`build/install/raid-constellation`. The bin and lib directory must be in this location.
 
 The application use [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) in order to support different TensorFlow ML models. When starting a Predictor with the `run.bash` script, the TensorFlow serving API will start on in the background and run on local host. The configuration file is located at `tensorflow/tensorflow_serving/ModelServerConfig.conf`, it only supports *absolute paths* and **must** therefor be modified with the device system paths.
 
@@ -69,7 +70,7 @@ The output of the `tensorflow_model_serving` is stored in `tensorflow_model_serv
 
 #### Configuration File
 Each device running an agent must have a configuration file in the location pointed to by the environment variable 
-`EDGEINFERENCE_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the 
+`RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the 
 `/configuration/configure.sh` script from the root directory and answer the questions. 
 
 It is also possible to manually create the config file by copy pasting the following into a file named `config.RAID`, 
@@ -78,10 +79,10 @@ right side of the equal sign with your local path:
 
 ```conf
 CONSTELLATION_PORT=4567
-EDGEINFERENCE_DIR=/home/username/edgeinference-constellation/build/install/edgeinference-constellation/
+RAID_DIR=/home/username/raid-constellation/build/install/raid-constellation/
 TENSORFLOW_BIN=/usr/bin/tensorflow_model_server
-EDGEINFERENCE_SERVING_PORT=8000
-EDGEINFERENCE_SERVING_CONFIG=/home/username/edgeinference-constellation/tensorflow/tensorflow_serving/ModelServerConfig.conf
+TENSORFLOW_SERVING_PORT=8000
+TENSORFLOW_SERVING_CONFIG=/home/username/raid-constellation/tensorflow/tensorflow_serving/ModelServerConfig.conf
 ```
 **NOTE** that the `CONSTELLATION_PORT` number must be **identical** on all devices in order for them to connect to the
  server and communicate.
@@ -102,7 +103,7 @@ from newly added _sources_ and send results to any _target_ specified when start
 
 To start the server, type the following command `/bin/distributed/constellation-server`.
 ```bash
-cd $EDGEINFERENCE_DIR
+cd $RAID_DIR
 $ ./bin/distributed/constellation-server
 Ibis server running on 172.17.0.1/10.72.152.146-4567#8a.a0.ee.40.52.7d.00.00.8f.dd.4e.46.8e.a9.36.23~zaklaw01+22
 List of Services:
@@ -132,7 +133,7 @@ when starting up a _source_ agent.
 ./bin/distributed/run.bash t 10.72.152.146 test.pool.name -modelName mnist
 
 ...
-09:57:35,085 INFO  [CID:0:1] nl.zakarias.constellation.edgeinference.collectActivities.CollectAndProcessEvents - In order to target this activity with classifications add the following as argument (exactly as printed) when initializing the new SOURCE: "0:1:0"
+09:57:35,085 INFO  [CID:0:1] nl.zakarias.constellation.raid.collectActivities.CollectAndProcessEvents - In order to target this activity with classifications add the following as argument (exactly as printed) when initializing the new SOURCE: "0:1:0"
 ...
 ```
 
