@@ -84,7 +84,7 @@ The output of the `tensorflow_model_serving` is stored in `tensorflow_model_serv
 #### <a name="Configuration"></a> Configuration File
 Each device running an agent must have a configuration file in the location pointed to by the environment variable 
 `RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the 
-`/configuration/configure.sh` script from the root directory and answer the questions. 
+`./configuration/configure.sh` script from the root directory and answer the questions. 
 
 It is also possible to manually create the config file by copy pasting the following into a file named `config.RAID`, 
 located in the dir pointed to by the environment variable `EDGEINFERECE_DIR`. Replace the 
