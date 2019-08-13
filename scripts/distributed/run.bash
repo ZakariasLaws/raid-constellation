@@ -5,6 +5,27 @@
 # Kill all child processes
 trap 'trap - SIGTERM && kill -- -$$' SIGINT SIGTERM EXIT
 
+function check_env() {
+    local name_env_dir=$1
+    if [[ -z ${!name_env_dir} ]]
+    then
+	echo "Environment variable $name_env_dir has not been set"
+	exit 1
+    fi
+}
+
+function check_env_dir() {
+    local name_env_dir=$1
+
+    check_env ${name_env_dir}
+
+    if [[ ! -d ${!name_env_dir} ]]
+    then
+	echo "Environment variable $name_env_dir does not represent a directory"
+	exit 1
+    fi
+}
+
 function usage() {
     echo "Usage:"
     echo "./bin/distributed/run.bash <role[s/p/t]> <server_address> <poolname> <possible_contexts> <others>"
@@ -18,20 +39,18 @@ function usage() {
     echo "Remember to start Constellation server first"
 }
 
+check_env_dir RAID_DIR
+check_env TENSORFLOW_SERVING_PORT
+
 # READ CONFIG FILE
 
 CONF_FILE="${RAID_DIR}/config.RAID"
 CONSTELLATION_PORT="$( cut -d'=' -f2 <<< "$(sed -n '1p' $CONF_FILE)")"
-RAID_DIR="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
-TENSORFLOW_SERVING="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
-TENSORFLOW_SERVING_PORT="$( cut -d'=' -f2 <<< "$(sed -n '4p' $CONF_FILE)")"
-TENSORFLOW_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '5p' $CONF_FILE)")"
+TENSORFLOW_SERVING="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
+TENSORFLOW_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
 
-if [[ ! "${RAID_DIR: -1}" == "/" ]]; then
-  RAID_DIR="${RAID_DIR}/"
-fi
 
-if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${RAID_DIR} ]] || [[ -z ${TENSORFLOW_SERVING_PORT} ]] || [[ -z ${TENSORFLOW_SERVING_CONFIG} ]]; then
+if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${TENSORFLOW_SERVING} ]] || [[ -z ${TENSORFLOW_SERVING_CONFIG} ]]; then
   echo "Config file either missing or corrupted"
   exit 1
 fi

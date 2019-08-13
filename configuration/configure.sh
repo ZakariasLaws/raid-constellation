@@ -16,39 +16,26 @@ echo "This script will set the necessary configurations, the config file will be
 
 read -rp "Constellation port: " constPort
 
-isNumber $constPort
-
-read -rep "RaidConstellation build location (dir where bin is located): " binDir
-
-if ! [[ -d $binDir ]]; then
-  echo "$binDir is not a directory"
-  exit 1
-fi  
+isNumber ${constPort}
 
 read -rep "Tensorflow Serving Binary location: " tfBin
 
 if ! [[ -f $tfBin ]]; then
-  echo "$binDir does not exist"
+  echo "${tfBin} does not exist"
   exit 1
 fi
 
 read -rep "TensorFlow serving config: " tfConf
 
-if ! [[ -f $tfConf ]]; then
-  echo "$tfConf does not exist"
+if ! [[ -f ${tfConf} ]]; then
+  echo "${tfConf} does not exist"
   exit 1
 fi
 
-read -rp "TensorFlow serving port: " tfPort
-
-isNumber $tfPort
-
-CONFIG_FILE="$binDir/config.RAID"
+CONFIG_FILE="${RAID_DIR}/config.RAID"
 
 echo "CONSTELLATION_PORT=$constPort" > $CONFIG_FILE
-echo "RAID_DIR=$binDir" >> $CONFIG_FILE
 echo "TENSORFLOW_BIN=$tfBin" >> $CONFIG_FILE
-echo "TENSORFLOW_SERVING_PORT=$tfPort" >> $CONFIG_FILE
-echo "TENSORFLOW_SERVING_CONFIG=$tfConf" >> $CONFIG_FILE
+echo "TENSORFLOW_SERVING_CONFIG=${tfConf}" >> $CONFIG_FILE
 
 echo "Created config file successfully"
