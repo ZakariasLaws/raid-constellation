@@ -37,6 +37,11 @@ This will create the distribution in `build/install/raid-constellation`.
 the desired models to the device. Make sure to maintain the same folder structure as if you installed everything with 
 gradle.
 
+RAID uses [TensorFlow Serving](#TensorFlowServing) to serve models and perform predictions. This binary needs to be 
+manually installed on each device and the location must be provided during [Configuration](#Configuration). For AArch64
+devices, you will most likely need to cross-compile it from source, 
+[This Github Tool for TF Serving on Arm](https://github.com/emacski/tensorflow-serving-arm) might do the trick.
+
 ## <a name="configuration"></a> Configuration 
 #### <a name="environment_variable"></a> Environment Variable
 For running this application, Constellation requires the following environment variable to be set on *ALL* devices.
@@ -44,9 +49,17 @@ For running this application, Constellation requires the following environment v
 ```bash
 export RAID_DIR=/build/path/raid-constellation
 export TENSORFLOW_SERVING_PORT=8000
+export CONSTELLATION_PORT=4675
 ```
 
-#### TensorFlow Serving
+#### Set SSH Environment Variables
+In order to set environment variables that persist through multiple SSH session, configure the `./ssh/environment` 
+file as well as enable `PermitUserEnvironment` in the sshd configuration.
+See [this StackExchange thread](https://superuser.com/questions/48783/how-can-i-pass-an-environment-variable-through-an-ssh-command)
+
+To setup the SSH keys, see: [Setup SSH keys and copy ID](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2)
+
+#### <a name="TensorFlowServing"></a> TensorFlow Serving
 
 The `RAID_DIR` should point to the location of your distribution, which should be 
 `build/install/raid-constellation`. The bin and lib directory must be in this location.
@@ -68,7 +81,7 @@ model_config_list {
 
 The output of the `tensorflow_model_serving` is stored in `tensorflow_model_serving.log` in the bin directory. If one or more agents in charge of prediction for some reason do not work during run time, view this log to see if the error is related to TensorFlow Serving.
 
-#### Configuration File
+#### <a name="Configuration"></a> Configuration File
 Each device running an agent must have a configuration file in the location pointed to by the environment variable 
 `RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the 
 `/configuration/configure.sh` script from the root directory and answer the questions. 
