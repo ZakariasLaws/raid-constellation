@@ -4,6 +4,7 @@ import ibis.constellation.AbstractContext;
 import ibis.constellation.ActivityIdentifier;
 import ibis.constellation.Constellation;
 import ibis.constellation.NoSuitableExecutorException;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ public class TinyYolo implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(TinyYolo.class);
 
     static private int PORT = Integer.parseInt(System.getenv("EDGEINFERENCE_SERVING_PORT"));
-    static public String modelName = "tiny_yolo"; // Matches tensorflow_serving
+    static public String modelName = Configuration.ModelName.TINY_YOLO.toString().toLowerCase(); // Matches tensorflow_serving
     static String signatureString = "predict";  // Matches tensorflow_serving
 
     private static int yoloImgRowLen = 608;

@@ -17,7 +17,6 @@ class Target {
     private static final Logger logger = LoggerFactory.getLogger(Target.class);
 
     private static final Context TARGET_CONTEXT = Configuration.TARGET_CONTEXT;
-    private CrunchifyGetIPHostname submittedNetworkInfo;
 
     private boolean done = false;
 
@@ -67,7 +66,7 @@ class Target {
     }
 
     void run(Constellation constellation, String outputFile, Configuration.ModelName modelName) throws NoSuitableExecutorException, UnknownHostException {
-        submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
+        CrunchifyGetIPHostname submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
         addShutdownHook(constellation);
 
         logger.info("\n\nStarting Target("+ submittedNetworkInfo.hostname() +") with context: " + TARGET_CONTEXT + "\n\n");

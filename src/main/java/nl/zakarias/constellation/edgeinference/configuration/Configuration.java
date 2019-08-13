@@ -45,7 +45,8 @@ public class Configuration {
      * added to this enum, as well as returned from {@link #getModel(ModelName) getModel}.
      */
     public enum ModelName implements Serializable {
-        MNIST("MNIST"), MNIST_CNN("MNIST_CNN"), YOLO("YOLO"), TINY_YOLO("TINY_YOLO"), CIFAR10("CIFAR10");
+        MNIST("MNIST"), MNIST_CNN("MNIST_CNN"), YOLO("YOLO"),
+        TINY_YOLO("TINY_YOLO"), CIFAR10("CIFAR10");
 
         private final String name;
 

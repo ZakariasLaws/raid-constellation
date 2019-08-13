@@ -50,6 +50,6 @@ class TinyYoloClassifier {
 
         float[] certainty = null;
 
-        return new ResultEvent(ModelName.YOLO, target, predictions, certainty);
+        return new ResultEvent(ModelName.TINY_YOLO, target, predictions, certainty);
     }
 }

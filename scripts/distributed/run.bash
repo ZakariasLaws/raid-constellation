@@ -93,7 +93,7 @@ if [[ ${role,,} == "s" ]]; then
     ${pre}.queue.limit=1 "
 elif [[ ${role,,} == "p" ]]; then
     if [[ ! -f ${TENSORFLOW_SERVING} ]]; then
-        echo "Could not read tensorflow serving binary, check that the config file has the correct path"
+        echo "Could not read TensorFlow serving binary, check that the config file has the correct path"
         exit 1
     fi
 

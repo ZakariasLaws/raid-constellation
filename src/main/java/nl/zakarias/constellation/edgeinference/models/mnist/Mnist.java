@@ -1,6 +1,7 @@
 package nl.zakarias.constellation.edgeinference.models.mnist;
 
 import ibis.constellation.*;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ import java.io.*;
 public class Mnist implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(Mnist.class);
 
-    static String modelName = "mnist";  // Matches tensorflow_serving
+    static String modelName = Configuration.ModelName.MNIST.toString().toLowerCase();  // Matches tensorflow_serving
     static String signatureString = "predict";  // Matches tensorflow_serving
 
     private int batchSize = 1;

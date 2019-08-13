@@ -33,7 +33,7 @@ public class TinyYoloActivity extends Activity {
 
     @Override
     public int initialize(Constellation constellation) {
-        Timer timer = constellation.getTimer("java", constellation.identifier().toString(), "Tiny-Yolo");
+        Timer timer = constellation.getTimer("java", constellation.identifier().toString(), "Tiny_Yolo");
         int timing = timer.start();
 
         // Get the location of where we are currently executing

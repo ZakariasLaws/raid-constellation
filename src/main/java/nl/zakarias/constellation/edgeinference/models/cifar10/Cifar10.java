@@ -4,6 +4,7 @@ import ibis.constellation.AbstractContext;
 import ibis.constellation.ActivityIdentifier;
 import ibis.constellation.Constellation;
 import ibis.constellation.NoSuitableExecutorException;
+import nl.zakarias.constellation.edgeinference.configuration.Configuration;
 import nl.zakarias.constellation.edgeinference.models.ModelInterface;
 import nl.zakarias.constellation.edgeinference.utils.Utils;
 import org.slf4j.Logger;
@@ -14,7 +15,7 @@ import java.io.IOException;
 public class Cifar10 implements ModelInterface {
     private static Logger logger = LoggerFactory.getLogger(Cifar10.class);
 
-    static String modelName = "cifar10";  // Matches tensorflow_serving
+    static String modelName = Configuration.ModelName.CIFAR10.toString().toLowerCase();  // Matches tensorflow_serving
     static String signatureString = "predict";  // Matches tensorflow_serving
 
     private int batchSize = 1;

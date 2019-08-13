@@ -1,14 +1,20 @@
-# Distributed Heterogeneous Inference on Edge Devices
-TODO
+# Resource Aware Inference Distribution - RAID
+RAID is a dynamic resource management and scheduling system for machine learning inference task distribution across 
+edge devices. It uses [Constellation](https://github.com/NLeSC/Constellation) for communication and scheduling and is 
+written 100% in **Java**.
 
-### <a name="source"></a> Source
-TODO
+The system has three types of Agents, **source**, **predictor** and **target**. 
 
-### <a name="target"></a> Target
-TODO
+* The Source produces data, currently read from the file system, but it can be extended to come from an input source, 
+such as a camera.
+* The Target collects the results and stores them in a log file, this can be extended to whatever functionality desired 
+from the results.
+* The Predictor will steal tasks from the source, perform the prediction and send the result to a specified target. 
+Predictors will typically be run on the edge devices, but it can be used anywhere.
 
-### <a name="predictor"></a> Predictor
-TODO
+RAID supports context-aware execution, meaning that we can specify what type of tasks should be performed where. This
+is done by using *contexts* when starting up a source, only predictors with matching contexts will steal this specific
+task.
 
 ## <a name="requirements"></a> Requirements
 
@@ -19,25 +25,34 @@ TODO
 In order to install everything and compile a distribution run the following in the root directory:
 
 ```bash
+git clone https://github.com/ZakariasLaws/edgeinference-constellation
+cd edgeinference-constellation
 ./gradlew installDist
 ```
 
 This will create the distribution in `build/install/edgeinference-constellation`.
 
+#### Edge Devices
+\- When installing on edge devices, only copy the distribution directory, the TensorFlow Model Serving config file and 
+the desired models to the device. Make sure to maintain the same folder structure as if you installed everything with 
+gradle.
+
 ## <a name="configuration"></a> Configuration 
-For running this application, Constellation requires the following environment variables to be set on *ALL* devices. The port number must be the same on all devices, it is used to connect to the server:
+#### <a name="environment_variable"></a> Environment Variable
+For running this application, Constellation requires the following environment variable to be set on *ALL* devices.
 
 ```bash
-export CONSTELLATION_PORT=<unique_port_nmr>
 export EDGEINFERENCE_DIR=/build/path/edgeinference-constellation
 ```
 
-The `EDGEINFERENCE_DIR` should correspond to the location of your distribution, which should be 
-`build/install/edgeinference-constellation`.
+#### TensorFlow Serving
+
+The `EDGEINFERENCE_DIR` should point to the location of your distribution, which should be 
+`build/install/edgeinference-constellation`. The bin and lib directory must be in this location.
 
 The application use [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) in order to support different TensorFlow ML models. When starting a Predictor with the `run.bash` script, the TensorFlow serving API will start on in the background and run on local host. The configuration file is located at `tensorflow/tensorflow_serving/ModelServerConfig.conf`, it only supports *absolute paths* and **must** therefor be modified with the device system paths.
 
-The config file should look something like this, (see [here](https://www.tensorflow.org/tfx/serving/serving_config) for more options):
+The config file should look something like this, (see [TensorFlow Serving Config File](https://www.tensorflow.org/tfx/serving/serving_config) for more options):
 ```conf
 model_config_list {
   config {
@@ -52,16 +67,40 @@ model_config_list {
 
 The output of the `tensorflow_model_serving` is stored in `tensorflow_model_serving.log` in the bin directory. If one or more agents in charge of prediction for some reason do not work during run time, view this log to see if the error is related to TensorFlow Serving.
 
+#### Configuration File
+Each device running an agent must have a configuration file in the location pointed to by the environment variable 
+`EDGEINFERENCE_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the 
+`/configuration/configure.sh` script from the root directory and answer the questions. 
+
+It is also possible to manually create the config file by copy pasting the following into a file named `config.RAID`, 
+located in the dir pointed to by the environment variable `EDGEINFERECE_DIR`. Replace the 
+right side of the equal sign with your local path:
+
+```conf
+CONSTELLATION_PORT=4567
+EDGEINFERENCE_DIR=/home/username/edgeinference-constellation/build/install/edgeinference-constellation/
+TENSORFLOW_BIN=/usr/bin/tensorflow_model_server
+EDGEINFERENCE_SERVING_PORT=8000
+EDGEINFERENCE_SERVING_CONFIG=/home/username/edgeinference-constellation/tensorflow/tensorflow_serving/ModelServerConfig.conf
+```
+**NOTE** that the `CONSTELLATION_PORT` number must be **identical** on all devices in order for them to connect to the
+ server and communicate.
+
 ## <a name="running"></a> Running
 
-Navigate to the bin directory and execute the appropriate agent, upon starting up a new execution, always startup the agents in the following order:
+To start up an agent, navigate to the bin directory and execute the `/bin/distributed/run.bash` scripts with the 
+appropriate parameters for that agent (available agents are [here](#agents)). Upon starting up a new execution, 
+always startup the agents in the following order:
 
 1. Constellation Server
 2. Target (in order to get Activity ID)
 3. Source(s) and Predictor(s)
 
-It is possible to add another _target_ during runtime, but this new target cannot receive classifications from images produced by an already running _source_, a **new** _source_ must be started. _Predictors_ however, can process images from newly added _sources_ and send classifcations to any _target_ specified when starting up the _source_.
+It is possible to add another _target_ during runtime, but this new target cannot receive classifications from images 
+produced by an already running _source_, a **new** _source_ must be started. _Predictors_ however, can process images 
+from newly added _sources_ and send results to any _target_ specified when starting up the _source_.
 
+To start the server, type the following command `/bin/distributed/constellation-server`.
 ```bash
 cd $EDGEINFERENCE_DIR
 $ ./bin/distributed/constellation-server
@@ -73,16 +112,22 @@ List of Services:
 Known hubs now: 172.17.0.1/10.72.152.146-4567#8a.a0.ee.40.52.7d.00.00.8f.dd.4e.46.8e.a9.36.23~zaklaw01+22
 ```
 
-When executing the server, we see the IP and the port number on which it listens, from the example above the `IP=10.72.152.146` and `port=4567`. The port should be saved in an environment variable (see [configuration](#configuration)) and the IP should be provided as the _second_ argument when starting any agent.
+When executing the server, we see the IP and the port number on which it listens, from the example above the 
+`IP=10.72.152.146` and `port=4567`. The port is retrieved from the configuration file 
+(see [configuration](#configuration)) and the IP should be provided as the _second_ argument when starting any agent.
 
-When starting one of the agents, the first, second and third argument follows the same pattern for all of them. The first argument (s/t/p) specifies whether it should run the _source_, _target_ or _predictor_ respectively, the second is the IP and the third is the _pool name_. The pool name can be any name, used by the server to dinstinguish each Constellation execution in the case of multiple simultanious ones. 
+When starting one of the agents, the first, second and third argument follows the same pattern for all of them. 
+The first argument (s/t/p) specifies whether it should run the _source_, _target_ or _predictor_ respectively, 
+the second is the IP and the third is the _pool name_. The pool name can be any name, used by the server to distinguish 
+each Constellation execution in the case of multiple simultaneous ones. 
 
 ```bash
-./bin/distributed/run.bash <s/t/p> <IP> <Pool Name> [Contexts] [extras]
+./bin/distributed/run.bash <s/t/p> <IP> <Pool Name> [params]
 ```
 
 #### Target
-When starting the _target_, the ID of the activity collecting the results will be printed to the screen. Use this ID when starting up a _source_ agent.
+When starting the _target_, the ID of the activity collecting the results will be printed to the screen. Use this ID 
+when starting up a _source_ agent.
 ```bash
 ./bin/distributed/run.bash t 10.72.152.146 test.pool.name -modelName mnist
 
@@ -91,45 +136,44 @@ When starting the _target_, the ID of the activity collecting the results will b
 ...
 ```
 
+Possible parameters for the Target are:
+
+* -outputFile /path/to/store/output/log
+  * Each target produces a log file, storing the results of the predictions
+* -profileOutput /path/to/store/profiling
+  * Each target produces a gantt log file, which can be used to visualize the scheduling of jobs in Constellation.
+
+The -profileOutput argument **MUST** be the last argument provided.
 
 #### Predictor
 Contexts used here are A and B, meaning that this agent will only steal jobs having context A or B.
 
 ```bash
-./bin/distributed/run.bash p 10.72.152.146 test.pool.name A,B
+./bin/distributed/run.bash p 10.72.152.146 test.pool.name -context A,B
 ```
 
+possible parameters for Predictor are:
+* -nrExecutors <number\>
+  * Set the number of executors to use (each executor runs asynchronously on a separate thread)
+  
 #### Source
-The source requires the following extra arguments:
-* contexts: All submitted images will have _all_ of these contexts, meaning they can be stolen by predictors with _one or more_ matching contexts.
-* target: The target activity identifier to send the result of the predictions to, printed to the screen when starting up a _target_ agent.
-* dataDir: The directory of where the data to be transmitted is stored
-* modelName: The tpe of model which should be used, see [Inference Models](#models) for availability.
+The source requires the following arguments:
+* -context: All submitted images will have _all_ of these contexts, meaning they can be stolen by predictors with _one or more_ matching contexts.
+* -target: The target activity identifier to send the result of the predictions to, printed to the screen when starting up a _target_ agent.
+* -dataDir: The directory of where the data to be transmitted is stored
+* -modelName: The type of model which should be used, see [Inference Models](#models) for availability. These models 
+need to be added to the repository manually, as they can be very large. Only add the models which that specific device
+will use. Store model in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
+see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model).
 
 ```bash
-./bin/distributed/run.bash s 10.72.152.146 test.pool.name A,B -target 0:1:0 -dataDir /home/zaklaw01/Projects/odroid-constellation/MNIST_data/ -modelName mnist
+./bin/distributed/run.bash s 10.72.152.146 test.pool.name -context A,B -target 0:1:0 -dataDir /home/username/MNIST_data/ -modelName mnist
 ```
 
-## <a name="models"></a> Inference Models
+## Production
+When executing in production, everything in the `log4j.properties` file should be set to false, and the command line 
+arguments supplied when starting up a Constellation agent should be overlooked, these are the arguments in the 
+`java -p ...` command in the `run.bash` file. Especially profiling (`-Dibis.constellation.profile=true`)
+can drastically slow down execution. 
 
-### <a name="arm-devices"></a> TensorFlow on Arm-based devices
-If running on a system architecture which Tensorflow does not [officially support](https://www.tensorflow.org/install/lang_java) (i.e Arm-based devices such as Raspberry Pi or Odroids), set
-the `EDGEINFERENCE_TENSORFLOW_DIR` to point to the parent of the `bazel-bin` directory obtained when 
-compiling TF from source. See [Build TensorFlow Java API for Odroid-N2](https://github.com/ZakariasLaws/TensorFlow-Java-Build-Odroid-N2) for instructions on how to do this on Odroid-N2. If using a different aarch64 based device, the procedure for building from source will still be similar.
-
-```bash
-EDGEINFERENCE_TENSORFLOW_DIR=/path/to/tensorflow/java/bindings
-```
-
-In case the `bin/distributed/run.sh` does not automatically identify your architecture, it will try to build using 
-the TensorFlow Java Native Bindings and JAR from Maven. This will result in an error looking something like:
-
-```bash
-Exception in thread "main" java.lang.UnsatisfiedLinkError: Cannot find TensorFlow native library for OS: linux, architecture: aarch64
-```
-
-To solve this, uncomment the following line in the `scripts/distributed/run.sh` file:
-
-```bash
-# command="${command} -Djava.library.path=${EDGEINFERENCE_TENSORFLOW_DIR}/bazel-bin/tensorflow/java"
-```
+For more Constellation specific arguments see [Constellation Configuration Javadoc](https://junglecomputing.github.io/Constellation/)
