@@ -163,6 +163,11 @@ java -cp ${RAID_DIR}/lib/*:${CLASSPATH} \
         -Dibis.constellation.closed=false \
         -Dibis.constellation.distributed=true \
         -Dibis.constellation.ignoreEmptyReplies=true \
+        -Dibis.constellation.queue.limit=0 \
+        -Dibis.constellation.remotesteal.size=1 \
+        -Dibis.constellation.steal.size=1 \
+        -Dibis.constellation.steal.delay=20 \
+        -Dibis.constellation.steal.ignoreEmptyReplies=true \
         -Dibis.io.serialization.object.default=sun \
         ${command} \
         ${classname} \
