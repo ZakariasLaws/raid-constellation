@@ -49,7 +49,7 @@ For running this application, Constellation requires the following environment v
 ```bash
 export RAID_DIR=/build/path/raid-constellation
 export TENSORFLOW_SERVING_PORT=8000
-export CONSTELLATION_PORT=4675
+export CONSTELLATION_PORT=4567
 ```
 
 #### Set SSH Environment Variables
@@ -143,7 +143,7 @@ each Constellation execution in the case of multiple simultaneous ones.
 When starting the _target_, the ID of the activity collecting the results will be printed to the screen. Use this ID 
 when starting up a _source_ agent.
 ```bash
-./bin/distributed/run.bash t 10.72.152.146 test.pool.name -modelName mnist
+./bin/distributed/run.bash t 10.72.152.146 test.pool.name
 
 ...
 09:57:35,085 INFO  [CID:0:1] nl.zakarias.constellation.raid.collectActivities.CollectAndProcessEvents - In order to target this activity with classifications add the following as argument (exactly as printed) when initializing the new SOURCE: "0:1:0"
@@ -157,13 +157,13 @@ Possible parameters for the Target are:
 * -profileOutput /path/to/store/profiling
   * Each target produces a gantt log file, which can be used to visualize the scheduling of jobs in Constellation.
 
-The -profileOutput argument **MUST** be the last argument provided.
+The -profileOutput argument **MUST** be the last argument provided (if provided).
 
 #### Predictor
 Contexts used here are A and B, meaning that this agent will only steal jobs having context A or B.
 
 ```bash
-./bin/distributed/run.bash p 10.72.152.146 test.pool.name -context A,B
+./bin/distributed/run.bash p 10.72.152.146 test.pool.name -context A
 ```
 
 possible parameters for Predictor are:
@@ -176,12 +176,13 @@ The source requires the following arguments:
 * -target: The target activity identifier to send the result of the predictions to, printed to the screen when starting up a _target_ agent.
 * -dataDir: The directory of where the data to be transmitted is stored
 * -modelName: The type of model which should be used, see [Inference Models](#models) for availability. These models 
+* -batchSize: The number of images to send in each task
 need to be added to the repository manually, as they can be very large. Only add the models which that specific device
 will use. Store model in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
 see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model).
 
 ```bash
-./bin/distributed/run.bash s 10.72.152.146 test.pool.name -context A,B -target 0:1:0 -dataDir /home/username/MNIST_data/ -modelName mnist
+./bin/distributed/run.bash s 10.72.152.146 test.pool.name -context A -target 0:1:0 -dataDir /home/username/MNIST_data/ -modelName mnist -batchSize 1
 ```
 
 ## Production

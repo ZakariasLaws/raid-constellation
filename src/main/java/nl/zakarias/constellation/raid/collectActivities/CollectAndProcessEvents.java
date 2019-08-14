@@ -93,6 +93,7 @@ public class CollectAndProcessEvents extends Activity {
             }
             predictions.add(item);
         }
+        json.addProperty("batch_size", result.imageIdentifiers.length);
 
         if (Configuration.LOG_PREDICTIONS) {
             json.add("predictions", predictions);

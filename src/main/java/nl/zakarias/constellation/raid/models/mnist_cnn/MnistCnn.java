@@ -18,6 +18,8 @@ public class MnistCnn implements ModelInterface {
     static String modelName = Configuration.ModelName.MNIST_CNN.toString().toLowerCase();  // Matches tensorflow_serving
     static String signatureString = "predict";  // Matches tensorflow_serving
 
+    private static final int NUMBER_OF_MNIST_IMAGES = 10000; // Must be even 10000
+
     private int batchSize;
 
     private void sendMnistImageBatch(byte[][][][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
@@ -42,22 +44,26 @@ public class MnistCnn implements ModelInterface {
         if (logger.isDebugEnabled()) {
             logger.debug("Reading MNIST image and label file...");
         }
-        byte[][][][] images = Utils.readMnist_3D(sourceDir + "/t10k-images-idx3-ubyte");
-        byte[] targets = Utils.readLabelsMnist(sourceDir + "/t10k-labels-idx1-ubyte");
-        if (logger.isDebugEnabled()) {
-            logger.debug("Done importing images");
-        }
 
-        for (int i = 0; i < images.length; i += batchSize) {
-            byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
-            byte[] targetBatch = new byte[batchSize];
-
-            for (int x = 0; x < batchSize; x++){
-                imageBatch[x] = images[i+x];
-                targetBatch[x] = targets[i+x];
+        int number = NUMBER_OF_MNIST_IMAGES / 10000;
+        for(int z=0; z<number; z++) {
+            byte[][][][] images = Utils.readMnist_3D(sourceDir + "/t10k-images-idx3-ubyte");
+            byte[] targets = Utils.readLabelsMnist(sourceDir + "/t10k-labels-idx1-ubyte");
+            if (logger.isDebugEnabled()) {
+                logger.debug("Done importing images");
             }
 
-            sendMnistImageBatch(imageBatch, targetBatch, constellation, target, contexts);
+            for (int i = 0; i < images.length; i += batchSize) {
+                byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
+                byte[] targetBatch = new byte[batchSize];
+
+                for (int x = 0; x < batchSize; x++) {
+                    imageBatch[x] = images[i + x];
+                    targetBatch[x] = targets[i + x];
+                }
+
+                sendMnistImageBatch(imageBatch, targetBatch, constellation, target, contexts);
+            }
         }
     }
 
