@@ -25,7 +25,7 @@ function check_env_dir() {
 check_env_dir RAID_DIR
 BIN_DIR=${RAID_DIR}/bin
 ROOT=${RAID_DIR}/../../../
-LOC='/Constellation/RAID-constellation'
+LOC='/Constellation/raid-constellation'
 
 source ${BIN_DIR}/distributed/config
 

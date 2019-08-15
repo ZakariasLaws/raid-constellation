@@ -90,7 +90,6 @@ public class RaidConstellation {
         Configuration.ModelName modelName = null;
 
         for (int i = 0; i < args.length; i++) {
-            System.out.println("Checking: " + args[i]);
             switch (args[i]) {
                 case "-nrExecutors":
                     i++;

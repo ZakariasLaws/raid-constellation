@@ -135,11 +135,11 @@ public class TinyYolo implements ModelInterface {
             pos = min;
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (pos == 100){
+            if (pos == 10000){
                 break;
             }
         }

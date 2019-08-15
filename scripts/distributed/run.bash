@@ -89,9 +89,9 @@ fi
 
 params=${array[0]}
 
-if [[ ${role,,} == "p" ]]; then
+if [[ ${role} == "p" ]]; then
     args="-role PREDICTOR ${params}"
-elif [[ ${role,,} == "s" ]]; then
+elif [[ ${role} == "s" ]]; then
     args="-role SOURCE ${params}"
 else
     args="-role TARGET ${params}"
@@ -107,14 +107,21 @@ echo "Params: ${params}"
 # Add system properties specific for each instance
 command=""
 pre="-Dibis.constellation"
-if [[ ${role,,} == "s" ]]; then
+if [[ ${role} == "s" ]]; then
     command="\
     ${pre}.queue.limit=1 "
-elif [[ ${role,,} == "p" ]]; then
+elif [[ ${role} == "p" ]]; then
     if [[ ! -f ${TENSORFLOW_SERVING} ]]; then
         echo "Could not read TensorFlow serving binary, check that the config file has the correct path"
         exit 1
     fi
+
+    tcmalloc=""
+    # Check whether to use tcmalloc or not
+    if [[ -f /usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ]]; then
+         tcmalloc=LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libtcmalloc.so.4
+    fi
+
 
     if [[ $(ps -C tensorflow_model_server | grep tensorflow_mode) ]]; then
         echo ""
@@ -127,7 +134,7 @@ elif [[ ${role,,} == "p" ]]; then
         echo ""
         echo "****************"
         echo "Starting TensorFlow Model Serving, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
-        nohup ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log &
+        nohup ${tcmalloc} ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log &
         echo "****************"
         echo ""
 
@@ -140,7 +147,7 @@ elif [[ ${role,,} == "p" ]]; then
     ${pre}.remotesteal.size=1 \
     ${pre}.allowLeave=true \
     "
-elif [[ ${role,,} == "t" ]]; then
+elif [[ ${role} == "t" ]]; then
     # Target will never steal activities, but only process events
     command="\
     ${pre}.remotesteal.throttle=false \

@@ -64,12 +64,18 @@ public class CollectAndProcessEvents extends Activity {
 
         JsonArray predictions = new JsonArray();
         for(int i = 0; i < result.imageIdentifiers.length; i++){
-            if (logger.isDebugEnabled()) {
-                if (result.predictions != null) {
-                    logger.debug(String.format("Src %s classified at %s using model %s: %d", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName, result.predictions[i]));
-                } else {
-                    logger.debug(String.format("Src %s classified at %s using model %s", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName));
-                }
+//            if (logger.isDebugEnabled()) {
+//                if (result.predictions != null) {
+//                    logger.debug(String.format("Src %s classified at %s using model %s: %d", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName, result.predictions[i]));
+//                } else {
+//                    logger.debug(String.format("Src %s classified at %s using model %s", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName));
+//                }
+//            }
+
+            if (result.predictions != null) {
+                System.out.println(String.format("Src %s classified at %s using model %s: %d", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName, result.predictions[i]));
+            } else {
+                System.out.println(String.format("Src %s classified at %s using model %s", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName));
             }
 
             JsonObject item = new JsonObject();
