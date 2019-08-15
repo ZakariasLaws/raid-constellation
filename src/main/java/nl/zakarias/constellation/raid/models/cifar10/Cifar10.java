@@ -45,17 +45,19 @@ public class Cifar10 implements ModelInterface {
 
         byte[][][][] images = Utils.readCifar10(sourceDir + "/data_batch_1.bin");
 
-        for (int i = 0; i < images.length; i += batchSize) {
-            byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
-//            byte[] targetBatch = new byte[batchSize];
+        do {
+            for (int i = 0; i < images.length; i += batchSize) {
+                byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
+    //            byte[] targetBatch = new byte[batchSize];
 
-            for (int x = 0; x < batchSize; x++){
-                imageBatch[x] = images[i+x];
-//                targetBatch[x] = targets[i+x];
+                for (int x = 0; x < batchSize; x++){
+                    imageBatch[x] = images[i+x];
+    //                targetBatch[x] = targets[i+x];
+                }
+
+                sendCifar10ImageBatch(imageBatch, null, constellation, target, contexts);
             }
-
-            sendCifar10ImageBatch(imageBatch, null, constellation, target, contexts);
-        }
+        } while (Configuration.ENDLESS);
     }
 
     @Override

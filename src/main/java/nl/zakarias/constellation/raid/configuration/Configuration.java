@@ -11,6 +11,11 @@ import nl.zakarias.constellation.raid.models.yolo.Yolo;
 import java.io.Serializable;
 
 public class Configuration {
+    /**
+     * Change this to make the all sources run forever
+     */
+    public static final boolean ENDLESS = false;
+
     public enum NODE_ROLES {
         SOURCE("SOURCE"),
         TARGET("TARGET"),

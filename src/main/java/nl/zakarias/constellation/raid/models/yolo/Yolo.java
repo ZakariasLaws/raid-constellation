@@ -139,7 +139,7 @@ public class Yolo implements ModelInterface {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (pos == 100){
+            if (pos == 100 && !Configuration.ENDLESS){
                 break;
             }
         }

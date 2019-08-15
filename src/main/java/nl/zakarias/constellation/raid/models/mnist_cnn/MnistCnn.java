@@ -45,14 +45,13 @@ public class MnistCnn implements ModelInterface {
             logger.debug("Reading MNIST image and label file...");
         }
 
-        int number = NUMBER_OF_MNIST_IMAGES / 10000;
-        for(int z=0; z<number; z++) {
-            byte[][][][] images = Utils.readMnist_3D(sourceDir + "/t10k-images-idx3-ubyte");
-            byte[] targets = Utils.readLabelsMnist(sourceDir + "/t10k-labels-idx1-ubyte");
-            if (logger.isDebugEnabled()) {
-                logger.debug("Done importing images");
-            }
+        byte[][][][] images = Utils.readMnist_3D(sourceDir + "/t10k-images-idx3-ubyte");
+        byte[] targets = Utils.readLabelsMnist(sourceDir + "/t10k-labels-idx1-ubyte");
+        if (logger.isDebugEnabled()) {
+            logger.debug("Done importing images");
+        }
 
+        do {
             for (int i = 0; i < images.length; i += batchSize) {
                 byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
                 byte[] targetBatch = new byte[batchSize];
@@ -64,7 +63,7 @@ public class MnistCnn implements ModelInterface {
 
                 sendMnistImageBatch(imageBatch, targetBatch, constellation, target, contexts);
             }
-        }
+        } while (Configuration.ENDLESS);
     }
 
     @Override
