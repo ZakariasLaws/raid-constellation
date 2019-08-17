@@ -11,10 +11,31 @@ import nl.zakarias.constellation.raid.models.yolo.Yolo;
 import java.io.Serializable;
 
 public class Configuration {
-    /**
-     * Change this to make the all sources run forever
-     */
+    /** Change this to make the all sources run forever */
     public static final boolean ENDLESS = false;
+
+    /** Whether to write the prediction results to the log file */
+    public static final boolean LOG_PREDICTIONS = false;
+
+    /** Default output file for logs, can be changed with argument -outputFile */
+    public static final String DEFAULT_OUTPUT_FILE = "output.log";
+
+    /** Cifar10 specific values */
+    public static final int CIFAR_10_FILE_LENGTH = 10000;
+    public static final int CIFAR_IMAGE_WIDTH = 32;
+    public static final int CIFAR_IMAGE_HEIGHT = 32;
+
+    /** How long to try to shutdown an agent gracefully, timeout results in killing that process */
+    public static final int SHUTDOWN_HOOK_TIMEOUT = 60; // Seconds
+
+    /** Number of images to send in each batch */
+    public static final int BATCH_SIZE = 1;
+
+    /** Number of of batches a source should send, if ENDLESS == true, this value is ignored */
+    public static final int BATCH_COUNT = 1;
+
+    /** Time to wait between submitting images in MS (be aware of memory limitations when using low values) */
+    public static final int TIME_INTERVAL = 100;
 
     public enum NODE_ROLES {
         SOURCE("SOURCE"),
@@ -32,18 +53,6 @@ public class Configuration {
             return this.name;
         }
     }
-
-    /**
-     * Whether to write the prediction results to the log file
-     */
-    public static final boolean LOG_PREDICTIONS = false;
-
-    public static final String DEFAULT_OUTPUT_FILE = "output.log";
-    public static final int CIFAR_10_FILE_LENGTH = 10000;
-    public static final int CIFAR_IMAGE_WIDTH = 32;
-    public static final int CIFAR_IMAGE_HEIGHT = 32;
-    public static final int SHUTDOWN_HOOK_TIMEOUT = 60; // Seconds
-    public static final int BATCH_SIZE = 1;
 
     /**
      * All available models. If manually adding a new model to tensorflow/tensorflow_serving/models/ it must be

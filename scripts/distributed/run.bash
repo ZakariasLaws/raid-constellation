@@ -105,23 +105,11 @@ echo "Server address: ${serverAddress}:${CONSTELLATION_PORT}"
 echo "Params: ${params}"
 
 # Add system properties specific for each instance
-command=""
-pre="-Dibis.constellation"
-if [[ ${role} == "s" ]]; then
-    command="\
-    ${pre}.queue.limit=1 "
-elif [[ ${role} == "p" ]]; then
+if [[ ${role} == "p" ]]; then
     if [[ ! -f ${TENSORFLOW_SERVING} ]]; then
         echo "Could not read TensorFlow serving binary, check that the config file has the correct path"
         exit 1
     fi
-
-    tcmalloc=""
-    # Check whether to use tcmalloc or not
-    if [[ -f /usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ]]; then
-         tcmalloc=LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libtcmalloc.so.4
-    fi
-
 
     if [[ $(ps -C tensorflow_model_server | grep tensorflow_mode) ]]; then
         echo ""
@@ -134,28 +122,18 @@ elif [[ ${role} == "p" ]]; then
         echo ""
         echo "****************"
         echo "Starting TensorFlow Model Serving, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
-        nohup ${tcmalloc} ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log &
+
+        # Check whether to use tcmalloc or not
+        if [[ -f /usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ]]; then
+             LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log 2>&1 &
+        else
+             ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log 2>&1 &
+        fi
         echo "****************"
         echo ""
 
         sleep 3
     fi
-
-    # Predictor will steal activities and should be allowed to leave the pool
-    command="\
-    ${pre}.remotesteal.throttle=false \
-    ${pre}.remotesteal.size=1 \
-    ${pre}.allowLeave=true \
-    "
-elif [[ ${role} == "t" ]]; then
-    # Target will never steal activities, but only process events
-    command="\
-    ${pre}.remotesteal.throttle=false \
-    ${pre}.remotesteal.size=1 \
-    "
-else
-    command="\
-    "
 fi
 
 java -cp ${RAID_DIR}/lib/*:${CLASSPATH} \
@@ -166,6 +144,7 @@ java -cp ${RAID_DIR}/lib/*:${CLASSPATH} \
         -Dibis.server.port=${CONSTELLATION_PORT} \
         -Dibis.pool.name=${poolName} \
         -Dibis.constellation.profile=true \
+        -Dibis.constellation.allowLeave=true \
         -Dibis.constellation.profile.output=${profileOutput} \
         -Dibis.constellation.closed=false \
         -Dibis.constellation.distributed=true \
@@ -174,8 +153,8 @@ java -cp ${RAID_DIR}/lib/*:${CLASSPATH} \
         -Dibis.constellation.remotesteal.size=1 \
         -Dibis.constellation.steal.size=1 \
         -Dibis.constellation.steal.delay=20 \
+        -Dibis.constellation.remotesteal.throttle=false \
         -Dibis.constellation.steal.ignoreEmptyReplies=true \
         -Dibis.io.serialization.object.default=sun \
-        ${command} \
         ${classname} \
         ${args}

@@ -79,7 +79,7 @@ class Source {
         }));
     }
 
-    void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName, int batchSize) throws IOException, NoSuitableExecutorException {
+    void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName, int batchSize, int timeInterval, int batchCount, boolean endless) throws IOException, NoSuitableExecutorException {
         submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");
 
@@ -101,7 +101,7 @@ class Source {
         timer = constellation.getTimer("java", constellation.identifier().toString(), "Source using model: " + modelName.toString());
         timing = timer.start();
 
-        model.run(constellation, aid, sourceDir, this.contexts, batchSize);
+        model.run(constellation, aid, sourceDir, this.contexts, batchSize, timeInterval, batchCount, endless);
 
         while (!isDone()){
             try {

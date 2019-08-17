@@ -26,7 +26,10 @@ public class RaidConstellation {
                 + "[ -nrExecutors <num> ] "
                 + "[ -context <String,String,String...> ] "
                 + "[ -dataDir </source/dataset/path> ] "
-                + "[ -batchSize <int> ] ";
+                + "[ -batchSize <int> ] "
+                + "[ -timeInterval <int> ] "
+                + "[ -batchCount <int> ] "
+                + "[ -endless <boolean> ] ";
     }
 
     private static String usagePredictor(){
@@ -88,6 +91,9 @@ public class RaidConstellation {
         String outputFile = null;
         int batchSize = Configuration.BATCH_SIZE;
         Configuration.ModelName modelName = null;
+        int timeInterval = Configuration.TIME_INTERVAL; // MS
+        int batchCount = Configuration.BATCH_COUNT;
+        boolean endless = Configuration.ENDLESS;
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -130,6 +136,18 @@ public class RaidConstellation {
                 case "-batchSize":
                     i++;
                     batchSize = Integer.parseInt(args[i]);
+                    break;
+                case "-timeInterval":
+                    i++;
+                    timeInterval = Integer.parseInt(args[i]);
+                    break;
+                case "-batchCount":
+                    i++;
+                    batchCount = Integer.parseInt(args[i]);
+                    break;
+                case "-endless":
+                    i++;
+                    endless = args[i].toLowerCase().equals("true");
                     break;
                 default:
                     if (role == null){
@@ -188,7 +206,7 @@ public class RaidConstellation {
                     throw new IllegalArgumentException("Specify the name of the predictions model to use (e.g. inception)");
                 }
 
-                source.run(constellation, targetActivity, sourceDataDir, modelName, batchSize);
+                source.run(constellation, targetActivity, sourceDataDir, modelName, batchSize, timeInterval, batchCount, endless);
                 break;
             case PREDICTOR:
                 Predictor predictor = new Predictor(contexts, nrExecutors);

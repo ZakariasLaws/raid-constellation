@@ -21,6 +21,9 @@ public class MnistCnn implements ModelInterface {
     private static final int NUMBER_OF_MNIST_IMAGES = 10000; // Must be even 10000
 
     private int batchSize;
+    private int batchCount = Configuration.BATCH_COUNT;
+    private int timeInterval = Configuration.TIME_INTERVAL;
+    private boolean endless = Configuration.ENDLESS;
 
     private void sendMnistImageBatch(byte[][][][] images, byte[] targets, Constellation constellation, ActivityIdentifier aid, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
         // Generate imageIdentifiers in order to link back the result to the image CURRENTLY DISCARDED UPON METHOD EXIT
@@ -51,8 +54,9 @@ public class MnistCnn implements ModelInterface {
             logger.debug("Done importing images");
         }
 
-        do {
-            for (int i = 0; i < images.length; i += batchSize) {
+        int counter = 0;
+        while(true){
+            for (int i = 0; i < this.batchCount; i += batchSize) {
                 byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
                 byte[] targetBatch = new byte[batchSize];
 
@@ -62,13 +66,27 @@ public class MnistCnn implements ModelInterface {
                 }
 
                 sendMnistImageBatch(imageBatch, targetBatch, constellation, target, contexts);
+
+                try {
+                    Thread.sleep(this.timeInterval);
+                } catch (InterruptedException e) {
+                    logger.error("Failed to sleep between submitting batches");
+                }
+
+                counter++;
+                if (counter == this.batchCount && !endless){
+                    return;
+                }
             }
-        } while (Configuration.ENDLESS);
+        }
     }
 
     @Override
-    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts, int batchSize) throws IOException, NoSuitableExecutorException {
+    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts, int batchSize, int timeInterval, int batchCount, boolean endless) throws IOException, NoSuitableExecutorException {
         this.batchSize = batchSize;
+        this.timeInterval = timeInterval;
+        this.batchCount = batchCount;
+        this.endless = endless;
         runMnist(constellation, targetActivityIdentifier, sourceDir, contexts);
     }
 }

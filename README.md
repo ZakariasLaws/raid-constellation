@@ -20,6 +20,17 @@ task.
 
 * Java JDK >= 8
 
+## Currently Supported Models
+
+* __mnist__: MNIST DNN
+* mnist_cnn__: MNIST CNN, slightly better accuracy than MNIST DNN
+* cifar10__: CIFAR10 CNN
+* yolo__: YOLO v2 full model
+* __tiny_yolo__: YOLO v2 smaller model
+
+#### Extending With New Models
+See README in `src/main/java/nl/zakarias/constellation/raid/`.
+
 ## <a name="installation"></a> Installation
 
 In order to install everything and compile a distribution run the following in the root directory:
@@ -175,8 +186,12 @@ The source requires the following arguments:
 * -context: All submitted images will have _all_ of these contexts, meaning they can be stolen by predictors with _one or more_ matching contexts.
 * -target: The target activity identifier to send the result of the predictions to, printed to the screen when starting up a _target_ agent.
 * -dataDir: The directory of where the data to be transmitted is stored
-* -modelName: The type of model which should be used, see [Inference Models](#models) for availability. These models 
-* -batchSize: The number of images to send in each task
+* -modelName: The type of model which should be used, see [Inference Models](#models) for availability
+* -batchSize: The number of images to send in each task (default is 1)
+* -endless: If set the source will keep submitting images forever, batchCount will be ignored (default is false)
+* -batchCount: The number of batches to send in total before exiting, ignored if endless is set to true (default is 100)
+* -timeInterval: The time to wait between submitting two batches, in milliseconds (default it 100)
+
 need to be added to the repository manually, as they can be very large. Only add the models which that specific device
 will use. Store model in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
 see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model).

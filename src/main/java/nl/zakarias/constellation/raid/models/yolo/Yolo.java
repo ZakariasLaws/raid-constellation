@@ -29,6 +29,9 @@ public class Yolo implements ModelInterface {
     private static int yoloRGBColors = 3;
 
     private int batchSize = 1;
+    private int batchCount = Configuration.BATCH_COUNT;
+    private int timeInterval = Configuration.TIME_INTERVAL;
+    private boolean endless = Configuration.ENDLESS;
 
     /** Fit the image to the yolo TF model input tensor dimensions by adding padding if necessary and otherwise
      * cropping. Padding is added on the right side and the bottom.
@@ -135,11 +138,11 @@ public class Yolo implements ModelInterface {
             pos = min;
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(this.timeInterval);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Failed to sleep between submitting batches");
             }
-            if (pos == 100 && !Configuration.ENDLESS){
+            if (pos == this.batchCount && !this.endless){
                 break;
             }
         }
@@ -147,8 +150,11 @@ public class Yolo implements ModelInterface {
     }
 
     @Override
-    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts, int batchSize) throws IOException, NoSuitableExecutorException {
+    public void run(Constellation constellation, ActivityIdentifier targetActivityIdentifier, String sourceDir, AbstractContext contexts, int batchSize, int timeInterval, int batchCount, boolean endless) throws IOException, NoSuitableExecutorException {
         this.batchSize = batchSize;
+        this.timeInterval = timeInterval;
+        this.batchCount = batchCount;
+        this.endless = endless;
         runYolo(constellation, targetActivityIdentifier, sourceDir, contexts);
     }
 }
