@@ -83,6 +83,8 @@ public class API {
     }
 
     private static String makePrediction(URL url, Content data) throws IOException {
+
+        long startTime = System.nanoTime();
         Gson gson = new Gson();
 
         HttpURLConnection connection;
@@ -115,6 +117,11 @@ public class API {
             result.append(inputLine);
         }
         in.close();
+
+        long endTime = System.nanoTime();
+        long duration = ((endTime - startTime) / 1000000);  //divide by 1000000 to get milliseconds.
+        System.out.println("Classification took: " + duration + "ms or " + duration / 1000. + "s");
+
 
         return result.toString();
     }

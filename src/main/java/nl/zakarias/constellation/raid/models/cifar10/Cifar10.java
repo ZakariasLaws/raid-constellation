@@ -41,7 +41,7 @@ public class Cifar10 implements ModelInterface {
         constellation.submit(activity);
     }
 
-    private void runMnist(Constellation constellation, ActivityIdentifier target, String sourceDir, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
+    private void runCifar10(Constellation constellation, ActivityIdentifier target, String sourceDir, AbstractContext contexts) throws IOException, NoSuitableExecutorException {
         if (logger.isDebugEnabled()) {
             logger.debug("Reading Cifar10 image and label file...");
         }
@@ -81,6 +81,6 @@ public class Cifar10 implements ModelInterface {
         this.timeInterval = timeInterval;
         this.batchCount = batchCount;
         this.endless = endless;
-        runMnist(constellation, targetActivityIdentifier, sourceDir, contexts);
+        runCifar10(constellation, targetActivityIdentifier, sourceDir, contexts);
     }
 }

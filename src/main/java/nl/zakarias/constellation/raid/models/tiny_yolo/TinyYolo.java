@@ -131,7 +131,7 @@ public class TinyYolo implements ModelInterface {
 
             // submit activity
             if (logger.isDebugEnabled()) {
-                logger.debug("Submitting YoloActivity with contexts " + contexts.toString());
+                logger.debug("Submitting TinyYoloActivity with contexts " + contexts.toString());
             }
             constellation.submit(activity);
 
@@ -141,7 +141,7 @@ public class TinyYolo implements ModelInterface {
             } catch (InterruptedException e) {
                 logger.error("Failed to sleep between submitting batches");
             }
-            if (pos == this.batchCount && !Configuration.ENDLESS){
+            if (pos == this.batchCount && !this.endless){
                 break;
             }
         }
