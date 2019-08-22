@@ -2,6 +2,6 @@
 
 TEMP_FILE=$(mktemp)
 
-python2 bin/gantt.py $* > $TEMP_FILE
+python2 $1 $* > $TEMP_FILE
 gnuplot -persist $TEMP_FILE
 /bin/rm -f $TEMP_FILE
