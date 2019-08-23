@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class Source {
+public class Source {
     private static final Logger logger = LoggerFactory.getLogger(Source.class);
 
     private AbstractContext contexts;
@@ -37,6 +37,11 @@ class Source {
         return this.done;
     }
 
+    /**
+     * Catch SIGINTs to kill this process from the outside, make sure we gracefully exit by notifying all other
+     * Constellation agents that we are leaving.
+     * @param constellation {@link ibis.constellation.Constellation}
+     */
     private void addShutdownHook(Constellation constellation){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             timer.stop(timing);
@@ -79,6 +84,21 @@ class Source {
         }));
     }
 
+    /**
+     * Start the {@link nl.zakarias.constellation.raid.Source}
+     * @param constellation The {@link ibis.constellation.Constellation} instance for this process
+     * @param target A string matching the {@link ibis.constellation.ActivityIdentifier} identifying the target where
+     *               we want to send the result of all classifications
+     * @param sourceDir The directory where the source images are located
+     * @param modelName The model which we wish to use (must exist on the {@link Predictor} devices which steal
+     *                  Activities from this source (matching contexts)
+     * @param batchSize The number of images to send in each Activity
+     * @param timeInterval Time between sending images (in milliseconds)
+     * @param batchCount The number of batches to send in total, before exiting
+     * @param endless Whether to keep sending batches forever or to sop after the batchCount has been reached.
+     * @throws IOException Thrown if we experience problems reading the images from disc
+     * @throws NoSuitableExecutorException Thrown if we experience problems submitting the activity
+     */
     void run(Constellation constellation, String target, String sourceDir, Configuration.ModelName modelName, int batchSize, int timeInterval, int batchCount, boolean endless) throws IOException, NoSuitableExecutorException {
         submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
         logger.info("\n\nStarting Source("+ submittedNetworkInfo.hostname() +") with contexts: " + this.contexts.toString() + "\n\n");

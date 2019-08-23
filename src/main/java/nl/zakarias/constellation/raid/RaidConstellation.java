@@ -214,7 +214,7 @@ public class RaidConstellation {
                 return;
             case TARGET:
                 Target target = new Target();
-                target.run(constellation, outputFile, modelName);
+                target.run(constellation, outputFile);
                 break;
             default:
                 throw new Error("No matching Java Class found for role: " + role.toString());

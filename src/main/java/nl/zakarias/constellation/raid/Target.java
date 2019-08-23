@@ -13,7 +13,11 @@ import org.slf4j.LoggerFactory;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class Target {
+/**
+ * The {@link nl.zakarias.constellation.raid.Target} collects all results from all running
+ * {@link nl.zakarias.constellation.raid.Predictor} and handles them appropriately (i.e. by writing them to a file).
+ */
+public class Target {
     private static final Logger logger = LoggerFactory.getLogger(Target.class);
 
     private static final Context TARGET_CONTEXT = Configuration.TARGET_CONTEXT;
@@ -23,6 +27,11 @@ class Target {
     private Timer timer;
     private int timing;
 
+    /**
+     * Catch SIGINTs to kill this process from the outside, make sure we gracefully exit by notifying all other
+     * Constellation agents that we are leaving.
+     * @param constellation {@link ibis.constellation.Constellation}
+     */
     private void addShutdownHook(Constellation constellation){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             timer.stop(timing);
@@ -65,7 +74,15 @@ class Target {
         }));
     }
 
-    void run(Constellation constellation, String outputFile, Configuration.ModelName modelName) throws NoSuitableExecutorException, UnknownHostException {
+    /**
+     * Start the {@link nl.zakarias.constellation.raid.Target}
+     *
+     * @param constellation The {@link ibis.constellation.Constellation} instance for this process
+     * @param outputFile Where to write results gathered from all {@link nl.zakarias.constellation.raid.Target}
+     * @throws NoSuitableExecutorException Error within Constellation when starting up executors
+     * @throws UnknownHostException Could not retrieve Host information from OS (such as hostname)
+     */
+    void run(Constellation constellation, String outputFile) throws NoSuitableExecutorException, UnknownHostException {
         CrunchifyGetIPHostname submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
         addShutdownHook(constellation);
 

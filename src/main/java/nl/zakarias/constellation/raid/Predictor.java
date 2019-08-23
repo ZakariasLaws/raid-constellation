@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class Predictor {
+public class Predictor {
     private static final Logger logger = LoggerFactory.getLogger(Predictor.class);
 
     private AbstractContext contexts;
@@ -32,7 +32,12 @@ class Predictor {
         return this.done;
     }
 
-    public void addShutdownHook(Constellation constellation){
+    /**
+     * Catch SIGINTs to kill this process from the outside, make sure we gracefully exit by notifying all other
+     * Constellation agents that we are leaving.
+     * @param constellation {@link ibis.constellation.Constellation}
+     */
+    private void addShutdownHook(Constellation constellation){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutdown hook leaving Constellation gracefully");
             AtomicInteger done = new AtomicInteger();
@@ -72,6 +77,12 @@ class Predictor {
         }));
     }
 
+    /**
+     * Start the {@link nl.zakarias.constellation.raid.Predictor}
+     *
+     * @param constellation The {@link ibis.constellation.Constellation} instance for this process
+     * @throws UnknownHostException Could not retrieve Host information from OS (such as hostname)
+     */
     void run(Constellation constellation)  throws UnknownHostException{
         submittedNetworkInfo = new CrunchifyGetIPHostname(constellation.identifier().toString());
 

@@ -10,6 +10,11 @@ import nl.zakarias.constellation.raid.models.yolo.Yolo;
 
 import java.io.Serializable;
 
+/**
+ * Change parameters in this file to modify the behaviour of Constellation.
+ *
+ * In order to turn on/off logging, see the log4j.properties in the root directory.
+ */
 public class Configuration {
     /** Change this to make the all sources run forever */
     public static final boolean ENDLESS = false;
@@ -76,7 +81,7 @@ public class Configuration {
 
     /**
      * Return a new model instance matching the input parameter. If manually adding a new model to
-     * tensorflow/tensorflow_serving/models/ it must be returned from this methos as well as added to the
+     * tensorflow/tensorflow_serving/models/ it must be returned from this methods as well as added to the
      * {@link ModelName ModelName} enum.
      *
      * @param modelName Name of the model, from command line

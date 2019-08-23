@@ -13,6 +13,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+
+/**
+ * This Activity is submitted from {@link nl.zakarias.constellation.raid.Target} , used to collect results from predictors and
+ * log them to a specified output file (can be specified with the command argument
+ * -outputFile <name> when starting up the process.
+ *
+ * The Activity will run for as long as the Target is running.
+ */
 public class CollectAndProcessEvents extends Activity {
     private static final Logger logger = LoggerFactory.getLogger(CollectAndProcessEvents.class);
 
@@ -21,6 +29,11 @@ public class CollectAndProcessEvents extends Activity {
 
     private int count;
 
+    /**
+     * Constructor, setup output stream and initiate activity
+     * @param c Context from {@link nl.zakarias.constellation.raid.Target}
+     * @param filePath Where to log the output from the classifications
+     */
     public CollectAndProcessEvents(AbstractContext c, String filePath){
         super(c, false, true);
         count = 1;
@@ -35,15 +48,57 @@ public class CollectAndProcessEvents extends Activity {
         }
     }
 
-    private JsonArray getPredictionYolo(ResultEvent result, int index){
+    /**
+     * @param result {@link nl.zakarias.constellation.raid.ResultEvent} sent from sent from {@link nl.zakarias.constellation.raid.Predictor}
+     * @param index The results can contain multiple results (in the case of batch prediction)
+     *              index specifies which result we are currently storing in the JSON array.
+     * @return JSON array with predictions
+     */
+    private JsonArray getPrediction2D(ResultEvent result, int index){
         JsonArray data = new JsonArray();
 
-        for (int z = 0; z < result.predictions_yolo[index].length; z++) {
+        for (int z = 0; z < result.predictions_2D[index].length; z++) {
+            data.add(result.predictions_2D[index][z]);
+        }
+
+        return data;
+    }
+
+    /**
+     * @param result {@link nl.zakarias.constellation.raid.ResultEvent} sent from sent from {@link nl.zakarias.constellation.raid.Predictor}
+     * @param index The results can contain multiple results (in the case of batch prediction)
+     *              index specifies which result we are currently storing in the JSON array.
+     * @return JSON array with predictions
+     */
+    private JsonArray getPrediction3D(ResultEvent result, int index){
+        JsonArray data = new JsonArray();
+
+        for (int z = 0; z < result.predictions_3D[index].length; z++) {
             JsonArray arr = new JsonArray();
-            for (int x = 0; x < result.predictions_yolo[index][z].length; x++) {
+            for (int x = 0; x < result.predictions_3D[index][z].length; x++) {
+                arr.add(result.predictions_3D[index][z][x]);
+            }
+            data.add(arr);
+        }
+
+        return data;
+    }
+
+    /**
+     * @param result {@link nl.zakarias.constellation.raid.ResultEvent} sent from sent from {@link nl.zakarias.constellation.raid.Predictor}
+     * @param index The results can contain multiple results (in the case of batch prediction)
+     *              index specifies which result we are currently storing in the JSON array.
+     * @return JSON array with predictions
+     */
+    private JsonArray getPrediction4D(ResultEvent result, int index){
+        JsonArray data = new JsonArray();
+
+        for (int z = 0; z < result.predictions_4D[index].length; z++) {
+            JsonArray arr = new JsonArray();
+            for (int x = 0; x < result.predictions_4D[index][z].length; x++) {
                 JsonArray arr2 = new JsonArray();
-                for (int y = 0; y < result.predictions_yolo[index][z][x].length; y++) {
-                    arr2.add(result.predictions_yolo[index][z][x][y]);
+                for (int y = 0; y < result.predictions_4D[index][z][x].length; y++) {
+                    arr2.add(result.predictions_4D[index][z][x][y]);
                 }
                 arr.add(arr2);
             }
@@ -53,6 +108,13 @@ public class CollectAndProcessEvents extends Activity {
         return data;
     }
 
+    /**
+     * Write the output of the predictions in the log file, specified with command line argument
+     * -outputFile <name> when starting up the Target
+     * @param fw A stream for writing to the output file
+     * @param result {@link nl.zakarias.constellation.raid.ResultEvent} sent from {@link nl.zakarias.constellation.raid.Predictor}
+     * @throws IOException
+     */
     private void writeOutput(FileOutputStream fw, ResultEvent result) throws IOException {
         LocalDateTime now = LocalDateTime.now();
 
@@ -63,27 +125,19 @@ public class CollectAndProcessEvents extends Activity {
         json.addProperty("prediction_location", result.host.uniqueHostname());
 
         JsonArray predictions = new JsonArray();
-        for(int i = 0; i < result.imageIdentifiers.length; i++){
-//            if (logger.isDebugEnabled()) {
-//                if (result.predictions != null) {
-//                    logger.debug(String.format("Src %s classified at %s using model %s: %d", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName, result.predictions[i]));
-//                } else {
-//                    logger.debug(String.format("Src %s classified at %s using model %s", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName));
-//                }
-//            }
-
-            if (result.predictions != null) {
-                System.out.println(String.format("Src %s classified at %s using model %s: %d", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName, result.predictions[i]));
-            } else {
-                System.out.println(String.format("Src %s classified at %s using model %s", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName));
-            }
+        for(int i = 0; i < result.imageIdentifiers.length; i++) {
+            System.out.println(String.format("Src %s classified at %s using model %s", result.src.uniqueHostname(), result.host.uniqueHostname(), result.modelName));
 
             JsonObject item = new JsonObject();
             item.addProperty("image_id", result.imageIdentifiers[i]);
-            if ( result.predictions != null ){
-                item.addProperty("prediction", result.predictions[i]);
-            } else { // YOLO
-                item.add("prediction", getPredictionYolo(result, i));
+            if (result.predictions_1D != null) {
+                item.addProperty("prediction", result.predictions_1D[i]);
+            } else if (result.predictions_2D != null) {
+                item.add("prediction", getPrediction2D(result, i));
+            } else if (result.predictions_3D != null) {
+                item.add("prediction", getPrediction3D(result, i));
+            } else { // 4D
+                item.add("prediction", getPrediction4D(result, i));
             }
 
             if (result.certainty != null){
@@ -111,6 +165,10 @@ public class CollectAndProcessEvents extends Activity {
         fw.write("\n".getBytes());
     }
 
+    /**
+     * Write result to file
+     * @param result {@link nl.zakarias.constellation.raid.ResultEvent}
+     */
     private void handleResult(ResultEvent result){
         // Write result to file
         try {
@@ -120,6 +178,11 @@ public class CollectAndProcessEvents extends Activity {
         }
     }
 
+    /**
+     * Overrides initialize method from {@link ibis.constellation.Activity}, setup Activity and immediately suspend
+     * @param c {@link ibis.constellation.Constellation}
+     * @return SUSPEND
+     */
     @Override
     public int initialize(Constellation c) {
         logger.debug("initialized\n");
@@ -137,6 +200,15 @@ public class CollectAndProcessEvents extends Activity {
         return SUSPEND;
     }
 
+    /**
+     * Overrides process method from {@link ibis.constellation.Activity}, collect a result from predictor and
+     * log it to a output file, specified in -outputFile <name> when starting up the {@link nl.zakarias.constellation.raid.Target}
+     *
+     * This method will always return suspend, hence the only way to stop this executor is by force stopping the
+     * {@link nl.zakarias.constellation.raid.Target} which started it.
+     * @param c {@link ibis.constellation.Constellation}
+     * @return SUSPEND
+     */
     @Override
     public synchronized int process(Constellation c, Event e) {
         Timer timer = c.getTimer("java", c.identifier().toString(), "Process Result");
@@ -158,6 +230,10 @@ public class CollectAndProcessEvents extends Activity {
         return SUSPEND;
     }
 
+    /**
+     * Overrides cleanup method from {@link ibis.constellation.Activity}, closes the file output stream
+     * @param c {@link ibis.constellation.Constellation}
+     */
     @Override
     public void cleanup(Constellation c) {
         // empty
@@ -173,6 +249,9 @@ public class CollectAndProcessEvents extends Activity {
         return "CollectAndProcessEventsYolo(" + identifier() + ")";
     }
 
+    /**
+     * Call from parent process, waits until notify() is sent from somewhere
+     */
     public synchronized void wakeOnEvent(){
         try {
             wait();

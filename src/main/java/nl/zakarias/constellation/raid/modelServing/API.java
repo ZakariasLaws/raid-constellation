@@ -11,7 +11,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * An API allowing the user to interface with the tensorflow model server, in order to make predictions.
+ * An API allowing the user to interface with the TensorFlow model server, in order to make predictions.
  */
 public class API {
 
@@ -19,6 +19,23 @@ public class API {
      * Inner class used for automatic JSON <-> String conversion and access
      */
     interface Content {}
+
+    public static class Content_single implements Content{
+        String signature_name;
+        int[][] instances;
+
+        private Content_single(String signature_string, byte[][] image){
+            this.signature_name = signature_string;
+
+            instances = new int[image.length][image[0].length];
+
+            for (int i=0; i<image.length; i++){
+                for(int x=0; x<image[i].length; x++){
+                    instances[i][x] = image[i][x] & 0xff; // Convert to int
+                }
+            }
+        }
+    }
 
     public static class Content_1D implements Content{
         String signature_name;
@@ -29,9 +46,28 @@ public class API {
 
             instances = new int[image.length][image[0].length];
 
-            for (int i=0; i<image.length; i++){
-                for(int x=0; x<image[i].length; x++){
-                    instances[i][x] = image[i][x] & 0xff; // Convert to int
+            for (int batch=0; batch<image.length; batch++){
+                for(int row=0; row<image[0].length; row++){
+                    instances[batch][row] = image[batch][row] & 0xff; // Convert to int
+                }
+            }
+        }
+    }
+
+    public static class Content_2D implements Content{
+        String signature_name;
+        int[][][] instances;
+
+        private Content_2D(String signature_string, byte[][][] image){
+            this.signature_name = signature_string;
+
+            instances = new int[image.length][image[0].length][image[0][0].length];
+
+            for (int batch=0; batch<image.length; batch++){
+                for(int row=0; row<image[0].length; row++){
+                    for(int col=0; col<image[0][0].length; col++) {
+                            instances[batch][row][col] = image[batch][row][col] & 0xff; // Convert to int
+                        }
                 }
             }
         }
@@ -82,6 +118,16 @@ public class API {
         return result.toString();
     }
 
+    /**
+     * Take a batch of images and make a API call to TensorFlow Serving to get a prediction. Wait for the results, check
+     * the response code for errors and return the prediction as a string in JSON format that needs to be converted to
+     * JSON format.
+     *
+     * @param url URL to access the correct TensorfFlow serving model
+     * @param data The data to classify
+     * @return Returns a JSON string containing the results of the predictions (can be a batch of predictions)
+     * @throws IOException Thrown in case we cannot access the URL
+     */
     private static String makePrediction(URL url, Content data) throws IOException {
 
         long startTime = System.nanoTime();
@@ -144,7 +190,7 @@ public class API {
         if (version > 0){
             url = new URL("http://localhost:" + port + "/v1/models/" + modelName + "/versions/" + version + ":predict");
         }
-        Content_1D data = new Content_1D(signatureString, image);
+        Content_single data = new Content_single(signatureString, image);
 
         return makePrediction(url, data);
     }
