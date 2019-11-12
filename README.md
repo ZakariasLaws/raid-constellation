@@ -22,11 +22,11 @@ task.
 
 ## Currently Supported Models
 
-* __mnist__: MNIST DNN
-* mnist_cnn__: MNIST CNN, slightly better accuracy than MNIST DNN
-* cifar10__: CIFAR10 CNN
-* yolo__: YOLO v2 full model
-* __tiny_yolo__: YOLO v2 smaller model
+* mnist: MNIST DNN
+* mnist_cnn: MNIST CNN, slightly better accuracy than MNIST DNN
+* cifar10: CIFAR10 CNN
+* yolo: YOLO v2 full model
+* tiny_yolo: YOLO v2 smaller model
 
 #### Extending With New Models
 See README in `src/main/java/nl/zakarias/constellation/raid/`.
@@ -93,9 +93,7 @@ model_config_list {
 The output of the `tensorflow_model_serving` is stored in `tensorflow_model_serving.log` in the bin directory. If one or more agents in charge of prediction for some reason do not work during run time, view this log to see if the error is related to TensorFlow Serving.
 
 #### <a name="Configuration"></a> Configuration File
-Each device running an agent must have a configuration file in the location pointed to by the environment variable 
-`RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the 
-`./configuration/configure.sh` script from the root directory and answer the questions. 
+Each device running a Predictor agent (not strictly necessary for Sources/Targets) must have a configuration file in the location pointed to by the environment variable `RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the `./configuration/configure.sh` script from the root directory and answer the questions. 
 
 It is also possible to manually create the config file by copy pasting the following into a file named `config.RAID`, 
 located in the dir pointed to by the environment variable `EDGEINFERECE_DIR`. Replace the 
@@ -103,9 +101,7 @@ right side of the equal sign with your local path:
 
 ```conf
 CONSTELLATION_PORT=4567
-RAID_DIR=/home/username/raid-constellation/build/install/raid-constellation/
 TENSORFLOW_BIN=/usr/bin/tensorflow_model_server
-TENSORFLOW_SERVING_PORT=8000
 TENSORFLOW_SERVING_CONFIG=/home/username/raid-constellation/tensorflow/tensorflow_serving/ModelServerConfig.conf
 ```
 **NOTE** that the `CONSTELLATION_PORT` number must be **identical** on all devices in order for them to connect to the
