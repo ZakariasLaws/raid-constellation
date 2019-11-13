@@ -1,7 +1,7 @@
 # Resource Aware Inference Distribution - RAID
 RAID is a dynamic resource management and scheduling system for machine learning inference task distribution across 
 edge devices. It uses [Constellation](https://github.com/NLeSC/Constellation) for communication and scheduling and is 
-written 100% in **Java**.
+written in **Java**.
 
 The system has three types of Agents, **source**, **predictor** and **target**. 
 
@@ -18,7 +18,7 @@ task.
 
 ## <a name="requirements"></a> Requirements
 
-* Java JDK >= 8
+* Java JDK >= 11 (Constellation supports Java 8, but since it's depricated we only tested on Java 11).
 
 ## Currently Supported Models
 
