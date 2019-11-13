@@ -18,7 +18,14 @@ task.
 
 ## <a name="requirements"></a> Requirements
 
-* Java JDK >= 11 (Constellation supports Java 8, but since it's depricated we only tested on Java 11).
+#### Running
+* Java JRE >= 11 ([Constellation](https://github.com/NLeSC/Constellation) supports Java 8, but since it's depricated we only tested on Java 11).
+* [TensorFlow Serving](#TensorFlowServing) installed on all devices where predictions will occur.
+
+#### Compiling
+* All dependencies of [Constellation](https://github.com/NLeSC/Constellation), compiled with __gradle__
+* Java JDK >= 11
+
 
 ## Currently Supported Models
 
