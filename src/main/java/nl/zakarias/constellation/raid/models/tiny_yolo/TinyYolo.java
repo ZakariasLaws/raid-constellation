@@ -108,6 +108,23 @@ public class TinyYolo implements ModelInterface {
 
         int pos = 0;
         while (pos < files.length){
+            // Check if we are approaching the Java heap memory limitations, in that case stop uploading until
+            // We have more memory available
+            if (Runtime.getRuntime().totalMemory() == Runtime.getRuntime().maxMemory() && Runtime.getRuntime().freeMemory() < (Configuration.HEAP_MEMORY_THRESHOLD*1000)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Memory threshold reached, Activity submission blocked. Avail memory: " + Runtime.getRuntime().freeMemory()/1000 + "KB");
+                }
+
+                try {
+                    Thread.sleep(this.timeInterval);
+                } catch (InterruptedException e) {
+                    logger.error("Failed to sleep when approaching Java heap memory limitation");
+                }
+
+                // Start over as other nodes might have stolen some Activities from this node
+                continue;
+            }
+
             byte[][][][] images = new byte[batchSize][yoloImgRowLen][yoloImgColLen][yoloRGBColors];
             int min = Math.min(pos + batchSize, files.length);
 
@@ -123,8 +140,6 @@ public class TinyYolo implements ModelInterface {
             for(int i=0; i<batchSize; i++){
                 imageIdentifiers[i] = Utils.imageIdentifier(images[i]);
             }
-
-            System.out.println(files[pos] + " - " + imageIdentifiers[0]);
 
             // Generate activity
             TinyYoloActivity activity = new TinyYoloActivity(constellation.identifier().toString(), contexts, true, false, images, aid, imageIdentifiers);

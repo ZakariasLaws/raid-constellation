@@ -35,7 +35,7 @@ public class MnistCnnActivity extends Activity {
 
     @Override
     public int initialize(Constellation constellation) {
-        Timer timer = constellation.getTimer("java", constellation.identifier().toString(), "MNIST-CNN");
+        Timer timer = constellation.getTimer("java", constellation.identifier().toString(), "MNIST_CNN");
         int timing = timer.start();
 
         // Get the location of where we are currently executing

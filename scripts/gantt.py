@@ -17,6 +17,8 @@
 import itertools, sys, getopt
 from ConfigParser import ConfigParser
 
+from sys import platform
+
 rectangleHeight = 0.8  #: Height of a rectangle in units.
 
 class Activity(object):
@@ -298,8 +300,7 @@ def generate_plotdata(activities, resources, tasks, rectangles, options,
     grid_tics = 'xtics'
 
     # Set plot dimensions
-    plot_dimensions = ['set terminal \'wxt\'',
-                        'set xrange [%f:%f]' % (xmin, xmax),
+    plot_dimensions = ['set xrange [%f:%f]' % (xmin, xmax),
                        'set yrange [%f:%f]' % (ymin, ymax),
                        'set autoscale x', # extends x axis to next tic mark
                        'set xlabel "%s"' % xlabel,
@@ -310,6 +311,13 @@ def generate_plotdata(activities, resources, tasks, rectangles, options,
                        'set grid %s' % grid_tics,
                        'set palette %s' % color_book.palette,
                        'unset colorbox']
+
+    if platform == "linux" or platform == "linux2":
+        plot_dimensions = ['set terminal \'wxt\''] + plot_dimensions
+    elif platform == "darwin":
+        plot_dimensions = ['set terminal \'qt\''] + plot_dimensions
+
+
 
     # Generate gnuplot rectangle objects
     plot_rectangles = (' '.join(['set object %d rectangle' % n,

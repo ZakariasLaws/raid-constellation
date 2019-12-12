@@ -50,6 +50,23 @@ public class Cifar10 implements ModelInterface {
 
         int counter = 0;
         while(true) {
+            // Check if we are approaching the Java heap memory limitations, in that case stop uploading until
+            // We have more memory available
+            if (Runtime.getRuntime().totalMemory() == Runtime.getRuntime().maxMemory() && Runtime.getRuntime().freeMemory() < (Configuration.HEAP_MEMORY_THRESHOLD*1000)) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Memory threshold reached, Activity submission blocked. Avail memory: " + Runtime.getRuntime().freeMemory()/1000 + "KB");
+                }
+
+                try {
+                    Thread.sleep(this.timeInterval);
+                } catch (InterruptedException e) {
+                    logger.error("Failed to sleep when approaching Java heap memory limitation");
+                }
+
+                // Start over as other nodes might have stolen some Activities from this node
+                continue;
+            }
+
             for (int i = 0; i < images.length; i += batchSize) {
                 byte[][][][] imageBatch = new byte[batchSize][images[i].length][images[i][0].length][images[i][0][0].length];
     //            byte[] targetBatch = new byte[batchSize];

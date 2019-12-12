@@ -197,7 +197,7 @@ public class RaidConstellation {
 
         switch (role){
             case SOURCE:
-                Source source = new Source(contexts);
+                Source source = new Source(contexts, 10);
                 if (targetActivity == null) {
                     throw new IllegalArgumentException("Missing activity ID to send results to");
                 } if (sourceDataDir == null) {

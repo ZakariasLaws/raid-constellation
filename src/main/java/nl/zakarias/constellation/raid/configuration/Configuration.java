@@ -42,6 +42,9 @@ public class Configuration {
     /** Time to wait between submitting images in MS (be aware of memory limitations when using low values) */
     public static final int TIME_INTERVAL = 100;
 
+    /** Threshold for how much available Java heap memory (KB) we need to upload new Activities */
+    public static final int HEAP_MEMORY_THRESHOLD = 50000; //50 MB
+
     public enum NODE_ROLES {
         SOURCE("SOURCE"),
         TARGET("TARGET"),

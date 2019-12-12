@@ -23,7 +23,7 @@ public class Source {
     private Timer timer;
     private int timing;
 
-    Source(Context[] contexts) throws UnknownHostException {
+    Source(Context[] contexts, int uploadThrottle) throws UnknownHostException {
         try {
             this.contexts = new OrContext(contexts);
         } catch (IllegalArgumentException e) {
