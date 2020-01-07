@@ -50,7 +50,14 @@ TENSORFLOW_SERVING="$( cut -d'=' -f2 <<< "$(sed -n '2p' $CONF_FILE)")"
 TENSORFLOW_SERVING_CONFIG="$( cut -d'=' -f2 <<< "$(sed -n '3p' $CONF_FILE)")"
 
 
-if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${TENSORFLOW_SERVING} ]] || [[ -z ${TENSORFLOW_SERVING_CONFIG} ]]; then
+if [[ -z ${CONSTELLATION_PORT} ]] || [[ -z ${TENSORFLOW_SERVING_CONFIG} ]]; then
+  echo "Config file either missing or corrupted"
+  exit 1
+fi
+
+if [[ ${TENSORFLOW_SERVING} == docker ]]; then
+  echo "Using docker for TensorFlow Serving"
+elif [[ -z ${TENSORFLOW_SERVING} ]]; then
   echo "Config file either missing or corrupted"
   exit 1
 fi
@@ -106,16 +113,8 @@ echo "Params: ${params}"
 
 # Add system properties specific for each instance
 if [[ ${role} == "p" ]]; then
-    if [[ ! -f ${TENSORFLOW_SERVING} ]]; then
-        echo "Could not read TensorFlow serving binary, check that the config file has the correct path"
-        exit 1
-    fi
+    if [[ ${TENSORFLOW_SERVING} == docker ]]; then
 
-    # Check what OS we are running
-    machine="$(uname -s)"
-
-    if [[ ${machine} == Darwin ]]; then
-      # Currently we have to start docker + serving manually in Mac!!
         if [[ $(ps | grep tensorflow_serving | grep model_config_file) ]]; then
             echo ""
             echo "****************"
@@ -123,10 +122,22 @@ if [[ ${role} == "p" ]]; then
             echo "****************"
             echo ""
         else
-          echo "START TENSORFLOW SERVING"
-          exit 1
+            # Start model serving in background, stores log in tensorflow_model_server.log
+            echo ""
+            echo "****************"
+            echo "Starting TensorFlow Model Serving, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
+            TENSORFLOW_SCRIPT=$(dirname $TENSORFLOW_SERVING_CONFIG)/tensorflow_serving_docker.sh
+
+            nohup ${TENSORFLOW_SCRIPT} &
+
+            sleep 3
         fi
     else
+        if [[ ! -f ${TENSORFLOW_SERVING} ]]; then
+            echo "Could not read TensorFlow serving binary, check that the config file has the correct path"
+            exit 1
+        fi
+
         if [[ $(ps -C tensorflow_model_server | grep tensorflow_mode) ]]; then
             echo ""
             echo "****************"

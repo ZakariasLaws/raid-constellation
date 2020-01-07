@@ -18,9 +18,11 @@ read -rp "Constellation port: " constPort
 
 isNumber ${constPort}
 
-read -rep "Tensorflow Serving Binary location: " tfBin
+read -rep "Tensorflow Serving Binary location (if using docker, type 'docker'): " tfBin
 
-if ! [[ -f $tfBin ]]; then
+if [[ $tfBin == docker ]]; then
+    echo "No binary, using docker"
+elif ! [[ -f $tfBin ]]; then
   echo "${tfBin} does not exist"
   exit 1
 fi
