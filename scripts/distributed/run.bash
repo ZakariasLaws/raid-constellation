@@ -111,28 +111,45 @@ if [[ ${role} == "p" ]]; then
         exit 1
     fi
 
-    if [[ $(ps -C tensorflow_model_server | grep tensorflow_mode) ]]; then
-        echo ""
-        echo "****************"
-        echo "Using existing TensorFlow Model Serving instance, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
-        echo "****************"
-        echo ""
-    else
-        # Start model serving in background, stores log in tensorflow_model_server.log
-        echo ""
-        echo "****************"
-        echo "Starting TensorFlow Model Serving, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
+    # Check what OS we are running
+    machine="$(uname -s)"
 
-        # Check whether to use tcmalloc or not
-        if [[ -f /usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ]]; then
-             LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log 2>&1 &
+    if [[ ${machine} == Darwin ]]; then
+      # Currently we have to start docker + serving manually in Mac!!
+        if [[ $(ps | grep tensorflow_serving | grep model_config_file) ]]; then
+            echo ""
+            echo "****************"
+            echo "Using existing TensorFlow Model Serving instance, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
+            echo "****************"
+            echo ""
         else
-             ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log 2>&1 &
+          echo "START TENSORFLOW SERVING"
+          exit 1
         fi
-        echo "****************"
-        echo ""
+    else
+        if [[ $(ps -C tensorflow_model_server | grep tensorflow_mode) ]]; then
+            echo ""
+            echo "****************"
+            echo "Using existing TensorFlow Model Serving instance, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
+            echo "****************"
+            echo ""
+        else
+            # Start model serving in background, stores log in tensorflow_model_server.log
+            echo ""
+            echo "****************"
+            echo "Starting TensorFlow Model Serving, log can be found at: ${RAID_DIR}/tensorflow_model_server.log"
 
-        sleep 3
+            # Check whether to use tcmalloc or not
+            if [[ -f /usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ]]; then
+                 LD_PRELOAD=/usr/lib/aarch64-linux-gnu/libtcmalloc.so.4 ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log 2>&1 &
+            else
+                 ${TENSORFLOW_SERVING} --port=$((${TENSORFLOW_SERVING_PORT} - 1)) --rest_api_port=${TENSORFLOW_SERVING_PORT} --model_config_file=${TENSORFLOW_SERVING_CONFIG} > ${RAID_DIR}/tensorflow_model_server.log 2>&1 &
+            fi
+            echo "****************"
+            echo ""
+
+            sleep 3
+        fi
     fi
 fi
 
