@@ -82,7 +82,11 @@ To setup the SSH keys, see: [Setup SSH keys and copy ID](https://www.digitalocea
 The `RAID_DIR` should point to the location of your distribution, which should be 
 `build/install/raid-constellation`. The bin and lib directory must be in this location.
 
-The application use [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) in order to support different TensorFlow ML models. When starting a Predictor with the `run.bash` script, the TensorFlow serving API will start on in the background and run on local host. The configuration file is located at `tensorflow/tensorflow_serving/ModelServerConfig.conf`, it only supports *absolute paths* and **must** therefor be modified with the device system paths.
+The application use [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) in order to support different TensorFlow ML models. When starting a Predictor with the `run.bash` script, the TensorFlow serving API will start on in the background and run on local host. The TensorFlow configuration file is located at `tensorflow/tensorflow_serving/ModelServerConfig.conf`, it only supports *absolute paths* and **must** therefor be modified with the device system paths.
+
+TensorFlow serving can be run either from a binary, or more commonly using docker, the startup script supports both.
+If using docker, type **docker** when creating the config file. Make sure that the permissions are set to allow user
+level docker commands on your system.
 
 The config file should look something like this, (see [TensorFlow Serving Config File](https://www.tensorflow.org/tfx/serving/serving_config) for more options):
 ```conf
