@@ -10,7 +10,7 @@ The system has three types of Agents, **source**, **predictor** and **target**.
 Predictors will typically be run on the edge devices, but it can be used anywhere.
 
 RAID supports context-aware execution, meaning that we can specify what type of tasks should be performed at what Predictor. This is done by using *labels* when starting up a source, only predictors with matching labels will steal this specific
-task.
+task.b2QgcThg9r8eAY5&b2QgcThg9r8eAY5&b2QgcThg9r8eAY5&
 
 ## <a name="requirements"></a> Requirements
 
@@ -198,6 +198,20 @@ The source requires the following arguments:
 ```bash
 ./bin/distributed/run.bash s 10.72.152.146 test.pool.name -context A -target 0:1:0 -dataDir /home/username/MNIST_data/ -modelName mnist -batchSize 1
 ```
+
+When using the MNIST models, provide the the directory containing the following two files as input as input:
+```bash
+t10k-labels-idx1-ubyte
+t10k-images-idx3-ubyte
+```
+Modify the `models/mnist/Mnist` class to read input in a different way, for example from user input.
+
+For CIFAR-10, provide the directory suitable for C, downloaded from [The CIFAR-10 Dataset](http://cs.toronto.edu).
+The directory will most likely be called `cifar-10-batches-bin`.
+
+For YOLO models, provide a directory containing any number of images to predict. The model was trained on the 
+[COCO Dataset](http://cocodataset.org/#home).
+
 
 ## Production
 When executing in production, everything in the `log4j.properties` file should be set to false, and the command line 
