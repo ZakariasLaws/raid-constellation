@@ -170,7 +170,7 @@ Possible parameters for the Target are:
 The -profileOutput argument **MUST** be the last argument provided (if provided).
 
 #### Predictor
-Contexts used here are A and B, meaning that this agent will only steal jobs having context A or B.
+Labels used here are A, B and C, meaning that this agent will only steal jobs having labels A, B or C.
 
 ```bash
 ./bin/distributed/run.bash p 10.72.152.146 test.pool.name -context A,B,C
@@ -180,6 +180,9 @@ possible parameters for Predictor are:
 * -nrExecutors <number\>
   * Set the number of executors to use (each executor runs asynchronously on a separate thread)
 * -context: Comma separated list of strings, containing at least one value, for example "label-1,test,2kb". The Predictor will only steal tasks with at least one matching label
+  
+Only two models are in this repository (mnist, mnist_cnn). Additional ones need to be added manually, as they can be large. Store new models in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
+see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model), and update the TensorFlow Model Serving config file.
   
 #### Source
 The source requires the following arguments:
@@ -191,9 +194,6 @@ The source requires the following arguments:
 * -endless: If set the source will keep submitting images forever, batchCount will be ignored (default is false)
 * -batchCount: The number of batches to send in total before exiting, ignored if endless is set to true (default is 100)
 * -timeInterval: The time to wait between submitting two batches, in milliseconds (default it 100)
-
-ML models need to be added to the repository manually, as they can be very large. Only add the models that specific devices will use. Store model in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
-see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model).
 
 ```bash
 ./bin/distributed/run.bash s 10.72.152.146 test.pool.name -context A -target 0:1:0 -dataDir /home/username/MNIST_data/ -modelName mnist -batchSize 1
