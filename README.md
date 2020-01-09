@@ -1,8 +1,8 @@
 # Resource Aware Inference Distribution - RAID
 RAID is a dynamic resource management and scheduling system for inference task distribution on 
-edge devices. It uses [Constellation](https://github.com/NLeSC/Constellation) for communication and scheduling, and TensorFlow Serving for applying ML models.
+edge devices. It uses the Java based scheduling platform [Constellation](https://github.com/NLeSC/Constellation) for communication, and TensorFlow Serving for applying ML models.
 
-The system has three types of Agents, **source**, **predictor** and **target**. 
+The system has three types of Agents, **Source**, **Predictor** and **Target**. 
 
 * The Source produces data, currently supports reading from the file system. It can be extended to come from an external input source, such as a camera.
 * The Target collects the results and stores them in a log file, this can be extended to whatever functionality that is desired from the results.
@@ -10,7 +10,12 @@ The system has three types of Agents, **source**, **predictor** and **target**.
 Predictors will typically be run on the edge devices, but it can be used anywhere.
 
 RAID supports context-aware execution, meaning that we can specify what type of tasks should be performed at what Predictor. This is done by using *labels* when starting up a source, only predictors with matching labels will steal this specific
-task.b2QgcThg9r8eAY5&b2QgcThg9r8eAY5&b2QgcThg9r8eAY5&
+task.
+
+The following image depicts an example execution in RAID with two Sources uploading data, 5 different Predictors with 
+different labels (A, B, or both), and one Target that collects the result.
+
+![RAID execution example](/figures/example_execution.png)
 
 ## <a name="requirements"></a> Requirements
 
