@@ -37,6 +37,10 @@ different labels (A, B, or both), and one Target that collects the result.
 * yolo: YOLO v2 full model
 * tiny_yolo: YOLO v2 smaller model
 
+After pulling the repository, extract the models from `tensorflow/tensorflow_serving/models.tgz`. The tiny_yolo and 
+yolo models are too big to fit in the tar file. If you desire to use them, manually add them to the 
+`tensorflow/tensorflow_serving/models` directory.
+
 #### Extending With New Models
 See README in `src/main/java/nl/zakarias/constellation/raid/`.
 
@@ -102,11 +106,11 @@ model_config_list {
 The output of the `tensorflow_model_serving` is stored in `tensorflow_model_serving.log` in the bin directory. If one or more agents in charge of prediction for some reason do not work during run time, view this log to see if the error is related to TensorFlow Serving.
 
 #### <a name="Configuration"></a> RAID Configuration File
-Each device running an agent must have a configuration file in the location pointed to by the environment variable `RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the `./configuration/configure.sh` script from the root directory and answer the questions. 
+Each device running an agent must have a configuration file in the location pointed to by the environment variable 
+`RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the 
+`./configuration/configure.sh` script from the root directory and answer the questions. 
 
-It is also possible to manually create the config file by copy pasting the following into a file named `config.RAID`, 
-located in the dir pointed to by the environment variable `RAID_DIR`. Replace the right side of the equal sign with your local path:
-
+The script will place a file named `config.RAID` in the `RAID_DIR`, looking something like this:
 ```conf
 CONSTELLATION_PORT=4567
 TENSORFLOW_BIN=/usr/bin/tensorflow_model_server
@@ -186,8 +190,8 @@ possible parameters for Predictor are:
   * Set the number of executors to use (each executor runs asynchronously on a separate thread)
 * -context: Comma separated list of strings, containing at least one value, for example "label-1,test,2kb". The Predictor will only steal tasks with at least one matching label
   
-Only two models are in this repository (mnist, mnist_cnn). Additional ones need to be added manually, as they can be large. Store new models in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
-see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model), and update the TensorFlow Model Serving config file.
+Only three models are in this repository (mnist, mnist_cnn, and cifar10). Additional ones need to be added manually. Store new models in directory `/tensorflow/tensorflow_serving/models/`, using TensorFlow **SavedModel** format, 
+see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model). Also, update the TensorFlow Model Serving config file to include the newly added model.
   
 #### Source
 The source requires the following arguments:
@@ -209,7 +213,7 @@ When using the MNIST models, provide the the directory containing the following 
 t10k-labels-idx1-ubyte
 t10k-images-idx3-ubyte
 ```
-Modify the `models/mnist/Mnist` class to read input in a different way, for example from user input.
+Modify the `src/.../models/mnist/Mnist` class to read input in a different way, for example from user input.
 
 For CIFAR-10, provide the directory suitable for C, downloaded from [The CIFAR-10 Dataset](http://cs.toronto.edu).
 The directory will most likely be called `cifar-10-batches-bin`.

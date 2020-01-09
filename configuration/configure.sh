@@ -69,4 +69,12 @@ if [[ ! -f $CONFIG_FILE ]]; then
     exit 1
 fi
 
+if [[ ! -d "${RAID_DIR}/../../../tensorflow/tensorflow_serving/models" ]]; then
+  echo "--------------------"
+  echo "No models directory found \"tensorflow/tensorflow_serving/models\""
+  echo "Either manually add these or extract tensorflow/tensorflow_serving/models.tgz"
+  echo "Remember to modify tensorflow/tensorflow_serving/ModelServerConfig.conf"
+  echo "--------------------"
+fi
+
 echo "Created config file successfully"
