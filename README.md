@@ -1,36 +1,33 @@
 # Resource Aware Inference Distribution - RAID
-RAID is a dynamic resource management and scheduling system for machine learning inference task distribution across 
-edge devices. It uses [Constellation](https://github.com/NLeSC/Constellation) for communication and scheduling and is 
-written in **Java**.
+RAID is a dynamic resource management and scheduling system for inference task distribution on 
+edge devices. It uses [Constellation](https://github.com/NLeSC/Constellation) for communication and scheduling, and TensorFlow Serving for applying ML models.
 
 The system has three types of Agents, **source**, **predictor** and **target**. 
 
-* The Source produces data, currently read from the file system, but it can be extended to come from an input source, 
-such as a camera.
-* The Target collects the results and stores them in a log file, this can be extended to whatever functionality desired 
-from the results.
+* The Source produces data, currently supports reading from the file system. It can be extended to come from an external input source, such as a camera.
+* The Target collects the results and stores them in a log file, this can be extended to whatever functionality that is desired from the results.
 * The Predictor will steal tasks from the source, perform the prediction and send the result to a specified target. 
 Predictors will typically be run on the edge devices, but it can be used anywhere.
 
-RAID supports context-aware execution, meaning that we can specify what type of tasks should be performed where. This
-is done by using *contexts* when starting up a source, only predictors with matching contexts will steal this specific
+RAID supports context-aware execution, meaning that we can specify what type of tasks should be performed at what Predictor. This is done by using *labels* when starting up a source, only predictors with matching labels will steal this specific
 task.
 
 ## <a name="requirements"></a> Requirements
 
 #### Running
-* Java JRE >= 11 ([Constellation](https://github.com/NLeSC/Constellation) supports Java 8, but since it's depricated we only tested on Java 11).
-* [TensorFlow Serving](#TensorFlowServing) installed on all devices where predictions will occur.
+* Java JRE >= 11 ([Constellation](https://github.com/NLeSC/Constellation) supports Java 8, but since it is depricated we made sure RAID would run on Java 11).
+* [TensorFlow Serving](#TensorFlowServing) installed on all devices where predictions will occur. Requires docker unless you wish to build the binary yourself.
+
 
 #### Compiling
-* All dependencies of [Constellation](https://github.com/NLeSC/Constellation), compiled with __gradle__
+* All dependencies of RAID, compiled with __gradle__
 * Java JDK >= 11
 
 
 ## Currently Supported Models
 
 * mnist: MNIST DNN
-* mnist_cnn: MNIST CNN, slightly better accuracy than MNIST DNN
+* mnist_cnn: MNIST CNN, slightly larger model with better accuracy than MNIST DNN
 * cifar10: CIFAR10 CNN
 * yolo: YOLO v2 full model
 * tiny_yolo: YOLO v2 smaller model
@@ -51,7 +48,7 @@ cd raid-constellation
 This will create the distribution in `build/install/raid-constellation`.
 
 #### Edge Devices
-\- When installing on edge devices, only copy the distribution directory, the TensorFlow Model Serving config file and 
+\- When installing on edge devices, only copy the distribution directory, the TensorFlow Serving config file and 
 the desired models to the device. Make sure to maintain the same folder structure as if you installed everything with 
 gradle.
 
@@ -60,9 +57,9 @@ manually installed on each device and the location must be provided during [Conf
 devices, you will most likely need to cross-compile it from source, 
 [This Github Tool for TF Serving on Arm](https://github.com/emacski/tensorflow-serving-arm) might do the trick.
 
-## <a name="configuration"></a> Configuration 
-#### <a name="environment_variable"></a> Environment Variable
-For running this application, Constellation requires the following environment variable to be set on *ALL* devices.
+## <a name="configuration"></a> RAID Configuration 
+#### <a name="environment_variable"></a> Environment Variables
+For running this application, RAID requires the following environment variable to be set on *ALL* devices.
 
 ```bash
 export RAID_DIR=/build/path/raid-constellation
@@ -70,25 +67,21 @@ export TENSORFLOW_SERVING_PORT=8000
 export CONSTELLATION_PORT=4567
 ```
 
-#### Set SSH Environment Variables
-In order to set environment variables that persist through multiple SSH session, configure the `./ssh/environment` 
+#### Set SSH Environment (remote startup script uses ssh, not strictly necessary)
+To setup the SSH keys, see: [Setup SSH keys and copy ID](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2)
+
+In order to enable passing environment variables through SSH sessions on Linux, configure the `./ssh/environment` 
 file as well as enable `PermitUserEnvironment` in the sshd configuration.
 See [this StackExchange thread](https://superuser.com/questions/48783/how-can-i-pass-an-environment-variable-through-an-ssh-command)
 
-To setup the SSH keys, see: [Setup SSH keys and copy ID](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2)
-
 #### <a name="TensorFlowServing"></a> TensorFlow Serving
-
-The `RAID_DIR` should point to the location of your distribution, which should be 
-`build/install/raid-constellation`. The bin and lib directory must be in this location.
-
-The application use [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) in order to support different TensorFlow ML models. When starting a Predictor with the `run.bash` script, the TensorFlow serving API will start on in the background and run on local host. The TensorFlow configuration file is located at `tensorflow/tensorflow_serving/ModelServerConfig.conf`, it only supports *absolute paths* and **must** therefor be modified with the device system paths.
+The application uses [TensorFlow Serving](https://www.tensorflow.org/tfx/guide/serving) to support different TensorFlow ML models. When starting a Predictor with the `run.bash` script, the TensorFlow serving API will start on in the background and run on local host. The TensorFlow Model config file is located at `tensorflow/tensorflow_serving/ModelServerConfig.conf`, it only supports *absolute paths* and **must** therefore be modified with the device system paths, on each device.
 
 TensorFlow serving can be run either from a binary, or more commonly using docker, the startup script supports both.
-If using docker, type **docker** when creating the config file. Make sure that the permissions are set to allow user
+If using docker, type **docker** when creating the RAID config file. Make sure that the permissions are set to allow user
 level docker commands on your system.
 
-The config file should look something like this, (see [TensorFlow Serving Config File](https://www.tensorflow.org/tfx/serving/serving_config) for more options):
+The TensorFlow Model config file should look something like this, (see [TensorFlow Serving Config File](https://www.tensorflow.org/tfx/serving/serving_config) for more options):
 ```conf
 model_config_list {
   config {
@@ -103,12 +96,11 @@ model_config_list {
 
 The output of the `tensorflow_model_serving` is stored in `tensorflow_model_serving.log` in the bin directory. If one or more agents in charge of prediction for some reason do not work during run time, view this log to see if the error is related to TensorFlow Serving.
 
-#### <a name="Configuration"></a> Configuration File
-Each device running a Predictor agent (not strictly necessary for Sources/Targets) must have a configuration file in the location pointed to by the environment variable `RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the `./configuration/configure.sh` script from the root directory and answer the questions. 
+#### <a name="Configuration"></a> RAID Configuration File
+Each device running an agent must have a configuration file in the location pointed to by the environment variable `RAID_DIR` (see [Environment Variable](#configuration)). To create this configuration file, run the `./configuration/configure.sh` script from the root directory and answer the questions. 
 
 It is also possible to manually create the config file by copy pasting the following into a file named `config.RAID`, 
-located in the dir pointed to by the environment variable `RAID_DIR`. Replace the 
-right side of the equal sign with your local path:
+located in the dir pointed to by the environment variable `RAID_DIR`. Replace the right side of the equal sign with your local path:
 
 ```conf
 CONSTELLATION_PORT=4567
@@ -129,7 +121,7 @@ always startup the agents in the following order:
 3. Source(s) and Predictor(s)
 
 It is possible to add another _target_ during runtime, but this new target cannot receive classifications from images 
-produced by an already running _source_, a **new** _source_ must be started. _Predictors_ however, can process images 
+produced by an already running _source_. _Predictors_ however, can process images 
 from newly added _sources_ and send results to any _target_ specified when starting up the _source_.
 
 To start the server, type the following command `/bin/distributed/constellation-server`.
@@ -145,7 +137,7 @@ Known hubs now: 172.17.0.1/10.72.152.146-4567#8a.a0.ee.40.52.7d.00.00.8f.dd.4e.4
 ```
 
 When executing the server, we see the IP and the port number on which it listens, from the example above the 
-`IP=10.72.152.146` and `port=4567`. The port is retrieved from the configuration file 
+`IP=10.72.152.146` and `port=4567`. The port is retrieved from the RAID configuration file 
 (see [configuration](#configuration)) and the IP should be provided as the _second_ argument when starting any agent.
 
 When starting one of the agents, the first, second and third argument follows the same pattern for all of them. 
@@ -181,16 +173,17 @@ The -profileOutput argument **MUST** be the last argument provided (if provided)
 Contexts used here are A and B, meaning that this agent will only steal jobs having context A or B.
 
 ```bash
-./bin/distributed/run.bash p 10.72.152.146 test.pool.name -context A
+./bin/distributed/run.bash p 10.72.152.146 test.pool.name -context A,B,C
 ```
 
 possible parameters for Predictor are:
 * -nrExecutors <number\>
   * Set the number of executors to use (each executor runs asynchronously on a separate thread)
+* -context: Comma separated list of strings, containing at least one value, for example "label-1,test,2kb". The Predictor will only steal tasks with at least one matching label
   
 #### Source
 The source requires the following arguments:
-* -context: All submitted images will have _all_ of these contexts, meaning they can be stolen by predictors with _one or more_ matching contexts.
+* -context: Comma separated list of strings, containing at least one value, for example "label-1,test,2kb". All submitted images will have _all_ of these labels, meaning they can be stolen by predictors with _one or more_ matching label.
 * -target: The target activity identifier to send the result of the predictions to, printed to the screen when starting up a _target_ agent.
 * -dataDir: The directory of where the data to be transmitted is stored
 * -modelName: The type of model which should be used, see [Inference Models](#models) for availability
@@ -199,8 +192,7 @@ The source requires the following arguments:
 * -batchCount: The number of batches to send in total before exiting, ignored if endless is set to true (default is 100)
 * -timeInterval: The time to wait between submitting two batches, in milliseconds (default it 100)
 
-need to be added to the repository manually, as they can be very large. Only add the models which that specific device
-will use. Store model in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
+ML models need to be added to the repository manually, as they can be very large. Only add the models that specific devices will use. Store model in `/tensorflow/tensorflow_serving/models/` in the TensorFlow **SavedModel** format, 
 see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model).
 
 ```bash
@@ -209,8 +201,6 @@ see [TensorFlow SavedModel](https://www.tensorflow.org/beta/guide/saved_model).
 
 ## Production
 When executing in production, everything in the `log4j.properties` file should be set to false, and the command line 
-arguments supplied when starting up a Constellation agent should be overlooked, these are the arguments in the 
-`java -p ...` command in the `run.bash` file. Especially profiling (`-Dibis.constellation.profile=true`)
-can drastically slow down execution. 
+arguments supplied when starting up a Constellation agent should be reviewed. It can be found in the `run.bash` file and has the following syntax `java -p ...`. Especially profiling (`-Dibis.constellation.profile=true`)can drastically slow down execution. 
 
 For more Constellation specific arguments see [Constellation Configuration Javadoc](https://junglecomputing.github.io/Constellation/)
