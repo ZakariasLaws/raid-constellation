@@ -18,7 +18,7 @@ fi
 
 TENSORFLOW_MODELS=$(dirname $TENSORFLOW_SERVING_CONFIG)/models/
 
-docker run \
+docker run -d \
 -p $((${TENSORFLOW_SERVING_PORT} - 1)):8500 \
 -p ${TENSORFLOW_SERVING_PORT}:8501 \
 --mount type=bind,source=$TENSORFLOW_MODELS,target=$TENSORFLOW_MODELS \
