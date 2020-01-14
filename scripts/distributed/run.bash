@@ -130,7 +130,7 @@ if [[ ${role} == "p" ]]; then
 
             nohup ${TENSORFLOW_SCRIPT} &
 
-            sleep 3
+            sleep 5
         fi
     else
         if [[ ! -f ${TENSORFLOW_SERVING} ]]; then
